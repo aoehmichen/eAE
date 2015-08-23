@@ -1,14 +1,11 @@
 package smartR.plugin
-
+import grails.util.Holders
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import org.quartz.JobDataMap
 import org.quartz.JobDetail
 import org.quartz.SimpleTrigger
 import org.quartz.Trigger
-import groovy.json.JsonSlurper
-import groovy.json.JsonBuilder
-import grails.util.Holders
-import groovy.util.FileNameFinder
-
 
 class SmartRService {
 
@@ -18,6 +15,14 @@ class SmartRService {
     def dataQueryService
 
     def jobDataMap = [:]
+
+    /**
+     *   Renders the default view
+     */
+    def getScriptList() {
+        def dir = getScriptDir()
+        return new File(dir).list().findAll { it != 'Wrapper.R' && it != 'Sample.R' }
+    }
 
     /**
     *   Get the working directory for the current user and create it if it doesn't exist
@@ -47,6 +52,11 @@ class SmartRService {
         def cohort1 = rIID1 ? i2b2HelperService.getSubjectsAsList(rIID1).collect { it.toLong() } : []
         def cohort2 = rIID2 ? i2b2HelperService.getSubjectsAsList(rIID2).collect { it.toLong() } : []
         def cohorts = [cohort1, cohort2]
+
+        println(rIID1)
+        println("toto")
+        println(rIID2)
+        println(cohort1)
 
         jobDataMap['conceptBoxes'].each { conceptBox ->
             def name = conceptBox.name
@@ -89,7 +99,11 @@ class SmartRService {
                 throw new IllegalArgumentException()
             }
         }
-        new File(jobDataMap['lowDimFile']).write(new JsonBuilder(data).toPrettyString())
+        def toto = new File(jobDataMap['lowDimFile']).write(new JsonBuilder(data).toPrettyString())
+
+        println(jobDataMap['lowDimFile'])
+
+        return toto
     }
 
     /**
