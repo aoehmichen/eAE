@@ -6,7 +6,7 @@ import org.apache.commons.io.FilenameUtils
 class EaeController {
 
     def smartRService
-    def eaeService
+    def EaeDataService
 
 
     /**
@@ -29,7 +29,7 @@ class EaeController {
     def getClinicalMetaDataforEAE() {
         List<Long> resultInstanceIds = parseResultInstanceIds()
 
-        render eaeService.getClinicalMetaDataForEAE(
+        render EaeDataService.getClinicalMetaDataForEAE(
                 resultInstanceIds[0],
                 resultInstanceIds[1]) as JSON
     }
