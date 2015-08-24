@@ -66,6 +66,21 @@ function runEAEScript(){
 }
 
 /**
+ *   Run a pathway enrichment from the eae
+ */
+function runPE(){
+    jQuery.ajax({
+        url: pageInfo.basePath + '/eae/runPEForSelectedGenes',
+        type: "POST",
+        timeout: '600000'
+    }).done(function(serverAnswer) {
+        jQuery("#outputs").html(serverAnswer);
+    }).fail(function() {
+        jQuery("#outputs").html("AJAX CALL FAILED!");
+    });
+}
+
+/**
  *   get the inpu from datasetexplorer
  */
 function getClinicalMetaDataforEAE(){
@@ -73,7 +88,7 @@ function getClinicalMetaDataforEAE(){
     jQuery.ajax({
         url: pageInfo.basePath + '/eae/getClinicalMetaDataforEAE',
         type: "POST",
-        timeout: '600000',
+        timeout: '600000'
     }).done(function(serverAnswer) {
         jQuery("#selectedCohort").html(serverAnswer);
     }).fail(function() {

@@ -26,7 +26,7 @@ class EaeController {
         }
     }
 
-    def getClinicalMetaDataforEAE() {
+    def getClinicalMetaDataforEAE = {
         List<Long> resultInstanceIds = parseResultInstanceIds()
 
         render EaeDataService.getClinicalMetaDataForEAE(
@@ -35,7 +35,7 @@ class EaeController {
     }
 
 
-    private List<Long> parseResultInstanceIds() {
+    private List<Long> parseResultInstanceIds () {
         List<Long> result = []
         int subsetNumber = 1
         while (params.containsKey('result_instance_id' + subsetNumber)) {
@@ -43,5 +43,9 @@ class EaeController {
             subsetNumber += 1
         }
         result
+    }
+
+    def runPEForSelectedGenes = {
+        render "pathway aa1"
     }
 }

@@ -35,12 +35,12 @@
         noSelection="['':'Choose an algorithm']"
         onchange="changeEAEInput()"/>
     &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-    <input
-        id="submitButton"
-        class='txt'
-        type="button"
-        value="Run Analysis"
-        onclick="runEAEScript()"/>
+    %{--<input--}%
+        %{--id="submitButton"--}%
+        %{--class='txt'--}%
+        %{--type="button"--}%
+        %{--value="Run Analysis"--}%
+        %{--onclick="runEAEScript()"/>--}%
     <hr class="myhr"/>
     </div>
 
