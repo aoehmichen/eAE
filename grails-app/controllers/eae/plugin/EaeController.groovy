@@ -46,6 +46,8 @@ class EaeController {
     }
 
     def runPEForSelectedGenes = {
-        render "pathway aa1"
+
+        println(params)
+        render params.genesList.toString()
     }
 }

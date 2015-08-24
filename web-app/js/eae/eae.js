@@ -68,11 +68,12 @@ function runEAEScript(){
 /**
  *   Run a pathway enrichment from the eae
  */
-function runPE(){
+function runPE(list){
     jQuery.ajax({
         url: pageInfo.basePath + '/eae/runPEForSelectedGenes',
         type: "POST",
-        timeout: '600000'
+        timeout: '600000',
+        data: {'genesList': list}
     }).done(function(serverAnswer) {
         jQuery("#outputs").html(serverAnswer);
     }).fail(function() {
@@ -96,3 +97,12 @@ function getClinicalMetaDataforEAE(){
     });
 }
 
+/**
+ *  Get the input List from the user
+ */
+
+function genesListData(){
+    var data = [];
+    data.push({list: 'ListOfGenes', value: jQuery('#genes').val()});
+    return data
+}

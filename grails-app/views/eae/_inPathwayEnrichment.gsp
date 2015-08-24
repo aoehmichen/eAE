@@ -4,21 +4,23 @@
 </div>
 
 <div id='genesList' class="txt">
-    <form method="post" action=runPE()>
-        <textarea name="genes" cols="25" rows="5">Enter your genes here...
+    <form method="post" action="">
+        <textarea id="genes" cols="25" rows="5">Enter your genes here...
         </textarea><br>
         <input
                 id="submitPE"
                 class='txt'
                 type="button"
                 value="Run Enrichment"
-                onclick="runPE()"/>
+                onclick="triggerPE()"/>
     </form>
 </div>
 <br/>
 
 <script>
-
+    function triggerPE() {
+        runPE(document.getElementById("genes").value)
+    }
 
 </script>
 
