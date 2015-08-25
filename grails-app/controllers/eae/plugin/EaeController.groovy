@@ -1,6 +1,5 @@
 package eae.plugin
 
-import grails.converters.JSON
 import org.apache.commons.io.FilenameUtils
 
 class EaeController {
@@ -26,24 +25,24 @@ class EaeController {
         }
     }
 
-    def getClinicalMetaDataforEAE = {
-        List<Long> resultInstanceIds = parseResultInstanceIds()
-
-        render EaeDataService.getClinicalMetaDataForEAE(
-                resultInstanceIds[0],
-                resultInstanceIds[1]) as JSON
-    }
-
-
-    private List<Long> parseResultInstanceIds () {
-        List<Long> result = []
-        int subsetNumber = 1
-        while (params.containsKey('result_instance_id' + subsetNumber)) {
-            result << params.long('result_instance_id' + subsetNumber)
-            subsetNumber += 1
-        }
-        result
-    }
+//    def getClinicalMetaDataforEAE = {
+//        List<Long> resultInstanceIds = parseResultInstanceIds()
+//
+//        render EaeDataService.getClinicalMetaDataForEAE(
+//                resultInstanceIds[0],
+//                resultInstanceIds[1]) as JSON
+//    }
+//
+//
+//    private List<Long> parseResultInstanceIds () {
+//        List<Long> result = []
+//        int subsetNumber = 1
+//        while (params.containsKey('result_instance_id' + subsetNumber)) {
+//            result << params.long('result_instance_id' + subsetNumber)
+//            subsetNumber += 1
+//        }
+//        result
+//    }
 
     def runPEForSelectedGenes = {
 
