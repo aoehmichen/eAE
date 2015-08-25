@@ -5,6 +5,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.FileStatus
 import org.apache.hadoop.fs.FileSystem
 import org.apache.hadoop.fs.Path
+import org.apache.commons.vfs2
 
 @Transactional
 class EaeDataService {
@@ -39,19 +40,33 @@ class EaeDataService {
 
     def sendToHDFS(){
         try {
-                Configuration conf = new Configuration();
-                conf.set ( "fs.defaultFS", "hdfs://146.169.32.196:8020/user/axel" );
+//                Configuration conf = new Configuration();
+//                conf.set ( "fs.defaultFS", "hdfs://146.169.32.196:8020/user/hdfs" );
+//
+//                FileSystem fs = FileSystem.get(conf);
+//
+//                fs.createNewFile ( new Path ( "/user/hdfs/test" ) );
+//
+//                FileStatus[] status = fs.listStatus(new Path("/user/hdfs"));
+//                for (
+//                int i = 0;
+//                i < status.length; i++) {
+//                    System.out.println(status[i].getPath());
+//                }
 
-                FileSystem fs = FileSystem.get(conf);
 
-                fs.createNewFile ( new Path ( "/user/axel/test" ) );
-
-                FileStatus[] status = fs.listStatus(new Path("/user/axel"));
-                for (
-                int i = 0;
-                i < status.length; i++) {
-                    System.out.println(status[i].getPath());
+                File f=new File("abc.txt")//Takes the default path, else, you can specify the required path
+                if(f.exists())
+                {
+                    f.delete()
                 }
+                f.createNewFile()
+
+                FileObject destn=VFS.getManager().resolveFile(f.getAbsolutePath())
+                FileSystem hdfs =FileSystem.get(new URI("hdfs://146.169.32.196:8020"), new Configuration())
+                Path newFilePath=new Path(f)
+                FSDataOutputStream out = hdfs.create(outFile)
+
                 return true
         } catch (Exception e) {
             e.printStackTrace();
