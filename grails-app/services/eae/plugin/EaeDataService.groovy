@@ -1,7 +1,10 @@
 package eae.plugin
-
 import grails.transaction.Transactional
 import groovy.json.JsonBuilder
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.FileStatus
+import org.apache.hadoop.fs.FileSystem
+import org.apache.hadoop.fs.Path
 
 @Transactional
 class EaeDataService {
@@ -32,4 +35,27 @@ class EaeDataService {
         return exportMetadataService.getClinicalMetaData(resultInstanceId1,resultInstanceId2)
 
     }
+
+
+    def sendToHDFS(){
+        try {
+                Configuration conf = new Configuration();
+                conf.set ( "fs.defaultFS", "hdfs://146.169.32.196:8020/user/axel" );
+
+                FileSystem fs = FileSystem.get(conf);
+
+                fs.createNewFile ( new Path ( "/user/axel/test" ) );
+
+                FileStatus[] status = fs.listStatus(new Path("/user/axel"));
+                for (
+                int i = 0;
+                i < status.length; i++) {
+                    System.out.println(status[i].getPath());
+                }
+                return true
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -1,11 +1,10 @@
 package eae.plugin
-
 import org.apache.commons.io.FilenameUtils
 
 class EaeController {
 
     def smartRService
-    def EaeDataService
+    def eaeDataService
 
 
     /**
@@ -47,6 +46,7 @@ class EaeController {
     def runPEForSelectedGenes = {
 
         println(params)
+        def val = eaeDataService.sendToHDFS()
         render params.genesList.toString()
     }
 }
