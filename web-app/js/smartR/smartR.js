@@ -161,27 +161,6 @@ function activateDragAndDrop(divName) {
     dtgI.notifyDrop = dropOntoCategorySelection;
 }
 
-// Panel item for the SmartR plugin
-var smartRPanel = new Ext.Panel({
-    id: 'smartRPanel',
-    title: 'SmartR',
-    region: 'center',
-    split: true,
-    height: 90,
-    layout: 'fit',
-    collapsible: true,
-    autoScroll: true,
-    tbar: new Ext.Toolbar({
-        id: 'smartRToolbar',
-        title: 'R Scripts',
-        items: []
-    }),
-    autoLoad: {
-        url: pageInfo.basePath + '/smartR/index',
-        method: 'POST',
-        evalScripts: false
-    }
-});
 
 /**
 *   Clears drag & drop selections from the given div
@@ -337,6 +316,21 @@ function runRScript() {
 }
 
 /**
+ *   Renders the input form for entering the parameters for a visualization/script
+ */
+function goToEAE() {
+    jQuery.ajax({
+        url: pageInfo.basePath + '/SmartR/goToEAEngine' ,
+        type: "POST",
+        timeout: '600000'
+    }).done(function(serverAnswer) {
+        jQuery("#index").html(serverAnswer);
+    }).fail(function() {
+        jQuery("#index").html("AJAX CALL FAILED!");
+    });
+}
+
+/**
 *   Renders the input form for entering the parameters for a visualization/script
 */
 function changeInputDIV() {
@@ -353,3 +347,5 @@ function changeInputDIV() {
         jQuery("#inputDIV").html("AJAX CALL FAILED!");
     });
 }
+
+

@@ -8,6 +8,7 @@ grails.project.dependency.resolution = {
     legacyResolve false
     inherits('global') {}
     repositories {
+
         grailsCentral()
         mavenLocal()
         mavenCentral()
@@ -15,7 +16,8 @@ grails.project.dependency.resolution = {
         mavenRepo 'https://repo.thehyve.nl/content/repositories/public/'
     }
     dependencies {
-        // compile 'org.apache.ant:ant:1.9.6'
+        compile 'org.apache.hadoop:hadoop-client:2.6.0'
+        compile 'org.mongodb:mongo-java-driver:3.0.3'
     }
     plugins {
 

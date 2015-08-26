@@ -49,6 +49,13 @@ class smartRGrailsPlugin {
             clinicalDataResourceService = ref('clinicalDataResourceService')
             highDimExportService = ref('highDimExportService')
         }
+        EaeDataService(eae.plugin.EaeDataService) {
+            studiesResourceService = ref('studiesResourceService')
+            conceptsResourceService = ref('conceptsResourceService')
+            clinicalDataResourceService = ref('clinicalDataResourceService')
+            highDimExportService = ref('highDimExportService')
+            exportMetadataService = ref('exportMetadataService')
+        }
     }
 
     def doWithDynamicMethods = { ctx ->
