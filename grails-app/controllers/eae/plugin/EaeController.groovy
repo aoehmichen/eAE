@@ -46,7 +46,7 @@ class EaeController {
     def runPEForSelectedGenes = {
 
         println(params)
-        def val = eaeDataService.sendToHDFS()
+        def val = eaeDataService.SendToHDFS(params.genesList)
         render params.genesList.toString()
     }
 }
