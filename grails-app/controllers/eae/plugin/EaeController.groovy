@@ -44,9 +44,16 @@ class EaeController {
 //    }
 
     def runPEForSelectedGenes = {
-
         println(params)
-        def val = eaeDataService.SendToHDFS(params.genesList)
+
+        def saneGenesList = ((String)params.genesList).replaceAll("\\s","\\t")
+        println(saneGenesList)
+        def sparkParameters = "pe.py pe_genes.txt Bonferroni"
+        final sparkURL = grailsApplication.config.com.eae.sparkURL;
+        eaeDataService.SendToHDFS(saneGenesList, sparkURL)
+        println("sent to HDFS")
+        eaeDataService.sparkSubmit(sparkParameters)
+        println("spark job submitted")
         render params.genesList.toString()
     }
 }

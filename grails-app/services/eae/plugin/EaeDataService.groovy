@@ -37,40 +37,39 @@ class EaeDataService {
 //        return exportMetadataService.getClinicalMetaData(resultInstanceId1,resultInstanceId2)
 //
 //    }
+/**
+ *   Gets the directory where all the R scripts are located
+ *
+ *   @return {str}: path to the script folder
+ */
+    def getEAEScriptDir() {
+        return org.codehaus.groovy.grails.plugins.GrailsPluginUtils.getPluginDirForName('smart-r').getFile().absolutePath + '/web-app/Scripts/eae/'
+    }
 
+    def  SendToHDFS (def genesList, String sparkURL ) {
+        def script =getEAEScriptDir()+'transferToHDFS.sh'
+        def fileToTransfer = 'geneList.txt'
 
-    def  SendToHDFS (def genesList) {
-//                Configuration conf = new Configuration();
-//                conf.set ( "fs.defaultFS", "hdfs://146.169.32.196:8020/user/hdfs" );
-//
-//                FileSystem fs = FileSystem.get(conf);
-//
-//                fs.createNewFile ( new Path ( "/user/hdfs/test" ) );
-//
-//                FileStatus[] status = fs.listStatus(new Path("/user/hdfs"));
-//                for (
-//                int i = 0;
-//                i < status.length; i++) {
-//                    System.out.println(status[i].getPath());
-//                }
+        File f =new File(genesList)
+        if(f.exists()){
+            f.delete()
+        }
+        f.createNewFile()
+        Path fp = new Path(f.getPath())
 
+        [script, fp, fileToTransfer, sparkURL].execute()
 
-                File f=new File("abc.txt")//Takes the default path, else, you can specify the required path
-                if(f.exists())
-                {
-                    f.delete()
-                }
-                f.createNewFile()
+        // We cleanup
+        f.delete()
 
-                Path fp = new Path(f.getPath())
-                FileSystem hdfs =FileSystem.get(new URI("hdfs://146.169.32.196:8020"), new Configuration())
+//              This code would work but requires the installation of the hadoop stack on the host with all the utils to work....
+//                FileSystem hdfs =FileSystem.get(new URI("hdfs://146.169.32.196:8020"), new Configuration())
+//                hdfs.copyFromLocalFile(fp,new Path('/home/hdfs/'))
+    }
 
-                hdfs.copyFromLocalFile(fp,new Path('/home/hdfs/'))
-
-               // Path newFilePath=new Path(f)
-               // FSDataOutputStream out = hdfs.create(outFile)
-
-                return true
+    def sparkSubmit(def sparkParameters){
+        def script =getEAEScriptDir()+'executeSparkJob.sh'
+        [script, sparkParameters].execute()
     }
 
 }

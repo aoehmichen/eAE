@@ -53,11 +53,6 @@ class SmartRService {
         def cohort2 = rIID2 ? i2b2HelperService.getSubjectsAsList(rIID2).collect { it.toLong() } : []
         def cohorts = [cohort1, cohort2]
 
-        println(rIID1)
-        println("toto")
-        println(rIID2)
-        println(cohort1)
-
         jobDataMap['conceptBoxes'].each { conceptBox ->
             def name = conceptBox.name
             def cohort = conceptBox.cohort
