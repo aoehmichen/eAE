@@ -46,7 +46,7 @@ class EaeController {
     def runPEForSelectedGenes = {
         println(params)
 
-        def saneGenesList = ((String)params.genesList).replaceAll("\\s","\\t")
+        def saneGenesList = ((String)params.genesList).trim().replaceAll("\\s","\\t")
         println(saneGenesList)
         def sparkParameters = "pe.py pe_genes.txt Bonferroni"
         final sparkURL = grailsApplication.config.com.eae.sparkURL;
