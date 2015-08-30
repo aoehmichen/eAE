@@ -11,7 +11,7 @@ import mongo.MongoCacheFactory
 @Transactional
 class MongoCacheService {
 
-    def retrieveValueFromCache(String mongoURL, String mongoPort, String dbName) {
+    def retrieveValueFromCache(String mongoURL, String mongoPort, String dbName, String paramValue) {
 
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         DB db = mongoClient.getDB( dbName );

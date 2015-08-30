@@ -104,13 +104,6 @@ function changeEAEInput(){
 
 }
 
-/**
- *   Run a script from the eae
- */
-function runEAEScript(){
-
-
-}
 
 /**
  *   Run a pathway enrichment from the eae

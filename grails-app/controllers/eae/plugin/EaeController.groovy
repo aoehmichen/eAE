@@ -66,9 +66,10 @@ class EaeController {
             println("sent to HDFS")
             eaeService.sparkSubmit(sparkParameters)
             println("spark job submitted")
-            render params.genesList.toString()
+            render "Your Job has been submitted. Please come back later for the result"
         }else{
-            render params.genesList.toString()
+            def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", saneGenesList)
+            render template :'/eae/_outPathwayEnrichement', model: [result: result]
         }
     }
 }
