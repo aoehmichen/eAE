@@ -2,13 +2,12 @@ package eae.plugin
 
 import grails.transaction.Transactional
 import org.apache.hadoop.fs.Path
+import org.codehaus.groovy.grails.plugins.GrailsPluginUtils
 
 @Transactional
 class EaeDataService {
 
     def jobDataMap = [:]
-
-    def eaeService
 
 //    def studiesResourceService
 //    def conceptsResourceService
@@ -35,8 +34,8 @@ class EaeDataService {
 //
 //    }
 
-    def  SendToHDFS (def genesList, String sparkURL ) {
-        def script = eaeService.getEAEScriptDir()+'transferToHDFS.sh'
+    def  SendToHDFS (def genesList, String scriptDir, String sparkURL ) {
+        def script = scriptDir +'transferToHDFS.sh'
         def fileToTransfer = 'geneList.txt'
 
         File f =new File(genesList)
@@ -46,10 +45,12 @@ class EaeDataService {
         f.createNewFile()
         Path fp = new Path(f.getPath())
 
-        [script, fp, fileToTransfer, sparkURL].execute()
+        def exitVal =[script, fp, fileToTransfer, sparkURL].execute().exitValue()
 
         // We cleanup
         f.delete()
+
+        return exitVal
 
 //              This code would work but requires the installation of the hadoop stack on the host with all the utils to work....
 //                FileSystem hdfs =FileSystem.get(new URI("hdfs://146.169.32.196:8020"), new Configuration())

@@ -24,7 +24,8 @@ class EaeService {
 
     def sparkSubmit(def sparkParameters){
         def script = getEAEScriptDir()+'executeSparkJob.sh'
-        [script, sparkParameters].execute()
+        def exitVal = [script, sparkParameters].execute().exitValue()
+        return exitVal
     }
 
 }

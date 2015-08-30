@@ -39,4 +39,18 @@ class MongoCacheService {
 
         return 0;
     }
+
+
+    def checkIfPresentInCache(String mongoURL, String mongoPort, String dbName, String paramValue){
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
+        DB db = mongoClient.getDB( dbName );
+        DBCollection coll = db.getCollection("pe")
+
+        def recordsCount = coll.find({ListOfgenes: paramValue}).countParallel()
+        if(recordsCount>1){
+            throw new Exception("Invalid number of records in the mongoDB")
+        }else{
+            return recordsCount == 1;
+        }
+    }
 }

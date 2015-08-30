@@ -6,6 +6,13 @@ class EaeController {
     def smartRService
     def eaeDataService
     def eaeService
+    def mongoCacheService
+
+
+    final String SPARK_URL = grailsApplication.config.com.eae.sparkURL;
+    final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
+    final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
+    final String scriptDir = eaeService.EAEScriptDir;
 
 
     /**
@@ -47,14 +54,21 @@ class EaeController {
     def runPEForSelectedGenes = {
         println(params)
 
-        def saneGenesList = ((String)params.genesList).trim().replaceAll("\\s","\\t")
+        String saneGenesList = ((String)params.genesList).trim().split(",").sort().join("\\t")
         println(saneGenesList)
-        def sparkParameters = "pe.py pe_genes.txt Bonferroni"
-        final sparkURL = grailsApplication.config.com.eae.sparkURL;
-        eaeDataService.SendToHDFS(saneGenesList, sparkURL)
-        println("sent to HDFS")
-        eaeService.sparkSubmit(sparkParameters)
-        println("spark job submitted")
-        render params.genesList.toString()
+        println(SPARK_URL)
+        // We check if this query has already been made before
+        Boolean cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT, "eae", saneGenesList)
+
+        if(!cached) {
+            def sparkParameters = "pe.py pe_genes.txt Bonferroni"
+            eaeDataService.SendToHDFS(saneGenesList, scriptDir, SPARK_URL)
+            println("sent to HDFS")
+            eaeService.sparkSubmit(sparkParameters)
+            println("spark job submitted")
+            render params.genesList.toString()
+        }else{
+            render params.genesList.toString()
+        }
     }
 }
