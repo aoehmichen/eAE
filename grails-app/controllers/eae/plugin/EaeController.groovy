@@ -5,6 +5,7 @@ class EaeController {
 
     def smartRService
     def eaeDataService
+    def eaeService
 
 
     /**
@@ -52,7 +53,7 @@ class EaeController {
         final sparkURL = grailsApplication.config.com.eae.sparkURL;
         eaeDataService.SendToHDFS(saneGenesList, sparkURL)
         println("sent to HDFS")
-        eaeDataService.sparkSubmit(sparkParameters)
+        eaeService.sparkSubmit(sparkParameters)
         println("spark job submitted")
         render params.genesList.toString()
     }

@@ -1,23 +1,20 @@
 package eae.plugin
 
-import groovy.json.JsonBuilder
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.FSDataOutputStream
-import org.apache.hadoop.fs.FileStatus
-import org.apache.hadoop.fs.FileSystem
+import grails.transaction.Transactional
 import org.apache.hadoop.fs.Path
 
-import javax.tools.FileObject
-
+@Transactional
 class EaeDataService {
 
     def jobDataMap = [:]
 
-    def studiesResourceService
-    def conceptsResourceService
-    def clinicalDataResourceService
-    def highDimExportService
-    def exportMetadataService
+    def eaeService
+
+//    def studiesResourceService
+//    def conceptsResourceService
+//    def clinicalDataResourceService
+//    def highDimExportService
+//    def exportMetadataService
 
 
 //    def getAllLowDim(){
@@ -37,17 +34,9 @@ class EaeDataService {
 //        return exportMetadataService.getClinicalMetaData(resultInstanceId1,resultInstanceId2)
 //
 //    }
-/**
- *   Gets the directory where all the R scripts are located
- *
- *   @return {str}: path to the script folder
- */
-    def getEAEScriptDir() {
-        return org.codehaus.groovy.grails.plugins.GrailsPluginUtils.getPluginDirForName('smart-r').getFile().absolutePath + '/web-app/Scripts/eae/'
-    }
 
     def  SendToHDFS (def genesList, String sparkURL ) {
-        def script =getEAEScriptDir()+'transferToHDFS.sh'
+        def script = eaeService.getEAEScriptDir()+'transferToHDFS.sh'
         def fileToTransfer = 'geneList.txt'
 
         File f =new File(genesList)
@@ -66,10 +55,4 @@ class EaeDataService {
 //                FileSystem hdfs =FileSystem.get(new URI("hdfs://146.169.32.196:8020"), new Configuration())
 //                hdfs.copyFromLocalFile(fp,new Path('/home/hdfs/'))
     }
-
-    def sparkSubmit(def sparkParameters){
-        def script =getEAEScriptDir()+'executeSparkJob.sh'
-        [script, sparkParameters].execute()
-    }
-
 }
