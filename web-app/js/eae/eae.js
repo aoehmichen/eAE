@@ -147,8 +147,6 @@ function genesListData(){
     return data
 }
 
-
-
 function getJobsDataForEAE()
 {
     eaejobsstore = new Ext.data.JsonStore({
@@ -157,17 +155,17 @@ function getJobsDataForEAE()
         fields : ['name', 'status']
     });
 
-    eaejobsstore.on('load', galaxyjobsstoreLoaded);
+    eaejobsstore.on('load', eaejobsstoreLoaded);
     var myparams = Ext.urlEncode({jobType: 'DataExport',disableCaching: true});
     eaejobsstore.load({ params : myparams  });
 }
 
-function galaxyjobsstoreLoaded()
+function eaejobsstoreLoaded()
 {
     var ojobs = Ext.getCmp('ajobsgrid');
     if(ojobs!=null)
     {
-        GalaxyPanel.remove(ojobs);
+        jQuery("#cacheTable").remove(ojobs);
     }
     var jobs = new Ext.grid.GridPanel({
         store: eaejobsstore,
@@ -259,6 +257,6 @@ function galaxyjobsstoreLoaded()
             }
         }]
     });
-    GalaxyPanel.add(jobs);
-    GalaxyPanel.doLayout();
+    jQuery("#cacheTable").add(jobs);
+    //jQuery("#cacheTable").doLayout();
 }
