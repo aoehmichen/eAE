@@ -44,8 +44,12 @@
     <hr class="myhr"/>
     </div>
 
+    <div id="cacheTable"></div>
+
     <div id="outputs" class='txt'></div>
 </body>
 
 <script>
+
+
 </script>

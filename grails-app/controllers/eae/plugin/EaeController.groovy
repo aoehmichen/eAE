@@ -3,11 +3,11 @@ import org.apache.commons.io.FilenameUtils
 
 class EaeController {
 
+    def springSecurityService
     def smartRService
     def eaeDataService
     def eaeService
     def mongoCacheService
-
 
     final String SPARK_URL = grailsApplication.config.com.eae.sparkURL;
     final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
@@ -71,5 +71,16 @@ class EaeController {
             def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", saneGenesList)
             render template :'/eae/_outPathwayEnrichement', model: [result: result]
         }
+    }
+
+    /**
+     * Method that will create the get the list of jobs to show in the galaxy jobs tab
+     */
+    def getjobs = {
+        def username = springSecurityService.getPrincipal().username
+        def result = eaeDataService.getjobs(username, "DataExport")
+
+        response.setContentType("text/json")
+        response.outputStream << result?.toString()
     }
 }
