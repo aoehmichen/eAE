@@ -78,7 +78,7 @@ class EaeController {
      */
     def getjobs = {
         def username = springSecurityService.getPrincipal().username
-        def result = eaeDataService.getjobs(username, "DataExport")
+        def result = eaeDataService.getjobs(username, params.workflow)
 
         response.setContentType("text/json")
         response.outputStream << result?.toString()

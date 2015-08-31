@@ -147,12 +147,13 @@ function genesListData(){
     return data
 }
 
-function getJobsDataForEAE()
+function getJobsDataForEAE(workflowSelected)
 {
     eaejobsstore = new Ext.data.JsonStore({
         url : pageInfo.basePath+'/eae/getjobs',
         root : 'jobs',
-        fields : ['name', 'status']
+        data : {'workflow' : workflowSelected},
+        fields : ['name', 'status', 'startDate']
     });
 
     eaejobsstore.on('load', eaejobsstoreLoaded);
@@ -183,14 +184,7 @@ function eaejobsstoreLoaded()
                 }
             },
             {name:'status', header: "Status", width: 120, sortable: true, dataIndex: 'status'},
-            {name:'runTime', header: "Run Time", width: 120, sortable: true, dataIndex: 'runTime', hidden: true},
-            {name:'startDate', header: "Started On", width: 120, sortable: true, dataIndex: 'startDate', hidden: true},
-            {name:'viewerURL', header: "Viewer URL", width: 120, sortable: false, dataIndex: 'viewerURL', hidden: true},
-            {name:'altViewerURL', header: "Alt Viewer URL", width: 120, sortable: false, dataIndex: 'altViewerURL', hidden: true},
-            {name:'lastExportName', header: "lastExportName", width: 120, sortable: true, dataIndex: 'lastExportName'},
-            {name:'lastExportTime', header: "lastExportTime", width: 120, sortable: true, dataIndex: 'lastExportTime' },
-            {name:'exportStatus', header: "exportStatus", width: 120, sortable: true, dataIndex: 'exportStatus' }
-
+            {name:'startDate', header: "Started On", width: 120, sortable: true, dataIndex: 'startDate'}
         ],
         listeners : {cellclick : function (grid, rowIndex, columnIndex, e){
             var colHeader = grid.getColumnModel().getColumnHeader(columnIndex);
@@ -201,36 +195,10 @@ function eaejobsstoreLoaded()
                 } else if (status == "Cancelled")	{
                     Ext.Msg.alert("Job Cancelled", "The job has been cancelled");}
                 else if (status == "Completed")	{
-                    Ext.Msg.prompt('Name', 'Name of the Library to be exported:', function(btn, text){
-                        if (btn == 'ok'){
-                            var nameOfTheLibrary = text;
-                            var nameOfTheExportJob = grid.getStore().getAt(rowIndex).get('name');
-                            Ext.Ajax.request({
-                                url: pageInfo.basePath+'/RetrieveData/JobExportToGalaxy',
-                                method: 'POST',
-                                params: {
-                                    "nameOfTheLibrary" : nameOfTheLibrary,
-                                    "nameOfTheExportJob" : nameOfTheExportJob
-                                },
-                                success: function(response) {
-                                    if (200 == response.status){
-                                        Ext.Msg.show({
-                                            title:'Request Sent',
-                                            msg: 'The export request has been sent to Galaxy',
-                                            buttons: Ext.Msg.OK,
-                                            animEl: 'elId'
-                                        });
-                                    }
-                                    else{
-                                        Ext.Msg.alert("Job Failure", "Unfortunately, an error occurred on this job. Error="+ response.status.toString());
-                                    }
-                                }
-                            });
-                        }
-                    })
+                         // Load the results into outputs from the cache
                 }
                 else if (status != "Completed") {
-                    Ext.Msg.alert("Job Processing", "The job is still processing, please wait");
+                    Ext.Msg.alert("There is something wrong in the status. Unknown status : " + status.toString());
                 }
             }
         }
@@ -244,16 +212,7 @@ function eaejobsstoreLoaded()
         buttons: [{
             text:'Refresh',
             handler: function()	{
-                galaxyjobsstore.reload();
-            }
-        }],
-        buttonAlign:'center',
-        tbar:['->',{
-            id:'help',
-            tooltip:'Click for Jobs help',
-            iconCls: "contextHelpBtn",
-            handler: function(event, toolEl, panel){
-                D2H_ShowHelp("1456",helpURL,"wndExternal",CTXT_DISPLAY_FULLHELP );
+                eaejobsstore.reload();
             }
         }]
     });

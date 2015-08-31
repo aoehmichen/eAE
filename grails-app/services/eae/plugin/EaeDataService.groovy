@@ -62,30 +62,17 @@ class EaeDataService {
     /**
      * Method that will get the list of jobs to show in the eae jobs table
      */
-    def getjobs(String userName, jobType = null) {
+    def getjobs(String userName, workflowSelected) {
         JSONObject result = new JSONObject()
         JSONArray rows = new JSONArray()
 
-        def jobResults = null
         def c = AsyncJob.createCriteria()
-        if (StringUtils.isNotEmpty(jobType)) {
-            jobResults = c {
+        def jobResults = c {
                 like("jobName", "${userName}%")
-                eq("jobType", "${jobType}")
-                ge("lastRunOn", new Date()-7)
+                eq("jobType", "${workflowSelected}")
+                ge("lastRunOn", new Date())
                 order("lastRunOn", "desc")
             }
-        } else {
-            jobResults = c {
-                like("jobName", "${userName}%")
-                or {
-                    ne("jobType", "DataExport")
-                    isNull("jobType")
-                }
-                ge("lastRunOn", new Date()-7)
-                order("lastRunOn", "desc")
-            }
-        }
 
         def m = [:]
         def d
@@ -98,7 +85,7 @@ class EaeDataService {
             m["viewerURL"] = jobResult.viewerURL
             m["altViewerURL"] = jobResult.altViewerURL
             m["jobInputsJson"] = new JSONObject(jobResult.jobInputsJson ?: "{}")
-            d = getLatest(StatusOfExport.findAllByJobName(jobResult.jobName));
+            d = getLatest(StatusOfWorflow.findAllByJobName(jobResult.jobName));
             if(!d.equals(null) ) {
                 m["lastExportName"] = d.lastExportName;
                 m["lastExportTime"] = d.lastExportTime.toString();
@@ -116,5 +103,24 @@ class EaeDataService {
         result.put("jobs", rows)
 
         return result
+    }
+
+    private def getLatest(ArrayList<?> exports){
+
+        switch (exports.size()){
+            case 0:
+                log.error("An error has occured while exporting to galaxy. The job name doesn't existe in the database");
+                return null;
+            case 1:
+                return exports[0];
+            default:
+                def latest = exports[0];
+                for(i in 1..exports.size()-1){
+                    if(exports[i].id > latest.id){
+                        latest = exports[i];
+                    }
+                }
+                return latest;
+        }
     }
 }
