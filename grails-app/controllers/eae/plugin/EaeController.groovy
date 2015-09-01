@@ -61,6 +61,7 @@ class EaeController {
         Boolean cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT, "eae", saneGenesList)
 
         if(!cached) {
+            mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae",saneGenesList)
             def sparkParameters = "pe.py pe_genes.txt Bonferroni"
             eaeDataService.SendToHDFS(saneGenesList, scriptDir, SPARK_URL)
             println("sent to HDFS")
@@ -78,7 +79,7 @@ class EaeController {
      */
     def getjobs = {
         def username = springSecurityService.getPrincipal().username
-        def result = eaeDataService.getjobs(username, params.workflow)
+        def result = mongoCacheService.getjobs(username, params.workflow)
 
         response.setContentType("text/json")
         response.outputStream << result?.toString()
