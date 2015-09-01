@@ -18,29 +18,12 @@ class MongoCacheService {
 
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         DB db = mongoClient.getDB( dbName );
-        BasicDBObject doc = new BasicDBObject()
-        doc.put("name", "MongoDB")
-        doc.put("type", "database")
-        doc.put("count", 1)
+        DBCollection coll = db.getCollection("pe")
 
-        def creationResult = db.createCollection("testCollection",doc);
-        System.err.println(creationResult);
-        DBCollection coll = db.getCollection("testCollection")
-
-        for(i in 1..100) {
-            coll.insert(new BasicDBObject().append("i", i))
-        }
-
-        println coll.getCount()
-
-        DBCursor cursor = coll.find()
-        while(cursor.hasNext()) {
-            println cursor.next()
-        }
-
+        DBCursor cursor = coll.find({ListOfgenes: paramValue})
         mongoClient.close();
 
-        return 0;
+        return cursor.next();
     }
 
     def initJob(String mongoURL, String mongoPort, String dbName, String user){
@@ -66,9 +49,12 @@ class MongoCacheService {
     def checkIfPresentInCache(String mongoURL, String mongoPort, String dbName, String paramValue){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         DB db = mongoClient.getDB( dbName );
-        DBCollection coll = db.getCollection("pe")
 
-        def recordsCount = coll.find({ListOfgenes: paramValue}).countParallel()
+        BasicDBObject query = new BasicDBObject("ListOfgenes", paramValue);
+        def coll = db.getCollection("pe").find(query)
+
+        def recordsCount = coll.count()
+        mongoClient.close();
         if(recordsCount>1){
             throw new Exception("Invalid number of records in the mongoDB")
         }else{
@@ -104,6 +90,8 @@ class MongoCacheService {
         result.put("success", true)
         result.put("totalCount", cursor.countParallel())
         result.put("jobs", rows)
+
+        mongoClient.close();
 
         return result
     }

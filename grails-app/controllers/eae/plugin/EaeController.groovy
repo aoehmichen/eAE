@@ -9,17 +9,12 @@ class EaeController {
     def eaeService
     def mongoCacheService
 
-    final String SPARK_URL = grailsApplication.config.com.eae.sparkURL;
-    final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
-    final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
-    final String scriptDir = eaeService.EAEScriptDir;
-
-
     /**
      *   Go to SmartR
      */
     def goToSmartR = {
         render template: '/smartR/index', model:[ scriptList: smartRService.scriptList] }
+
 
     /**
      *   Renders the input form for initial script parameters
@@ -32,31 +27,16 @@ class EaeController {
         }
     }
 
-//    def getClinicalMetaDataforEAE = {
-//        List<Long> resultInstanceIds = parseResultInstanceIds()
-//
-//        render EaeDataService.getClinicalMetaDataForEAE(
-//                resultInstanceIds[0],
-//                resultInstanceIds[1]) as JSON
-//    }
-//
-//
-//    private List<Long> parseResultInstanceIds () {
-//        List<Long> result = []
-//        int subsetNumber = 1
-//        while (params.containsKey('result_instance_id' + subsetNumber)) {
-//            result << params.long('result_instance_id' + subsetNumber)
-//            subsetNumber += 1
-//        }
-//        result
-//    }
-
     def runPEForSelectedGenes = {
         println(params)
+        final String SPARK_URL = grailsApplication.config.com.eae.sparkURL;
+        final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
+        final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
+        final String scriptDir = eaeService.getEAEScriptDir();
 
-        String saneGenesList = ((String)params.genesList).trim().split(",").sort().join("\\t")
+        String saneGenesList = ((String)params.genesList).trim().split(",").sort(false).join('\t')
         println(saneGenesList)
-        println(SPARK_URL)
+
         // We check if this query has already been made before
         Boolean cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT, "eae", saneGenesList)
 
