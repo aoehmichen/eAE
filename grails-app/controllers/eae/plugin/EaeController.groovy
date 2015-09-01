@@ -32,9 +32,9 @@ class EaeController {
         final String SPARK_URL = grailsApplication.config.com.eae.sparkURL;
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
-        final String scriptDir = eaeService.getEAEScriptDir();
+        final String scriptDir = grailsApplication.config.com.eae.EAEScriptDir;
 
-        String saneGenesList = ((String)params.genesList).trim().split(",").sort(false).join('\t')
+        String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join('\t').trim()
         println(saneGenesList)
 
         // We check if this query has already been made before

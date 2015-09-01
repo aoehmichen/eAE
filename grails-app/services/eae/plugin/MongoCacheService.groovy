@@ -1,11 +1,5 @@
 package eae.plugin
-
-import com.mongodb.BasicDBList
-import com.mongodb.BasicDBObject
-import com.mongodb.DB
-import com.mongodb.DBCollection
-import com.mongodb.DBCursor
-import com.mongodb.MongoClient
+import com.mongodb.*
 import grails.transaction.Transactional
 import mongo.MongoCacheFactory
 import org.json.JSONArray
@@ -16,14 +10,15 @@ class MongoCacheService {
 
     def retrieveValueFromCache(String mongoURL, String mongoPort, String dbName, String paramValue) {
 
-        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
-        DB db = mongoClient.getDB( dbName );
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort)
+        DB db = mongoClient.getDB( dbName )
         DBCollection coll = db.getCollection("pe")
 
-        DBCursor cursor = coll.find({ListOfgenes: paramValue})
-        mongoClient.close();
+        BasicDBObject query = new BasicDBObject("ListOfgenes", paramValue)
+        def result = db.getCollection("pe").find(query)
+        mongoClient.close()
 
-        return cursor.next();
+        return result;
     }
 
     def initJob(String mongoURL, String mongoPort, String dbName, String user){
