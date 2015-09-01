@@ -22,6 +22,8 @@
         runPE(document.getElementById("genes").value)
     }
 
+    populateCacheDIV("pe")
+
 </script>
 
 

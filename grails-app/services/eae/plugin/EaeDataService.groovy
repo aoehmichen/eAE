@@ -36,14 +36,17 @@ class EaeDataService {
 //
 //    }
 
-    def  SendToHDFS (def genesList, String scriptDir, String sparkURL ) {
+    def  SendToHDFS (String genesList, String scriptDir, String sparkURL ) {
         def script = scriptDir +'transferToHDFS.sh'
         def fileToTransfer = 'geneList.txt'
 
-        File f =new File(genesList)
+        File f =new File("/tmp/eae/","test.txt")
         if(f.exists()){
             f.delete()
         }
+        f.withWriter('utf-8') { writer ->
+            writer.writeLine genesList
+        } // or << genesList
         f.createNewFile()
         String fp = f.getPath()
 

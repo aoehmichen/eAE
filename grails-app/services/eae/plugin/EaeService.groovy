@@ -10,7 +10,7 @@ class EaeService {
         return scriptList
     }
 
-    def sparkSubmit(def sparkParameters, String scriptDir){
+    def sparkSubmit(String scriptDir, String sparkParameters){
         def script = scriptDir +'executeSparkJob.sh'
         def exitVal = [script, sparkParameters].execute().exitValue()
         return exitVal

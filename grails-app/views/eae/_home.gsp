@@ -46,7 +46,7 @@
 
     <div id="cacheTable"></div>
 
-    <div id="outputs" class='txt'></div>
+    <div id="outputs" ></div>
 </body>
 
 <script>

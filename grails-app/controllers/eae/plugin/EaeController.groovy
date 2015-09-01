@@ -1,4 +1,6 @@
 package eae.plugin
+
+import com.mongodb.util.JSON
 import org.apache.commons.io.FilenameUtils
 
 class EaeController {
@@ -28,30 +30,34 @@ class EaeController {
     }
 
     def runPEForSelectedGenes = {
-        println(params)
+
         final String SPARK_URL = grailsApplication.config.com.eae.sparkURL;
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
         final String scriptDir = grailsApplication.config.com.eae.EAEScriptDir;
+        final String username = springSecurityService.getPrincipal().username;
 
         String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join('\t').trim()
-        println(saneGenesList)
 
         // We check if this query has already been made before
-        Boolean cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT, "eae", saneGenesList)
-
-        if(!cached) {
-            mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae",saneGenesList)
-            def sparkParameters = "pe.py pe_genes.txt Bonferroni"
+        String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT, "eae", saneGenesList)
+        def result
+        if(cached == "NotCached") {
+            String jobID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, saneGenesList)
+            String sparkParameters = "pe.py pe_genes.txt Bonferroni " + jobID
             eaeDataService.SendToHDFS(saneGenesList, scriptDir, SPARK_URL)
             println("sent to HDFS")
-            eaeService.sparkSubmit(sparkParameters)
-            println("spark job submitted")
-            render "Your Job has been submitted. Please come back later for the result"
+            eaeService.sparkSubmit(scriptDir, sparkParameters)
+
+            result = "Your Job has been submitted. Please come back later for the result"
+        }else if (cached == "Completed"){
+            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", saneGenesList)
+            println(result)
         }else{
-            def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", saneGenesList)
-            render template :'/eae/_outPathwayEnrichement', model: [result: result]
+            result = "Your Job has been submitted. Please come back later for the result"
         }
+
+        render template :'/eae/_outPathwayEnrichement', model: [resultPE: result]
     }
 
     /**
@@ -59,9 +65,11 @@ class EaeController {
      */
     def getjobs = {
         def username = springSecurityService.getPrincipal().username
-        def result = mongoCacheService.getjobs(username, params.workflow)
+        final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
+        final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
+        def result = mongoCacheService.getjobs(MONGO_URL, MONGO_PORT, "eae", username, params.workflow)
 
         response.setContentType("text/json")
-        response.outputStream << result?.toString()
+        response.outputStream << result as JSON
     }
 }
