@@ -219,3 +219,18 @@ function eaejobsstoreLoaded()
     jQuery("#cacheTable").add(jobs);
     //jQuery("#cacheTable").doLayout();
 }
+
+
+
+var _o = $('output')
+var _t = $('<table/>')
+$.each([__JBS__], function (i, e) {
+    _t.append($('<tr/>').append(
+        $('<td/>').val(e.nom)
+    ).append(
+        $('<td/>').append($('<a/>').attr('href', e.lien).val(e.date))
+    ).append(
+        $('<td/>').val(e.heure)
+    ))
+})
+_o.append(_t)
