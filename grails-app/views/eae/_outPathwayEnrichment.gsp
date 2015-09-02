@@ -1,5 +1,4 @@
 
-
 <script>
     var results = ${resultPE}
 

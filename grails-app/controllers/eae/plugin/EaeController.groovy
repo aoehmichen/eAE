@@ -57,7 +57,7 @@ class EaeController {
             result = "Your Job has been submitted. Please come back later for the result"
         }
 
-        render template :'/eae/_outPathwayEnrichement', model: [resultPE: result]
+        render template :'/eae/outPathwayEnrichement', model: [resultPE: result]
     }
 
     /**
@@ -67,8 +67,34 @@ class EaeController {
         def username = springSecurityService.getPrincipal().username
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
-        def result = mongoCacheService.getjobs(MONGO_URL, MONGO_PORT, "eae", username, params.workflow)
+        def workflow = ""
 
+        println(params)
+
+        if(params.script == null) {
+        workflow = "pe"
+        }else {
+
+            switch (params.script) {
+                case "Pathway Enrichment":
+                    workflow = "pe";
+                    break;
+                case "General Testing":
+                    workflow = "gt";
+                    break;
+                case "Cross Validation":
+                    workflow = "cv";
+                    break;
+                case "Label Propagation":
+                    workflow = "lp";
+                    break;
+                default:
+                    throw new Exception("The workflow doesn't exist.")
+            }
+        }
+        def result = mongoCacheService.getjobsFromMongo(MONGO_URL, MONGO_PORT, "eae", username, workflow)
+
+        println(result)
         response.setContentType("text/json")
         response.outputStream << result as JSON
     }

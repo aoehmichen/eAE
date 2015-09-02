@@ -1,8 +1,11 @@
 package eae.plugin
-import com.mongodb.*
+import com.mongodb.BasicDBObject
+import com.mongodb.MongoClient
+import com.mongodb.client.MongoCollection
+import com.mongodb.client.MongoDatabase
 import grails.transaction.Transactional
 import mongo.MongoCacheFactory
-import org.apache.poi.hssf.record.formula.functions.Now
+import org.bson.Document
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -12,33 +15,33 @@ class MongoCacheService {
     def retrieveValueFromCache(String mongoURL, String mongoPort, String dbName, String paramValue) {
 
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort)
-        DB db = mongoClient.getDB( dbName )
-        DBCollection coll = db.getCollection("pe")
+        MongoDatabase db = mongoClient.getDatabase( dbName )
+        MongoCollection<Document> coll = db.getCollection("pe")
 
         BasicDBObject query = new BasicDBObject("ListOfgenes", paramValue)
-        def result = coll.find(query)
+        def result = new JSONObject(((Document)coll.find(query).first()).toJson())
         mongoClient.close()
 
-        return result;
+        return result.get("KeggTopPathway");
     }
 
     def initJob(String mongoURL, String mongoPort, String dbName, String workflow, String user, String geneList){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
-        DB db = mongoClient.getDB( dbName );
-        DBCollection coll = db.getCollection(workflow);
+        MongoDatabase db = mongoClient.getDatabase( dbName );
+        MongoCollection<Document> coll = db.getCollection(workflow);
 
-        BasicDBObject doc = new BasicDBObject();
-        doc.put("topPathways", [])
-        doc.put("corrected_pValues", [])
-        doc.put("KeggTopPathway", "")
-        doc.put("status", "started")
-        doc.put("user", user)
-        doc.put("ListOfgenes", geneList)
-        doc.put("Correction", "")
-        doc.put("StartTime", new Date())
-        doc.put("EndTime", new Date())
+        Document doc = new Document();
+        doc.append("topPathways", [])
+        doc.append("corrected_pValues", [])
+        doc.append("KeggTopPathway", "")
+        doc.append("status", "started")
+        doc.append("user", user)
+        doc.append("ListOfgenes", geneList)
+        doc.append("Correction", "")
+        doc.append("StartTime", new Date())
+        doc.append("EndTime", new Date())
 
-        coll.insert(doc)
+        coll.insertOne(doc)
         def jobId = doc.get( "_id" );
 
         return jobId;
@@ -46,19 +49,23 @@ class MongoCacheService {
 
     def checkIfPresentInCache(String mongoURL, String mongoPort, String dbName, String paramValue){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
-        DB db = mongoClient.getDB( dbName );
+        MongoDatabase db = mongoClient.getDatabase( dbName );
 
         BasicDBObject query = new BasicDBObject("ListOfgenes", paramValue);
-        def coll = db.getCollection("pe").find(query)
+        def cursor = db.getCollection("pe").find(query).iterator()
+        def recordsCount = 0
 
-        def recordsCount = coll.count()
+        while(cursor.hasNext()) {
+            cursor.next();
+            recordsCount+=1;
+        }
         mongoClient.close();
         if(recordsCount>1){
             throw new Exception("Invalid number of records in the mongoDB")
         }else{
             if (recordsCount == 0){
                 return "NotCached"
-            }else if(coll.get("status") == "started" ){
+            }else if(coll.getProperties()["status"] == "started" ){
                 return "started"
             }else{
                 return "Completed"
@@ -69,30 +76,32 @@ class MongoCacheService {
     /**
      * Method that will get the list of jobs to show in the eae jobs table
      */
-    def getjobs(String mongoURL, String mongoPort, String dbName, String userName, String workflowSelected) {
+    def getjobsFromMongo(String mongoURL, String mongoPort, String dbName, String userName, String workflowSelected) {
 
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
-        DB db = mongoClient.getDB( dbName );
-        DBCollection coll = db.getCollection(workflowSelected);
+        MongoDatabase  db = mongoClient.getDatabase( dbName );
+        MongoCollection coll = db.getCollection(workflowSelected);
 
         JSONObject result = new JSONObject()
         JSONArray rows = new JSONArray()
-
-        def cursor = coll.find({ user: userName});
+        BasicDBObject query = new BasicDBObject("user", userName);
+        def cursor = coll.find(query).iterator();
+        def count = 0;
 
         while(cursor.hasNext()) {
-            BasicDBObject obj = (BasicDBObject) cursor.next();
+            JSONObject obj =  new JSONObject(cursor.next().toJson());
             result = new JSONObject();
-            BasicDBList name = (BasicDBList) obj.get("ListOfgenes");
-            result.put("status", obj.getString("status"));
-            result.put("startDate", obj.getString("startTime"));
+            String name =  obj.get("ListOfgenes");
+            result.put("status", obj.get("status"));
+            result.put("start", obj.get("StartTime"));
             result.put("name", name);
             rows.put(result);
+            count+=1;
         }
 
         println(rows)
         result.put("success", true)
-        result.put("totalCount", cursor.countParallel())
+        result.put("totalCount",count)
         result.put("jobs", rows)
 
         mongoClient.close();

@@ -1,10 +1,4 @@
 package eae.plugin
-
-import com.recomdata.transmart.domain.i2b2.AsyncJob
-import org.apache.commons.lang.StringUtils
-import org.json.JSONArray
-import org.json.JSONObject
-
 //import org.apache.hadoop.fs.Path
 
 class EaeDataService {
@@ -40,22 +34,28 @@ class EaeDataService {
         def script = scriptDir +'transferToHDFS.sh'
         def fileToTransfer = 'geneList.txt'
 
-        File f =new File("/tmp/eae/","test.txt")
+        File f =new File("/tmp/eae/","geneList.txt")
         if(f.exists()){
             f.delete()
         }
         f.withWriter('utf-8') { writer ->
             writer.writeLine genesList
         } // or << genesList
-        f.createNewFile()
-        String fp = f.getPath()
-
-        def exitVal =[script, fp, fileToTransfer, sparkURL].execute().exitValue()
+        boolean created = f.createNewFile()
+        String fp = f.getAbsolutePath() + "geneList.txt"
+        println(f.exists())
+        println(created)
+        println(fp)
+        println(script)
+        println(fileToTransfer)
+        def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL
+        println(executeCommand)
+        executeCommand.execute().waitFor()
 
         // We cleanup
         f.delete()
 
-        return exitVal
+        return 0
 
 //              This code would work but requires the installation of the hadoop stack on the host with all the utils to work....
 //                FileSystem hdfs =FileSystem.get(new URI("hdfs://146.169.32.196:8020"), new Configuration())

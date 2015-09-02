@@ -17,12 +17,14 @@
 </div>
 <br/>
 
+<div id="cacheTable"></div>
+
 <script>
     function triggerPE() {
         runPE(document.getElementById("genes").value)
     }
 
-    populateCacheDIV("pe")
+    populateCacheDIV()
 
 </script>
 
