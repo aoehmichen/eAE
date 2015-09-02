@@ -1,4 +1,5 @@
 package eae.plugin
+
 import com.mongodb.BasicDBObject
 import com.mongodb.MongoClient
 import com.mongodb.client.MongoCollection
@@ -52,11 +53,12 @@ class MongoCacheService {
         MongoDatabase db = mongoClient.getDatabase( dbName );
 
         BasicDBObject query = new BasicDBObject("ListOfgenes", paramValue);
-        def cursor = db.getCollection("pe").find(query).iterator()
-        def recordsCount = 0
+        def cursor = db.getCollection("pe").find(query).iterator();
+        def recordsCount = 0;
+        JSONObject cacheItem;
 
         while(cursor.hasNext()) {
-            cursor.next();
+            cacheItem =new JSONObject(cursor.next().toJson());
             recordsCount+=1;
         }
         mongoClient.close();
@@ -65,7 +67,7 @@ class MongoCacheService {
         }else{
             if (recordsCount == 0){
                 return "NotCached"
-            }else if(coll.getProperties()["status"] == "started" ){
+            }else if(cacheItem.get("status") == "started" ){
                 return "started"
             }else{
                 return "Completed"
@@ -82,8 +84,8 @@ class MongoCacheService {
         MongoDatabase  db = mongoClient.getDatabase( dbName );
         MongoCollection coll = db.getCollection(workflowSelected);
 
-        JSONObject result = new JSONObject()
-        JSONArray rows = new JSONArray()
+        JSONObject result;
+        JSONArray rows = new JSONArray();
         BasicDBObject query = new BasicDBObject("user", userName);
         def cursor = coll.find(query).iterator();
         def count = 0;
@@ -99,13 +101,13 @@ class MongoCacheService {
             count+=1;
         }
 
-        println(rows)
-        result.put("success", true)
-        result.put("totalCount",count)
-        result.put("jobs", rows)
+        JSONObject res=  new JSONObject();
+        res.put("success", true)
+        res.put("totalCount",count)
+        res.put("jobs", rows)
 
         mongoClient.close();
 
-        return result
+        return res
     }
 }

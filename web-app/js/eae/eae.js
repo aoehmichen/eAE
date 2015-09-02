@@ -127,20 +127,20 @@ function populateCacheDIV(){
         type: "POST",
         timeout: '600000'
         }).done(function(serverAnswer) {
-        var _o = $('output')
-        var _t = $('<table/>')
-        $.each([serverAnswer], function (i, e) {
-            _t.append($('<tr/>').append(
-                $('<td/>').val(e.nom)
-            ).append(
-                $('<td/>').append($('<a/>').attr('href', e.lien).val(e.date))
-            ).append(
-                $('<td/>').val(e.heure)
-            ))
-        })
-        _o.append(_t)
+        //var _o = $('output')
+        //var _t = $('<table/>')
+        //$.each([serverAnswer], function (i, e) {
+        //    _t.append($('<tr/>').append(
+        //        $('<td/>').val(e.nom)
+        //    ).append(
+        //        $('<td/>').append($('<a/>').attr('href', e.lien).val(e.date))
+        //    ).append(
+        //        $('<td/>').val(e.heure)
+        //    ))
+        //})
+        //_o.append(_t)
 
-        jQuery("#cacheTable").html(_o);
+        jQuery("#cacheTable").html(serverAnswer);
     }).fail(function() {
         jQuery("#cacheTable").html("AJAX CALL FAILED!");
     });

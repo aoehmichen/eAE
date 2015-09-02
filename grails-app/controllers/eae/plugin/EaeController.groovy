@@ -1,6 +1,5 @@
 package eae.plugin
 
-import com.mongodb.util.JSON
 import org.apache.commons.io.FilenameUtils
 
 class EaeController {
@@ -69,7 +68,6 @@ class EaeController {
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
         def workflow = ""
 
-        println(params)
 
         if(params.script == null) {
         workflow = "pe"
@@ -94,8 +92,10 @@ class EaeController {
         }
         def result = mongoCacheService.getjobsFromMongo(MONGO_URL, MONGO_PORT, "eae", username, workflow)
 
-        println(result)
-        response.setContentType("text/json")
-        response.outputStream << result as JSON
+        if(result.get("totalCount") == 0){
+            render "The Cache is empty"}
+        else{
+            render result
+        }
     }
 }
