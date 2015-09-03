@@ -1,14 +1,18 @@
 package smartR.plugin
-import grails.util.Holders
-import groovy.json.JsonBuilder
-import groovy.json.JsonSlurper
+
 import org.quartz.JobDataMap
 import org.quartz.JobDetail
 import org.quartz.SimpleTrigger
 import org.quartz.Trigger
+import groovy.json.JsonSlurper
+import groovy.json.JsonBuilder
+import grails.util.Holders
+import grails.util.Environment
+
 
 class SmartRService {
 
+    def grailsApplication = Holders.grailsApplication
     def springSecurityService
     def quartzScheduler
     def i2b2HelperService
@@ -16,7 +20,7 @@ class SmartRService {
 
     def jobDataMap = [:]
 
-    /**
+	 /**
      *   Renders the default view
      */
     def getScriptList() {
@@ -33,7 +37,7 @@ class SmartRService {
     def getWorkingDir(user) {
         def tempDir = Holders.config.RModules.tempFolderDirectory
         tempDir = tempDir.replace('\\', '/')
-        if (tempDir[-1] != '/') {
+        if (! tempDir.endsWith('/')) {
             tempDir += '/'
         }
         def workingDir = tempDir + 'SmartR/' + user + '/'
@@ -52,11 +56,6 @@ class SmartRService {
         def cohort1 = rIID1 ? i2b2HelperService.getSubjectsAsList(rIID1).collect { it.toLong() } : []
         def cohort2 = rIID2 ? i2b2HelperService.getSubjectsAsList(rIID2).collect { it.toLong() } : []
         def cohorts = [cohort1, cohort2]
-
-        println(rIID1)
-        println("toto")
-        println(rIID2)
-        println(cohort1)
 
         jobDataMap['conceptBoxes'].each { conceptBox ->
             def name = conceptBox.name
@@ -81,17 +80,11 @@ class SmartRService {
             if (type == 'valueicon' || type == 'alphaicon') {
                 data[name] = dataQueryService.getAllData(concepts, patientIDs)
             } else if (type == 'hleaficon') {
-                dataQueryService.getHighDimData(
+                dataQueryService.exportHighDimData(
                         concepts,
+                        patientIDs,
                         rIID as Long,
-                        new File(jobDataMap['workingDir']),
-                        'TSV',
-                        'mrna',
-                        '')
-                def tsvFiles = new FileNameFinder().getFileNames(jobDataMap['workingDir'], '**/*.tsv')
-                assert tsvFiles.size() == 1
-                def tsvFile = new File(tsvFiles[0])
-                assert tsvFile.renameTo(new File(highDimFile))
+                        highDimFile)
             } else if (type == 'null') {
                 data[name] = [:]
             }
@@ -99,11 +92,7 @@ class SmartRService {
                 throw new IllegalArgumentException()
             }
         }
-        def toto = new File(jobDataMap['lowDimFile']).write(new JsonBuilder(data).toPrettyString())
-
-        println(jobDataMap['lowDimFile'])
-
-        return toto
+        new File(jobDataMap['lowDimFile']).write(new JsonBuilder(data).toPrettyString())
     }
 
     /**
@@ -119,7 +108,11 @@ class SmartRService {
     *   @return {str}: path to the script folder
     */
     def getScriptDir() {
-        return org.codehaus.groovy.grails.plugins.GrailsPluginUtils.getPluginDirForName('smart-r').getFile().absolutePath + '/web-app/Scripts/'
+        if (Environment.current == Environment.DEVELOPMENT) {
+            return org.codehaus.groovy.grails.plugins.GrailsPluginUtils.getPluginDirForName('smart-r').getFile().absolutePath + '/web-app/Scripts/'
+        } else {
+            return grailsApplication.mainContext.servletContext.getRealPath('/plugins/') + '/smart-r-0.1/Scripts/'
+        }
     }
 
     /**

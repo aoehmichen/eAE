@@ -26,7 +26,7 @@
     registerConceptBoxEAE('highDimData', 1, 'alphaicon', 0, undefined);
 
     function triggerCV() {
-        runPE(document.getElementById("genes").value)
+        runCV(document.getElementById("genes").value)
     }
 
 </script>

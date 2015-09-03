@@ -41,11 +41,14 @@
         %{--type="button"--}%
         %{--value="Run Analysis"--}%
         %{--onclick="runEAEScript()"/>--}%
+
     <hr class="myhr"/>
     </div>
 
-    <div id="outputs" class='txt'></div>
+    <div id="outputs" ></div>
 </body>
 
 <script>
+
+
 </script>

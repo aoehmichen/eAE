@@ -47,14 +47,8 @@ class smartRGrailsPlugin {
             studiesResourceService = ref('studiesResourceService')
             conceptsResourceService = ref('conceptsResourceService')
             clinicalDataResourceService = ref('clinicalDataResourceService')
-            highDimExportService = ref('highDimExportService')
-        }
-        EaeDataService(eae.plugin.EaeDataService) {
-            studiesResourceService = ref('studiesResourceService')
-            conceptsResourceService = ref('conceptsResourceService')
-            clinicalDataResourceService = ref('clinicalDataResourceService')
-            highDimExportService = ref('highDimExportService')
-            exportMetadataService = ref('exportMetadataService')
+            dataSource = ref('dataSource')
+            i2b2HelperService = ref('i2b2HelperService')
         }
     }
 

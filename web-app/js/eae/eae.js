@@ -104,13 +104,6 @@ function changeEAEInput(){
 
 }
 
-/**
- *   Run a script from the eae
- */
-function runEAEScript(){
-
-
-}
 
 /**
  *   Run a pathway enrichment from the eae
@@ -125,6 +118,31 @@ function runPE(list){
         jQuery("#outputs").html(serverAnswer);
     }).fail(function() {
         jQuery("#outputs").html("AJAX CALL FAILED!");
+    });
+}
+
+function populateCacheDIV(){
+    jQuery.ajax({
+        url: pageInfo.basePath + '/eae/getjobs',
+        type: "POST",
+        timeout: '600000'
+        }).done(function(serverAnswer) {
+        //var _o = $('output')
+        //var _t = $('<table/>')
+        //$.each([serverAnswer], function (i, e) {
+        //    _t.append($('<tr/>').append(
+        //        $('<td/>').val(e.nom)
+        //    ).append(
+        //        $('<td/>').append($('<a/>').attr('href', e.lien).val(e.date))
+        //    ).append(
+        //        $('<td/>').val(e.heure)
+        //    ))
+        //})
+        //_o.append(_t)
+
+        jQuery("#cacheTable").html(serverAnswer);
+    }).fail(function() {
+        jQuery("#cacheTable").html("AJAX CALL FAILED!");
     });
 }
 
@@ -153,3 +171,80 @@ function genesListData(){
     data.push({list: 'ListOfGenes', value: jQuery('#genes').val()});
     return data
 }
+
+//function getJobsDataForEAE(workflowSelected)
+//{
+//    eaejobsstore = new Ext.data.JsonStore({
+//        url : pageInfo.basePath+'/eae/getjobs',
+//        root : 'jobs',
+//        data : {'workflow' : workflowSelected},
+//        fields : ['name', 'status', 'startDate']
+//    });
+//
+//    eaejobsstore.on('load', eaejobsstoreLoaded);
+//    var myparams = Ext.urlEncode({jobType: 'DataExport',disableCaching: true});
+//    eaejobsstore.load({ params : myparams  });
+//}
+//
+//function eaejobsstoreLoaded()
+//{
+//    var ojobs = Ext.getCmp('ajobsgrid');
+//    if(ojobs!=null)
+//    {
+//        jQuery("#cacheTable").remove(ojobs);
+//    }
+//    var jobs = new Ext.grid.GridPanel({
+//        store: eaejobsstore,
+//        id:'ajobsgrid',
+//        columns: [
+//            {name:'name', header: "Name", width: 120, sortable: true, dataIndex: 'name',
+//                renderer: function(value, metaData, record, rowIndex, colIndex, store) {
+//                    var changedName;
+//                    if (store.getAt(rowIndex).get('status') == 'Completed') {
+//                        changedName = '<a href="#">'+value+'</a>';
+//                    } else {
+//                        changedName = value;
+//                    }
+//                    return changedName;
+//                }
+//            },
+//            {name:'status', header: "Status", width: 120, sortable: true, dataIndex: 'status'},
+//            {name:'startDate', header: "Started On", width: 120, sortable: true, dataIndex: 'startDate'}
+//        ],
+//        listeners : {cellclick : function (grid, rowIndex, columnIndex, e){
+//            var colHeader = grid.getColumnModel().getColumnHeader(columnIndex);
+//            if (colHeader == "Name") {
+//                var status = grid.getStore().getAt(rowIndex).get('status');
+//                if (status == "Error")	{
+//                    Ext.Msg.alert("Job Failure", "Unfortunately, an error occurred on this job.");
+//                } else if (status == "Cancelled")	{
+//                    Ext.Msg.alert("Job Cancelled", "The job has been cancelled");}
+//                else if (status == "Completed")	{
+//                         // Load the results into outputs from the cache
+//                }
+//                else if (status != "Completed") {
+//                    Ext.Msg.alert("There is something wrong in the status. Unknown status : " + status.toString());
+//                }
+//            }
+//        }
+//        },
+//        viewConfig:	{
+//            forceFit : true
+//        },
+//        sm : new Ext.grid.RowSelectionModel({singleSelect : true}),
+//        layout : 'fit',
+//        width : 600,
+//        buttons: [{
+//            text:'Refresh',
+//            handler: function()	{
+//                eaejobsstore.reload();
+//            }
+//        }]
+//    });
+//    jQuery("#cacheTable").add(jobs);
+//    //jQuery("#cacheTable").doLayout();
+//}
+
+
+
+

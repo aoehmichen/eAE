@@ -1,14 +1,6 @@
 package eae.plugin
 
-import grails.converters.JSON
-import groovy.json.JsonBuilder
-import org.springframework.beans.factory.annotation.Autowired
-
-
 class EaeService {
-
-
-
 
     /**
      *   Renders the default view
@@ -18,7 +10,10 @@ class EaeService {
         return scriptList
     }
 
-
-
+    def sparkSubmit(String scriptDir, String sparkParameters){
+        def script = scriptDir +'executeSparkJob.sh'
+        [script, sparkParameters].execute().waitFor()
+        return 0
+    }
 
 }

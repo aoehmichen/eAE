@@ -22,8 +22,13 @@ tryCatch(
 				stop("SmartR requires the R package 'data.table'")
 			}
 			suppressWarnings(
-				highDimData_cohort1 <- as.data.frame(fread(highDimPath_cohort1, header=TRUE, sep='\t', showProgress=FALSE), stringsAsFactors=FALSE)
+				highDimData_cohort1 <- as.data.frame(fread(
+							highDimPath_cohort1, 
+							header=TRUE,
+							sep='\t',
+							showProgress=FALSE), stringsAsFactors=FALSE)
 			)
+			highDimData_cohort1 <- transform(highDimData_cohort1, VALUE=as.numeric(VALUE))
 		}
 
 		if (file.exists(highDimPath_cohort2)) {
@@ -31,10 +36,14 @@ tryCatch(
 				stop("SmartR requires the R package 'data.table'")
 			}
 			suppressWarnings(
-				highDimData_cohort2 <- as.data.frame(fread(highDimPath_cohort2, header=TRUE, sep='\t', showProgress=FALSE), stringsAsFactors=FALSE)
+				highDimData_cohort2 <- as.data.frame(fread(
+							highDimPath_cohort2, 
+							header=TRUE,
+							sep='\t',
+							showProgress=FALSE), stringsAsFactors=FALSE)
 			)
+			highDimData_cohort2 <- transform(highDimData_cohort2, VALUE=as.numeric(VALUE))
 		}
-
 
 		settings <- fromJSON(readChar(settingsPath, file.info(settingsPath)$size))
 
