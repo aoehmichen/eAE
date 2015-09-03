@@ -17,7 +17,7 @@ grails.project.dependency.resolution = {
     }
     dependencies {
         //compile 'org.apache.hadoop:hadoop-client:2.6.0'
-        //compile 'org.mongodb:mongodb-driver:3.0.3'
+        compile 'org.mongodb:mongo-java-driver:3.0.3'
 
     }
     plugins {
