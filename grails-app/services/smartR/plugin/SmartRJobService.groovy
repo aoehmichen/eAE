@@ -65,7 +65,7 @@ class SmartRJobService implements InterruptableJob {
                 log.info('Job successfully executed!')
             }
         } catch (Exception e) {
-            log.error('An unexpected exception occured!')
+            log.error('Failed to launch job!')
             throw new JobExecutionException(e)
         }
 	}

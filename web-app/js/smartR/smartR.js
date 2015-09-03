@@ -120,6 +120,10 @@ function createQueryCriteriaDIV(conceptid, normalunits, setvaluemode, setvalueop
 *   @param {boolean} reCompute: should the current visualization be recomputed after updating the cohorts? (for large db queries it is faster to just handle the update within the visualization itself)
 */
 function setCohorts(constrains, andConcat, negate, reCompute, subset) {
+    if (typeof appendItemFromConceptInto !== "function") { 
+        alert('This functionality is not available in the tranSMART version you use.');
+        return;
+    }
     if (! confirm("Attention! This action will have the following impact:\n1. Your cohort selection in the 'Comparison' tab will be modified.\n2. Your current analysis will be recomputed based on this selection.\n")) {
         return;
     }
@@ -161,6 +165,27 @@ function activateDragAndDrop(divName) {
     dtgI.notifyDrop = dropOntoCategorySelection;
 }
 
+// Panel item for the SmartR plugin
+var smartRPanel = new Ext.Panel({
+    id: 'smartRPanel',
+    title: 'SmartR',
+    region: 'center',
+    split: true,
+    height: 90,
+    layout: 'fit',
+    collapsible: true,
+    autoScroll: true,
+    tbar: new Ext.Toolbar({
+        id: 'smartRToolbar',
+        title: 'R Scripts',
+        items: []
+    }),
+    autoLoad: {
+        url: pageInfo.basePath + '/smartR/index',
+        method: 'POST',
+        evalScripts: false
+    }
+});
 
 /**
 *   Clears drag & drop selections from the given div
@@ -214,7 +239,7 @@ var conceptBoxes = [];
 var sanityCheckErrors = [];
 function registerConceptBox(name, cohort, type, min, max) {
     var concepts = getConcepts(name);
-    var check1 = containsOnly(name, type);
+    var check1 = type === undefined || containsOnly(name, type);
     var check2 = min === undefined || concepts.length >= min;
     var check3 = max === undefined || concepts.length <= max;
     var check4 = concepts.length === 0 || !isSubsetEmpty(cohort);
@@ -315,9 +340,6 @@ function runRScript() {
     });
 }
 
-/**
- *   Renders the input form for entering the parameters for a visualization/script
- */
 function goToEAE() {
     jQuery.ajax({
         url: pageInfo.basePath + '/SmartR/goToEAEngine' ,
@@ -329,6 +351,11 @@ function goToEAE() {
         jQuery("#index").html("AJAX CALL FAILED!");
     });
 }
+
+/**
+*   Renders the input form for entering the parameters for a visualization/script
+*/
+
 
 /**
 *   Renders the input form for entering the parameters for a visualization/script
@@ -347,5 +374,3 @@ function changeInputDIV() {
         jQuery("#inputDIV").html("AJAX CALL FAILED!");
     });
 }
-
-

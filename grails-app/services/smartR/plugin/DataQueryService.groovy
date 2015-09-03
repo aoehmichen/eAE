@@ -4,6 +4,9 @@ import org.transmartproject.rest.marshallers.ObservationWrapper
 import org.transmartproject.core.ontology.OntologyTerm
 import org.transmartproject.core.dataquery.clinical.*
 import org.transmartproject.core.dataquery.TabularResult
+import groovy.sql.Sql
+import groovy.json.JsonBuilder
+import au.com.bytecode.opencsv.CSVWriter
 
 
 class DataQueryService {
@@ -11,7 +14,8 @@ class DataQueryService {
     def studiesResourceService
     def conceptsResourceService
     def clinicalDataResourceService
-    def highDimExportService
+    def dataSource
+    def i2b2HelperService
 
     /**
     *   This method can be considered the main method of this class
@@ -38,6 +42,7 @@ class DataQueryService {
             def values = wrappedObservations
                 .findAll { it.subject.id in patientIDs }
                 .collect { it.value }
+
             def ids = concept.patients
                 .findAll { it.id in patientIDs }
                 .collect { it.id }
@@ -51,15 +56,57 @@ class DataQueryService {
         return data
     }
 
-    def getHighDimData(conceptPaths, resultInstanceId, studyDir, format, dataType, jobName) {
-        def map = [:]
-        map.conceptPaths = conceptPaths
-        map.resultInstanceId = resultInstanceId
-        map.studyDir = studyDir
-        map.format = format
-        map.dataType = dataType
-        map.jobName = jobName
-        highDimExportService.exportHighDimData(map)
+    def exportHighDimData(conceptKeys, patientIDs, resultInstanceId, outputFilePath) {
+        List<String> HEADER = ['PATIENTID', 'VALUE', 'PROBE', 'GENEID', 'GENESYMBOL']
+        char COLUMN_SEPERATOR = '\t'
+        def query = 
+        """
+        SELECT
+            ssm.patient_id,
+            ma.probe_id,
+            ma.gene_symbol,
+            ma.gene_id,
+            smd.raw_intensity
+        FROM
+            deapp.de_subject_microarray_data smd
+            INNER JOIN
+                deapp.de_subject_sample_mapping ssm
+            ON
+                smd.assay_id = ssm.assay_id
+            AND
+                ssm.patient_id in (${patientIDs.collect { '?' }.join(',')})
+            INNER JOIN
+                deapp.de_mrna_annotation ma
+            ON 
+                smd.probeset_id = ma.probeset_id
+            INNER JOIN
+                deapp.de_gpl_info gi
+            ON
+                ssm.gpl_id = gi.platform
+        WHERE
+            ssm.concept_code = ?
+        AND
+            gi.marker_type = 'Gene Expression'
+        """
+        assert conceptKeys.size() == 1 // for now we support only one HDD node per concept 
+        def conceptCode = i2b2HelperService.getConceptCodeFromKey(conceptKeys[0])
+        def params = patientIDs
+        params << conceptCode
+        def outputFile = new File(outputFilePath)
+        outputFile.withWriter { Writer writer ->
+            CSVWriter csvWriter = new CSVWriter(writer, COLUMN_SEPERATOR)
+            csvWriter.writeNext(HEADER as String[])
+            new Sql(dataSource).eachRow(query, params, { row ->
+                def line = [
+                    row.patient_id,
+                    row.raw_intensity,
+                    row.probe_id,
+                    row.gene_id,
+                    row.gene_symbol
+                ]
+                csvWriter.writeNext(line as String[])
+            })
+        } 
     }
 
     private ClinicalVariable createClinicalVariable(OntologyTerm term) {
