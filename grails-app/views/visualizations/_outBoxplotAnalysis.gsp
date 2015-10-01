@@ -118,199 +118,29 @@
         color: white;
         background: #326FCB;
     }
-
-    .niceButton {
-        width: 200px;
-        height: 44px;
-        display: block;
-        background-color: #009ac9;
-        border: 1px solid transparent;
-        color: #ffffff;
-        border-radius: 3px;
-        -webkit-transition: all 0.3s ease-in-out;
-        -moz-transition: all 0.3s ease-in-out;
-        transition: all 0.3s ease-in-out;
-    }
-
-    .niceButton:hover {
-        cursor: pointer;
-        background-color: #ffffff;
-        color: #009ac9;
-        border-color: #009ac9;
-    }
-
-    .ios7-switch {
-        display: inline-block;
-        position: relative;
-        cursor: pointer;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        -webkit-tap-highlight-color: transparent;
-        tap-highlight-color: transparent;
-    }
-
-    .ios7-switch input {
-        opacity: 0;
-        position: absolute;
-    }
-
-    .ios7-switch input + span {
-        position: relative;
-        display: inline-block;
-        width: 1.65em;
-        height: 1em;
-        background: white;
-        box-shadow: inset 0 0 0 0.0625em #e9e9e9;
-        border-radius: 0.5em;
-        vertical-align: -0.15em;
-        transition: all 0.40s cubic-bezier(.17,.67,.43,.98);
-    }
-
-    .ios7-switch:active input + span,
-    .ios7-switch input + span:active {
-        box-shadow: inset 0 0 0 0.73em #e9e9e9;
-    }
-
-    .ios7-switch input + span:after {
-        position: absolute;
-        display: block;
-        content: '';
-        width: 0.875em;
-        height: 0.875em;
-        border-radius: 0.4375em;
-        top: 0.0625em;
-        left: 0.0625em;
-        background: white;
-        box-shadow: inset 0 0 0 0.03em rgba(0,0,0,0.1),
-                    0 0 0.05em rgba(0,0,0,0.05),
-                    0 0.1em 0.2em rgba(0,0,0,0.2);
-        transition: all 0.25s ease-out;
-    }
-
-    .ios7-switch:active input + span:after,
-    .ios7-switch input + span:active:after {
-        width: 1.15em;
-    }
-
-    .ios7-switch input:checked + span {
-        box-shadow: inset 0 0 0 0.73em #009ac9;
-    }
-
-    .ios7-switch input:checked + span:after {
-        left: 0.7125em;
-    }
-
-    .ios7-switch:active input:checked + span:after,
-    .ios7-switch input:checked + span:active:after {
-        left: 0.4375em;
-    }
-
-    /* accessibility styles */
-    .ios7-switch input:focus + span:after {
-        box-shadow: inset 0 0 0 0.03em rgba(0,0,0,0.15),
-                    0 0 0.05em rgba(0,0,0,0.08),
-                    0 0.1em 0.2em rgba(0,0,0,0.3);
-        background: #fff;
-    }
-
-    .ios7-switch input:focus + span {
-        box-shadow: inset 0 0 0 0.0625em #dadada;
-    }
-
-    .ios7-switch input:focus:checked + span {
-        box-shadow: inset 0 0 0 0.73em #009ac9;
-    }
-
-    /* reset accessibility style on hover */
-    .ios7-switch:hover input:focus + span:after {
-        box-shadow: inset 0 0 0 0.03em rgba(0,0,0,0.1),
-                    0 0 0.05em rgba(0,0,0,0.05),
-                    0 0.1em 0.2em rgba(0,0,0,0.2);
-        background: #fff;
-    }
-
-    .ios7-switch:hover input:focus + span {
-        box-shadow: inset 0 0 0 0.0625em #e9e9e9;
-    }
-
-    .ios7-switch:hover input:focus:checked + span {
-        box-shadow: inset 0 0 0 0.73em #009ac9;
-    }
 </style>
 
 <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
 <g:javascript src="resource/d3.js"/>
 
 <div id="visualization">
-    <table style='float: left; padding-right: 10px border-spacing:5em'>
-        <tr>
-            <td style='padding-bottom: 0.5em'>
-                <div>
-                    <input id='removeOutliersButton' class='text niceButton' type='button' value='Remove Outliers' onclick='removeOutliers()'/>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td style='padding-bottom: 0.5em'>
-                <div>
-                    <input id='resetButton' class='text niceButton' type='button' value='Reset' onclick='reset()'/>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td style='padding-bottom: 2em'>
-                <div>
-                    <input id='updateCohortsButton' class='text niceButton' type='button' value='Update Cohorts' onclick='updateCohorts()'/>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td style='padding-bottom: 0.5em'>
-                <div>
-                    <div style='float: left; padding-right: 20px'>
-                        <label class="ios7-switch" style="font-size: 16px">
-                            Dark Background
-                            <input onclick='swapBackgroundColor()' type="checkbox">
-                            <span></span>
-                        </label>
-                    </div>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td style='padding-bottom: 0.5em'>
-                <div>
-                    <div style='float: left; padding-right: 20px'>
-                        <label class="ios7-switch" style="font-size: 16px">
-                            Show Density Estimation
-                            <input onclick='swapKDE()' type="checkbox">
-                            <span></span>
-                        </label>
-                    </div>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td style='padding-bottom: 0.5em'>
-                <div>
-                    <div style='float: left; padding-right: 20px'>
-                        <label class="ios7-switch" style="font-size: 16px">
-                            Shuffle Datapoints
-                            <input onclick='swapJitter()' type="checkbox">
-                            <span></span>
-                        </label>
-                    </div>
-                </div>
-            </td>
-        </tr>
-    </table>
+    <div id="controls" style='float: left; padding-right: 10px'></div>
     <div id="boxplot1" style='float: left; padding-right: 10px'></div>
     <div id="boxplot2" style='float: left; padding-right: 10px; border-left: 1px solid black'></div>
 </div>
 
 <script>
+    var animationDuration = 1000;
+    var tmpAnimationDuration = animationDuration;
+    function switchAnimation(checked) {
+        if (! checked) {
+            tmpAnimationDuration = animationDuration;
+            animationDuration = 0;
+        } else {
+            animationDuration = tmpAnimationDuration;
+        }
+    }
+
 	var results = ${raw(results)};
 
     results.cohort2 = results.cohort2 === undefined ? {concept: 'undefined', subsets: []} : results.cohort2;
@@ -318,6 +148,10 @@
 	var margin = {top: 10, right: 60, bottom: 200, left: 60};
     var width = jQuery("#smartRPanel").width() / 2 - 200 - margin.left - margin.right;
     var height = jQuery("#smartRPanel").height() * 0.65 - margin.top - margin.bottom;
+
+    var controls = d3.select('#controls').append('svg')
+    .attr('width', '220px')
+    .attr('height', height * 2);
 
     var boxplot1 = d3.select("#boxplot1").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -429,17 +263,27 @@
     boxplot1.append("g")
     .attr('id', 'brush1')
     .attr("class", "brush")
+    .on("mousedown", function(){
+        if(d3.event.button === 2){
+            d3.event.stopImmediatePropagation();
+        }
+    })   
     .call(brush1);
     
     boxplot2.append("g")
     .attr('id', 'brush2')
     .attr("class", "brush")
+    .on("mousedown", function(){
+        if(d3.event.button === 2){
+            d3.event.stopImmediatePropagation();
+        }
+    })   
     .call(brush2);
     
     var contextMenu = d3.select("#visualization").append("div")
     .attr("class", "contextMenu text")
     .style("visibility", "hidden")
-    .html("<input id='excludeButton' class='mybutton text' type='button' value='Exclude' onclick='excludeSelection()'/><input id='resetButton' class='mybutton text' type='button' value='Reset' onclick='reset()'/><input id='cohortButton' class='mybutton text' type='button' value='Update Cohorts' onclick='updateCohorts(true)'/>")
+    .html("<input id='excludeButton' class='mybutton text' type='button' value='Exclude' onclick='excludeSelection()'/><input id='resetButton' class='mybutton text' type='button' value='Reset' onclick='reset()'/><input id='cohortButton' class='mybutton text' type='button' value='Update Cohorts' onclick='updateCohorts()'/>")
     .on('click', function() {
         d3.select(this)
         .style('visibility', 'hidden')
@@ -497,6 +341,7 @@
             timeout: '600000',
             data: data
         }).done(function(serverAnswer) {
+            serverAnswer = JSON.parse(serverAnswer);
             if (serverAnswer.error) {
                 alert(serverAnswer.error);
                 return;
@@ -508,18 +353,11 @@
         });
     }
 
-    d3.select('#removeOutliersButton')
-    .on('mouseover', function() {
-        d3.selectAll('.outlier')
-        .attr('r', 5);
-    })
-    .on('mouseout', function() {
-        d3.selectAll('.outlier')
-        .attr('r', 3);
-    });
-
     function removeOutliers() {
-        currentSelection = d3.selectAll('.outlier').map(function(d) { return d.patientID; });
+        currentSelection = [];
+        d3.selectAll('.outlier').each(function(d) { 
+            currentSelection.push(d.patientID);
+        });
         if (currentSelection.length !== 0) {
             excludeSelection();
         }
@@ -539,39 +377,35 @@
         };
     }
 
-    var kdeChecked = false;
-    function swapKDE() {
-        if (kdeChecked) {
+    function swapKDE(checked) {
+        if (! checked) {
             d3.selectAll('.line')
             .attr('visibility', 'hidden');
-            kdeChecked = false;
         } else {
             d3.selectAll('.line')
             .attr('visibility', 'visible');
-            kdeChecked = true;
         }
     }
     
     function shortenNodeLabel(label) {
-        label = label.replace(/ /g, '');
-        label = label.replace(/,/g, '');
-        return label
+        label = label.replace(/\W+/g, '');
+        return label;
     }
     
     var jitterWidth = 1.0;
     var jitterChecked = false;
-    function swapJitter() {
-        if (jitterChecked) {
+    function swapJitter(checked) {
+        if (! checked) {
             for (var i = 0; i < results.cohort1.subsets.length; i++) {
                 d3.selectAll('.point.cohort1.' + shortenNodeLabel(results.cohort1.subsets[i]))
                 .transition()
-                .duration(1000)
+                .duration(animationDuration)
                 .attr("cx", x1(results.cohort1.subsets[i]));
             }
             for (i = 0; i < results.cohort2.subsets.length; i++) {
                 d3.selectAll('.point.cohort2.' + shortenNodeLabel(results.cohort2.subsets[i]))
                 .transition()
-                .duration(1000)
+                .duration(animationDuration)
                 .attr("cx", x2(results.cohort2.subsets[i]));
             }
             jitterChecked = false;
@@ -579,65 +413,62 @@
             for (var j = 0; j < results.cohort1.subsets.length; j++) {
                 d3.selectAll('.point.cohort1.' + shortenNodeLabel(results.cohort1.subsets[j]))
                 .transition()
-                .duration(1000)
+                .duration(animationDuration)
                 .attr("cx", function(d) { return x1(results.cohort1.subsets[j]) + boxplotWidth * jitterWidth * d.jitter; });
             }
             for (j = 0; j < results.cohort2.subsets.length; j++) {
                 d3.selectAll('.point.cohort2.' + shortenNodeLabel(results.cohort2.subsets[j]))
                 .transition()
-                .duration(1000)
+                .duration(animationDuration)
                 .attr("cx", function(d) { return x2(results.cohort2.subsets[j]) + boxplotWidth * jitterWidth * d.jitter; });
             }
             jitterChecked = true;
         }
     }
 
-    var backgroundCheckChecked = false;
-    function swapBackgroundColor() {
-        if (! backgroundCheckChecked) {
+    function swapBackgroundColor(checked) {
+        if (! checked) {
             d3.selectAll('#boxplot1,#boxplot2')
             .transition()
-            .duration(1500)
+            .duration(animationDuration)
             .style('background-color', 'black');
             d3.selectAll('.whisker, .hinge, .connection, .line, .axis path, .axis line')
             .transition()
-            .duration(1500)
+            .duration(animationDuration)
             .style('stroke', 'white');
             d3.selectAll('.text')
             .transition()
-            .duration(1500)
+            .duration(animationDuration)
             .style('fill', 'white');
             d3.selectAll('.box')
             .transition()
-            .duration(1500)
+            .duration(animationDuration)
             .style('fill', 'white');
             d3.selectAll('.brush, .extent')
             .transition()
-            .duration(1500)
+            .duration(animationDuration)
             .style('fill', 'white');
-            backgroundCheckChecked = true;
         } else {
             d3.selectAll('#boxplot1,#boxplot2')
             .transition()
-            .duration(1500)
+            .duration(animationDuration)
             .style('background-color', 'white');
             d3.selectAll('.whisker, .hinge, .connection, .line, .axis path, .axis line')
             .transition()
-            .duration(1500)
+            .duration(animationDuration)
             .style('stroke', 'black');
             d3.selectAll('.text')
             .transition()
-            .duration(1500)
+            .duration(animationDuration)
             .style('fill', 'black');
             d3.selectAll('.box')
             .transition()
-            .duration(1500)
+            .duration(animationDuration)
             .style('fill', '#008BFF');
             d3.selectAll('.brush, .extent')
             .transition()
-            .duration(1500)
+            .duration(animationDuration)
             .style('fill', 'blue');
-            backgroundCheckChecked = false;
         }
 
     }    
@@ -667,7 +498,7 @@
 
         whisker
         .transition()
-        .duration(1000)
+        .duration(animationDuration)
     	.attr('x1', x(subset) - whiskerLength / 2)
     	.attr('y1', function(d) { return y(d); })
     	.attr('x2', x(subset) + whiskerLength / 2)
@@ -683,7 +514,7 @@
 
         whiskerLabel
         .transition()
-        .duration(1000)
+        .duration(animationDuration)
         .attr('x', x(subset) + whiskerLength / 2)
         .attr('y', function(d) { return y(d); })
         .attr("dx", ".35em")
@@ -701,7 +532,7 @@
 
         hinge
         .transition()
-        .duration(1000)
+        .duration(animationDuration)
     	.attr('x1', x(subset) - hingeLength / 2)
     	.attr('y1', function(d) { return y(d); })
     	.attr('x2', x(subset) + hingeLength / 2)
@@ -716,7 +547,7 @@
 
         hingeLabel
         .transition()
-        .duration(1000)
+        .duration(animationDuration)
         .attr('x', x(subset) - hingeLength / 2)
         .attr('y', function(d) { return y(d); })
         .attr("dx", "-.35em")
@@ -735,7 +566,7 @@
 
         connection
         .transition()
-        .duration(1000)
+        .duration(animationDuration)
     	.attr('x1', x(subset))
     	.attr('y1', function(d) { return y(d[0]); })
     	.attr('x2', x(subset))
@@ -750,7 +581,7 @@
 
         upperBox
         .transition()
-        .duration(1000)
+        .duration(animationDuration)
     	.attr('x', x(subset) - hingeLength / 2)
     	.attr('y', y(params.upperHinge))
     	.attr('height', Math.abs(y(params.upperHinge) - y(params.median)))
@@ -765,7 +596,7 @@
 
         lowerBox
         .transition()
-        .duration(1000)
+        .duration(animationDuration)
     	.attr('x', x(subset) - hingeLength / 2)
     	.attr('y', y(params.median))
     	.attr('height', Math.abs(y(params.median) - y(params.lowerHinge)))
@@ -780,7 +611,7 @@
 
         medianLabel
         .transition()
-        .duration(1000)
+        .duration(animationDuration)
         .attr('x', x(subset) + hingeLength / 2)
         .attr('y', function(d) { return y(params.median); })
         .attr("dx", ".35em")
@@ -815,14 +646,14 @@
             return 'point patientID-' + d.patientID + (d.outlier ? ' outlier ' : ' ') + cohort + ' ' + shortenedSubset;
         }) // This is here and not in the .enter() because points might become outlier on removal of other points
         .transition()
-        .duration(1000)
+        .duration(animationDuration)
         .attr("cy", function(d) { return y(d.value); })
         .attr("r", 3);
 
         point
         .exit()
         .transition()
-        .duration(1000)
+        .duration(animationDuration)
         .attr("r", 0)
         .remove();
 
@@ -853,7 +684,7 @@
         line
         .datum(estFun)
         .transition()
-        .duration(1000)
+        .duration(animationDuration)
         .attr("d", lineGen);
 
         var label = boxplots[cohort][subset].selectAll('.label')
@@ -906,26 +737,112 @@
         excludeSelection(); // Abusing the method because I can
     }
 
-    function updateCohorts(bySelection) {
-        var cohort1MinMax;
-        var cohort2MinMax;
-        if (bySelection) {
-            cohort1MinMax = d3.extent(currentSelection.map(function(d) {
-                return d3.select('.cohort1.patientID-' + d).property('__data__').value;
-            }));
-            cohort2MinMax = d3.extent(currentSelection.map(function(d) {
-                return d3.select('.cohort2.patientID-' + d).property('__data__').value;
-            }));
-        } else {
-            cohort1MinMax = d3.extent(d3.selectAll('.point.cohort1').map(function(d) { return d.value; }));
-            cohort2MinMax = d3.extent(d3.selectAll('.point.cohort2').map(function(d) { return d.value; }));
-        }
+    function updateCohorts() {
+        alert('Under Construction.');
+        // var values = {};
+        // var cohort = d3.select('.patientID-' + currentSelection[0]).classed('cohort1') ? 1 : 2;
+        // var subsets = cohrt === 1 ? results.cohort1.subsets : results.cohort2.subsets;
+        // for (var i = 0; i < currentSelection.length; i++) {
+        //     var patientID = currentSelection[i];
+        //     var point = d3.select('.patientID-' + patientID);
+        //     for (var j = 0; j < subsets.length; j++) {
+        //         var subset = shortenNodeLabel(subsets[j]);
+        //         if (point.classed(subset)) {
+        //             values[subset] = point.property('__data__').value;
+        //         }
+        //     }
+        // }
 
-        var div1 = createQueryCriteriaDIV(results.cohort1.concept, 'ratio', 'numeric', 'BETWEEN', cohort1MinMax[0], cohort1MinMax[1], 'ratio', 'Y', 'valueicon');
-        var div2 = createQueryCriteriaDIV(results.cohort2.concept, 'ratio', 'numeric', 'BETWEEN', cohort2MinMax[0], cohort2MinMax[1], 'ratio', 'Y', 'valueicon');
-        setCohorts(div1, false, false, false, 1);
-        setCohorts(div2, false, false, true, 2);
+        // for (var k = 0, keys = Object.keys(values); k < keys.length; k++) {
+        //     var key = keys[k];
+        //     var extent = d3.extent(values[key]);
+        //     var numConcept = 
+        //     var divs = [];
+        //     for (var l = 0; l < subsets.length; l++) {
+        //         subset = shortenNodeLabel(subsets[l]);
+        //         var subConcept = 
+        //         if (numConcept !== subConcept) {
+
+        //         }
+        //     }
+        //     divs.push(createQueryCriteriaDIV(numConcept, 'ratio', 'numeric', 'BETWEEN', extent[0], extent[1], 'ratio', 'Y', 'valueicon'));
+
+        //     setCohorts(divs, true, false, true, cohort);
+        // }
     }
 
     init();
+
+    var buttonWidth = 200;
+    var buttonHeight = 40;
+    var padding = 5;
+
+    createD3Button({
+        location: controls,
+        label: 'Remove Outliers',
+        x: 2,
+        y: 2,
+        width: buttonWidth,
+        height: buttonHeight,
+        callback: removeOutliers
+    });
+
+    createD3Button({
+        location: controls,
+        label: 'Reset',
+        x: 2,
+        y: 2 + padding + buttonHeight,
+        width: buttonWidth,
+        height: buttonHeight,
+        callback: reset
+    });
+
+    createD3Switch({
+        location: controls,
+        onlabel: 'Light Background ON',
+        offlabel: 'Light Background OFF',
+        x: 2,
+        y: 2 + padding * 2 + buttonHeight * 2,
+        width: buttonWidth,
+        height: buttonHeight,
+        callback: swapBackgroundColor,
+        checked: true
+    });
+
+    createD3Switch({
+        location: controls,
+        onlabel: 'Density Estimation ON',
+        offlabel: 'Density Estimation OFF',
+        x: 2,
+        y: 2 + padding * 3 + buttonHeight * 3,
+        width: buttonWidth,
+        height: buttonHeight,
+        callback: swapKDE,
+        checked: false
+    });
+
+    createD3Switch({
+        location: controls,
+        onlabel: 'Jitter Datapoints ON',
+        offlabel: 'Jitter Datapoints OFF',
+        x: 2,
+        y: 2 + padding * 4 + buttonHeight * 4,
+        width: buttonWidth,
+        height: buttonHeight,
+        callback: swapJitter,
+        checked: false
+    });
+
+    createD3Switch({
+        location: controls,
+        onlabel: 'Animation ON',
+        offlabel: 'Animation OFF',
+        x: 2,
+        y: 2 + padding * 5 + buttonHeight * 5,
+        width: buttonWidth,
+        height: buttonHeight,
+        callback: switchAnimation,
+        checked: true
+    });
+
 </script>

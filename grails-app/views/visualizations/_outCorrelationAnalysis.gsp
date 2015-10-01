@@ -114,12 +114,11 @@
         color: white;
         background: #326FCB;
     }
-
 </style>
 
 <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
 <g:javascript src="resource/d3.js"/>
-
+<div id='controls'></div>
 <div id="visualization">
     <div id="histogram1"></div>
     <div id="scatterplot"></div>
@@ -127,11 +126,26 @@
 </div>
 
 <script>
+    var animationDuration = 500;
+    var tmpAnimationDuration = animationDuration;
+    function switchAnimation(checked) {
+        if (! checked) {
+            tmpAnimationDuration = animationDuration;
+            animationDuration = 0;
+        } else {
+            animationDuration = tmpAnimationDuration;
+        }
+    }
+
+    var controls = d3.select('#controls').append('svg')
+    .attr('width', jQuery("#smartRPanel").width())
+    .attr('height', 45);
+
     var margin = {top: 20, right: 40, bottom: 5, left: 10};
     var width = jQuery("#smartRPanel").width() / 2 - 10 - margin.left - margin.right;
     var height = jQuery("#smartRPanel").height() / 2 - 10 - margin.top - margin.bottom;
 
-    var results = ${raw(results)};
+    var results = ${results};
     var xLabel = results.xArrLabel;
     var yLabel = results.yArrLabel;
     var xArr = results.xArr;
@@ -198,6 +212,8 @@
             legend
             .style("left", jQuery('#scatterplot').position().left + margin.left + "px")
             .style("top", jQuery('#scatterplot').position().top + margin.top + "px");
+            legendPosX = jQuery('#scatterplot').position().left + margin.left + "px";
+            legendPosY = jQuery('#scatterplot').position().top + margin.top + "px";
         } else {
             legend
             .style("left", legendPosX)
@@ -253,6 +269,11 @@
 
         scatterplot.append("g")
         .attr("class", "brush")
+        .on("mousedown", function(){
+            if(d3.event.button === 2){
+                d3.event.stopImmediatePropagation();
+            }
+        })        
         .call(brush);
 
         detectedTags = [];
@@ -377,7 +398,7 @@
         .attr("r", 5);
 
         point.exit()
-        .transition().duration(500)
+        .transition().duration(animationDuration)
         .attr("r", 0)
         .remove();
     }
@@ -395,17 +416,17 @@
         } else {
             regressionLine
             .transition()
-            .duration(250)
+            .duration(animationDuration)
             .attr("stroke-width", 10)
             .transition()
-            .duration(250)
+            .duration(animationDuration)
             .attr("stroke-width", 0);
             return;
         }
 
         regressionLine
         .transition()
-        .duration(500)
+        .duration(animationDuration)
         .attr("x1", minX)
         .attr("y1", y(parseFloat(results.regLineYIntercept) + parseFloat(results.regLineSlope) * x.invert(minX)))
         .attr("x2", maxX)
@@ -525,6 +546,7 @@
             timeout: '600000',
             data: data
         }).done(function(serverAnswer) {
+            serverAnswer = JSON.parse(serverAnswer);
             if (serverAnswer.error) {
                 alert(serverAnswer.error);
                 return;
@@ -613,7 +635,7 @@
         .attr("y", function(d, i) { return hist1Data[i].x; })
         .transition()
         .delay(function(d, i) { return i * 25; })
-        .duration(250)
+        .duration(animationDuration)
         .attr("x", function(d) { return width - hist1BarScale(d.y); })
         .attr("width", function(d) { return hist1BarScale(d.y); });
 
@@ -623,7 +645,7 @@
         .attr("y", function(d, i) { return hist1Data[i].x; })
         .transition()
         .delay(function(d, i) { return i * 25; })
-        .duration(250)
+        .duration(animationDuration)
         .attr("dy", ".35em")
         .attr("x", function(d) { return width - hist1BarScale(d.y) + 10; })
         .attr("y", function(d, i) { return hist1Data[i].x + hist1Data[i].dx / 2; })
@@ -641,7 +663,7 @@
         .attr("y", 0)
         .transition()
         .delay(function(d, i) { return i * 25; })
-        .duration(250)
+        .duration(animationDuration)
         .attr("height", function(d) { return hist2BarScale(d.y); });
 
         hist2Bar.append("text")
@@ -650,7 +672,7 @@
         .attr("y", 0)
         .transition()
         .delay(function(d, i) { return i * 25; })
-        .duration(250)
+        .duration(animationDuration)
         .attr("dx", "-.5em")
         .attr("x", function(d, i) { return hist2Data[i].x + hist2Data[i].dx / 2; })
         .attr("y", function(d) { return hist2BarScale(d.y) - 5; })
@@ -661,4 +683,20 @@
         .attr("transform", "translate(" + 0 + "," + 0 + ")")
         .call(hist2xAxis);
     }
+
+    var buttonWidth = 200;
+    var buttonHeight = 40;
+    var padding = 20;
+
+    createD3Switch({
+        location: controls,
+        onlabel: 'Animation ON',
+        offlabel: 'Animation OFF',
+        x: 2,
+        y: 2,
+        width: buttonWidth,
+        height: buttonHeight,
+        callback: switchAnimation,
+        checked: true
+    });
 </script>

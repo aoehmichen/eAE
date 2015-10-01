@@ -1,3 +1,384 @@
+function createD3Button(args) {
+    var button = args.location.append('g');
+
+    var box = button.append("rect")
+    .attr("x", args.x)
+    .attr("y", args.y)
+    .attr("rx", 3)
+    .attr("ry", 3)
+    .attr("width", args.width)
+    .attr("height", args.height)
+    .style('stroke-width', '1px')
+    .style('stroke', '#009ac9')
+    .style('fill', '#009ac9')
+    .style('cursor', 'pointer')
+    .on('mouseover', function() {
+        box
+        .transition()
+        .duration(300)
+        .style('fill', '#ffffff');
+
+        text
+        .transition()
+        .duration(300)
+        .style('fill', '#009ac9');
+    })
+    .on('mouseout', function() {
+        box
+        .transition()
+        .duration(300)
+        .style('fill', '#009ac9');
+
+        text
+        .transition()
+        .duration(300)
+        .style('fill', '#ffffff');
+    })
+    .on('click', function() { args.callback(); }); 
+
+    var text = button.append('text')
+    .attr('x', args.x + args.width / 2)
+    .attr('y', args.y + args.height / 2)
+    .attr('dy', '0.35em')
+    .style('pointer-events', 'none')
+    .style("text-anchor", "middle")
+    .style('fill', '#ffffff')
+    .style('font-size', '14px')
+    .text(args.label);
+
+    return button;
+}
+
+function createD3Switch(args) {
+    var switcher = args.location.append('g');
+
+    var checked = args.checked;
+    var color = checked ? 'green' : 'red';
+
+    var box = switcher.append("rect")
+    .attr("x", args.x)
+    .attr("y", args.y)
+    .attr("rx", 3)
+    .attr("ry", 3)
+    .attr("width", args.width)
+    .attr("height", args.height)
+    .style('stroke-width', '1px')
+    .style('stroke', color)
+    .style('fill', color)
+    .style('cursor', 'pointer')
+    .on('click', function() {
+        if (color === 'green') {
+            box
+            .transition()
+            .duration(300)
+            .style('stroke', 'red')
+            .style('fill', 'red');
+            color = 'red';
+            checked = false;
+        } else {
+            box
+            .transition()
+            .duration(300)
+            .style('stroke', 'green')
+            .style('fill', 'green');
+            color = 'green';
+            checked = true;
+        }
+        text.text(checked ? args.onlabel : args.offlabel);
+        args.callback(checked); 
+    });
+
+    var text = switcher.append('text')
+    .attr('x', args.x + args.width / 2)
+    .attr('y', args.y + args.height / 2)
+    .attr('dy', '0.35em')
+    .style('pointer-events', 'none')
+    .style("text-anchor", "middle")
+    .style('fill', '#ffffff')
+    .style('font-size', '14px')
+    .text(checked ? args.onlabel : args.offlabel);
+
+    return switcher;
+}
+
+function createD3Dropdown(args) {
+    function shrink() {
+        dropdown.selectAll('.itemBox')
+        .attr('y', args.y + args.height)
+        .style('visibility', 'hidden');
+        dropdown.selectAll('.itemText')
+        .attr('y', args.y + args.height + args.height / 2)
+        .style('visibility', 'hidden');
+        itemHovered = false;
+        hovered = false;
+        itemHovered = false;
+    }
+    var dropdown = args.location.append('g');
+
+    var hovered = false;
+    var itemHovered = false;
+
+    var itemBox = dropdown.selectAll('.itemBox')
+    .data(args.items, function(item) { return item.label; });
+
+    itemBox
+    .enter()
+    .append('rect')
+    .attr('class', 'itemBox')
+    .attr("x", args.x)
+    .attr("y", args.y + args.height)
+    .attr("rx", 0)
+    .attr("ry", 0)
+    .attr("width", args.width)
+    .attr("height", args.height)
+    .style('cursor', 'pointer')
+    .style('stroke-width', '2px')
+    .style('stroke', '#ffffff')
+    .style('fill', '#E3E3E3')
+    .style('visibility', 'hidden')
+    .on('mouseover', function() {
+        itemHovered = true;
+        d3.select(this)
+        .style('fill', '#009ac9');
+    })
+    .on('mouseout', function() {
+        itemHovered = false;
+        d3.select(this)
+        .style('fill', '#E3E3E3');
+        setTimeout(function() {
+            if (! hovered && ! itemHovered) {
+                shrink();
+            }
+        }, 50);
+    })
+    .on('click', function(d) {
+        d.callback();
+    });
+
+    var itemText = dropdown.selectAll('.itemText')
+    .data(args.items, function(item) { return item.label; });
+
+    itemText
+    .enter()
+    .append('text')
+    .attr('class', 'itemText')
+    .attr('x', args.x + args.width / 2)
+    .attr('y', args.y + args.height + args.height / 2)
+    .attr('dy', '0.35em')
+    .style('pointer-events', 'none')
+    .style("text-anchor", "middle")
+    .style('fill', '#000000')
+    .style('font-size', '14px')
+    .style('visibility', 'hidden')
+    .text(function(d) { return d.label; });
+
+    var box = dropdown.append("rect")
+    .attr("x", args.x)
+    .attr("y", args.y)
+    .attr("rx", 3)
+    .attr("ry", 3)
+    .attr("width", args.width)
+    .attr("height", args.height)
+    .style('stroke-width', '1px')
+    .style('stroke', '#009ac9')
+    .style('fill', '#009ac9')
+    .on('mouseover', function() {
+        if (hovered) {
+            return;
+        }
+        dropdown.selectAll('.itemBox')        
+        .transition()
+        .duration(300)
+        .style('visibility', 'visible')
+        .attr('y', function(d) {
+            var pos;
+            for (var i = 0; i < args.items.length; i++) {
+                if (d.label === args.items[i].label) {
+                    pos = i;
+                }
+            }
+            return 2 + args.y + (pos + 1) * args.height;
+        });
+
+        dropdown.selectAll('.itemText')
+        .transition()
+        .duration(300)
+        .style('visibility', 'visible')
+        .attr('y', function(d) {
+            var pos;
+            for (var i = 0; i < args.items.length; i++) {
+                if (d.label === args.items[i].label) {
+                    pos = i;
+                }
+            }
+            return 2 + args.y + (pos + 1) * args.height + args.height / 2;
+        });
+
+        hovered = true;
+    })
+    .on('mouseout', function() {
+        hovered = false;
+        setTimeout(function() {
+            if (! hovered && ! itemHovered) {
+                shrink();  
+            }
+        }, 50);
+        setTimeout(function() { // first check is not enough if animation interrupts it
+            if (! hovered && ! itemHovered) {
+                shrink();  
+            }
+        }, 350);
+    });
+
+    var text = dropdown.append('text')
+    .attr('class', 'buttonText')
+    .attr('x', args.x + args.width / 2)
+    .attr('y', args.y + args.height / 2)
+    .attr('dy', '0.35em')
+    .style('pointer-events', 'none')
+    .style("text-anchor", "middle")
+    .style('fill', '#ffffff')
+    .style('font-size', '14px')
+    .text(args.label);
+
+    return dropdown;
+}
+
+function createD3Slider(args) {
+    var slider = args.location.append('g');
+
+    var lineGen = d3.svg.line()
+    .x(function(d) { return d.x; })
+    .y(function(d) { return d.y; })
+    .interpolate("linear");
+
+    var lineData = [
+        {x: args.x, y: args.y + args.height},
+        {x: args.x, y: args.y + 0.75 * args.height},
+        {x: args.x + args.width, y: args.y + 0.75 * args.height},
+        {x: args.x + args.width, y: args.y + args.height}
+    ];
+
+    var sliderScale = d3.scale.linear()
+    .domain([args.min, args.max])
+    .range([args.x, args.x + args.width]);
+
+    slider.append('path')
+    .attr('d', lineGen(lineData))
+    .style('pointer-events', 'none')
+    .style('stroke', '#009ac9')
+    .style('stroke-width', '2px')
+    .style('shape-rendering', 'crispEdges')
+    .style('fill', 'none');
+
+    slider.append('text')
+    .attr('x', args.x)
+    .attr('y', args.y + args.height + 10)
+    .attr('dy', '0.35em')
+    .style('pointer-events', 'none')
+    .style("text-anchor", "middle")
+    .style('fill', '#000000')
+    .style('font-size', '9px')
+    .text(args.min);
+
+    slider.append('text')
+    .attr('x', args.x + args.width)
+    .attr('y', args.y + args.height + 10)
+    .attr('dy', '0.35em')
+    .style('pointer-events', 'none')
+    .style("text-anchor", "middle")
+    .style('fill', '#000000')
+    .style('font-size', '9px')
+    .text(args.max);
+
+    slider.append('text')
+    .attr('x', args.x + args.width / 2)
+    .attr('y', args.y + args.height)
+    .attr('dy', '0.35em')
+    .style('pointer-events', 'none')
+    .style("text-anchor", "middle")
+    .style('fill', '#000000')
+    .style('font-size', '14px')
+    .text(args.label);
+
+    var currentValue = args.init;
+
+    function move() {
+        var xPos = d3.event.x;
+        if (xPos < args.x) {
+            xPos = args.x;
+        } else if (xPos > args.x + args.width) {
+            xPos = args.x + args.width;
+        }
+
+        currentValue = Number(sliderScale.invert(xPos)).toFixed(5);
+
+        dragger
+        .attr('x', xPos - 20);
+        handle
+        .attr('cx', xPos);
+        pointer
+        .attr('x1', xPos)
+        .attr('x2', xPos);
+        value
+        .attr('x', xPos + 10)
+        .text(currentValue);
+    }
+
+    var drag = d3.behavior.drag()
+    .on("drag", move)
+    .on(args.trigger, function() { args.callback(currentValue); });
+
+    var dragger = slider.append('rect')
+    .attr('x', sliderScale(args.init) - 20)
+    .attr('y', args.y)
+    .attr('width', 40)
+    .attr('height', args.height)
+    .style('opacity', 0)
+    .style('cursor', 'pointer')
+    .on('mouseover', function() {
+        handle
+        .style('fill', '#009ac9');
+        pointer
+        .style('stroke', '#009ac9');
+    })
+    .on('mouseout', function() {
+        handle
+        .style('fill', '#000000');
+        pointer
+        .style('stroke', '#000000');
+    })
+    .call(drag);
+
+    var handle = slider.append('circle')
+    .attr("cx", sliderScale(args.init))
+    .attr("cy", args.y + 10)
+    .attr("r", 6)
+    .style('pointer-events', 'none')
+    .style('fill', '#000000');
+
+    var pointer = slider.append('line')
+    .attr('x1', sliderScale(args.init))
+    .attr('y1', args.y + 10)
+    .attr('x2', sliderScale(args.init))
+    .attr('y2', args.y + 0.75 * args.height)
+    .style('pointer-events', 'none')
+    .style('stroke', '#000000')
+    .style('stroke-width', '1px');
+
+    var value = slider.append('text')
+    .attr('x', sliderScale(args.init) + 10)
+    .attr('y', args.y + 10)
+    .attr('dy', '0.35em')
+    .style('pointer-events', 'none')
+    .style("text-anchor", "start")
+    .style('fill', '#000000')
+    .style('font-size', '10px')
+    .text(args.init);
+
+    return slider;
+}
+
 /**
 *   Gets the x position of the mouse on the screen (TODO: this is not as precise as I want it to be)
 *
@@ -5,7 +386,7 @@
 */
 function mouseX() {
     var mouseXPos = typeof d3.event.sourceEvent !== 'undefined' ? d3.event.sourceEvent.pageX : d3.event.clientX;
-    return mouseXPos - jQuery("#westPanel").width() + 20;
+    return mouseXPos - jQuery('#smartRPanel').offset().left + jQuery('#outputDIV').parent().scrollLeft();
 }
 
 /**
@@ -15,7 +396,7 @@ function mouseX() {
 */
 function mouseY() {
     var mouseYPos = typeof d3.event.sourceEvent !== 'undefined' ? d3.event.sourceEvent.pageY : d3.event.clientY;
-    return mouseYPos + jQuery("#index").parent().scrollTop() - 50;
+    return mouseYPos + jQuery("#index").parent().scrollTop() - jQuery('#smartRPanel').offset().top;
 }
 
 /**
@@ -129,13 +510,11 @@ function setCohorts(constrains, andConcat, negate, reCompute, subset) {
     }
 
     subset = subset === undefined ? 1 : subset;
-    var destination;
-    if (andConcat) {
-        destination = 1; // TODO; does this makes sense?
-    } else {
-        destination = jQuery(jQuery("#queryTable tr:last-of-type td")[subset - 1]).find('div[id^=panelBoxList]').last();
-    }
-    for(var i = 0, len = constrains.length; i < len; i++) {
+    var destination = jQuery(jQuery("#queryTable tr:last-of-type td")[subset - 1]).find('div[id^=panelBoxList]').last();
+    for (var i = 0, len = constrains.length; i < len; i++) {
+        if (andConcat) {
+            destination = jQuery(jQuery("#queryTable tr:last-of-type td")[subset - 1]).find('div[id^=panelBoxList]').last();
+        }
         appendItemFromConceptInto(destination, constrains[i], negate);
     }
     if (reCompute) {
@@ -184,6 +563,15 @@ var smartRPanel = new Ext.Panel({
         url: pageInfo.basePath + '/smartR/index',
         method: 'POST',
         evalScripts: false
+    },
+    listeners: {
+        render: function(panel) {
+            panel.body.on('click', function() {
+                if (typeof updateOnView === "function") {
+                    updateOnView();  
+                } 
+            });
+        }
     }
 });
 
@@ -237,18 +625,16 @@ function addSettingsToData(data, settings) {
 
 var conceptBoxes = [];
 var sanityCheckErrors = [];
-function registerConceptBox(name, cohort, type, min, max) {
+function registerConceptBox(name, cohorts, type, min, max) {
     var concepts = getConcepts(name);
     var check1 = type === undefined || containsOnly(name, type);
     var check2 = min === undefined || concepts.length >= min;
     var check3 = max === undefined || concepts.length <= max;
-    var check4 = concepts.length === 0 || !isSubsetEmpty(cohort);
     sanityCheckErrors.push( 
         !check1 ? 'Concept box (' + name + ') contains concepts with invalid type! Valid type: ' + type :
         !check2 ? 'Concept box (' + name + ') contains too few concepts! Valid range: ' + min + ' - ' + max :
-        !check3 ? 'Concept box (' + name + ') contains too many concepts! Valid range: ' + min + ' - ' + max :
-        !check4 ? 'Concept box (' + name + ') contains concepts but you have not specified any cohort for it!' : '');
-    conceptBoxes.push({name: name, cohort: cohort, type: type, concepts: concepts});
+        !check3 ? 'Concept box (' + name + ') contains too many concepts! Valid range: ' + min + ' - ' + max : '');
+    conceptBoxes.push({name: name, cohorts: cohorts, type: type, concepts: concepts});
 }
 
 /**
@@ -263,6 +649,7 @@ function prepareFormData() {
     data.push({name: 'result_instance_id2', value: GLOBAL.CurrentSubsetIDs[2]});
     data.push({name: 'script', value: jQuery('#scriptSelect').val()});
     data.push({name: 'settings', value: JSON.stringify(getSettings())});
+    data.push({name: 'cookieID', value: setSmartRCookie()});
     return data;
 }
 
@@ -309,6 +696,22 @@ function sane() { // FIXME: somehow check for subset2 to be non empty iff two co
     return customSanityCheck(); // method MUST be implemented by _inFoobarAnalysis.gsp
 }
 
+function setSmartRCookie() {
+    // first check if a cookie exists
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i];
+        var crumbs = cookie.split('=');
+        if (crumbs[0] === 'SmartR') {
+            return crumbs[1];
+        }
+    }
+    // create one if not
+    var id = new Date().getTime();
+    document.cookie = 'SmartR=' + id;
+    return id;
+}
+
 /**
 *   Initial method for the whole process of computing a visualization
 */
@@ -327,7 +730,17 @@ function runRScript() {
         return false;
     }
 
-    jQuery("#outputDIV").html("Fetching data from database. This might last up to several minutes...");
+    jQuery.ajax({
+        url: pageInfo.basePath + '/SmartR/renderLoadingScreen',
+        type: "POST",
+        timeout: '600000'
+    }).done(function(serverAnswer) {
+        jQuery("#outputDIV").html(serverAnswer);
+    }).fail(function() {
+        jQuery("#outputDIV").html("An unexpected error occurred. This should never happen. Ask your administrator for help.");
+    });
+
+    jQuery('#submitButton').prop('disabled', true);
     jQuery.ajax({
         url: pageInfo.basePath + '/SmartR/renderOutputDIV',
         type: "POST",
@@ -335,8 +748,10 @@ function runRScript() {
         data: prepareFormData()
     }).done(function(serverAnswer) {
         jQuery("#outputDIV").html(serverAnswer);
+        jQuery('#submitButton').prop('disabled', false);
     }).fail(function() {
-        jQuery("#outputDIV").html("AJAX CALL FAILED!");
+        jQuery("#outputDIV").html("An unexpected error occurred. This should never happen. Ask your administrator for help.");
+        jQuery('#submitButton').prop('disabled', false);
     });
 }
 
@@ -352,17 +767,12 @@ function goToEAE() {
     });
 }
 
-/**
-*   Renders the input form for entering the parameters for a visualization/script
-*/
-
 
 /**
 *   Renders the input form for entering the parameters for a visualization/script
 */
 function changeInputDIV() {
     jQuery("#outputDIV").html("");
-
     jQuery.ajax({
         url: pageInfo.basePath + '/SmartR/renderInputDIV',
         type: "POST",
@@ -371,6 +781,15 @@ function changeInputDIV() {
     }).done(function(serverAnswer) {
         jQuery("#inputDIV").html(serverAnswer);
     }).fail(function() {
-        jQuery("#inputDIV").html("AJAX CALL FAILED!");
+        jQuery("#inputDIV").html("An unexpected error occurred. This should never happen. Ask your administrator for help.");
     });
+}
+
+function contact() {
+    var version = 0.1;
+    alert("Before reporting a bug...\n" + 
+        "... 1. Make sure you use the lastet SmartR version (installed version: " + version + ")\n" +
+        "... 2. Make sure that all requirements for using SmartR are met\n" + 
+        "All relevant information can be found on https://github.com/sherzinger/SmartR\n\n" +
+        "If you still want to report a bug you MUST include these information:\n\n>>>" + navigator.userAgent + " SmartR/" + version + "<<<\n\nBug reports -> http://usersupport.etriks.org/\nFeedback -> sascha.herzinger@uni.lu");
 }
