@@ -1,6 +1,6 @@
 package smartR.plugin
 
-import grails.converters.JSON
+import groovy.json.JsonBuilder
 import org.apache.commons.io.FilenameUtils
 
 class SmartRController {
