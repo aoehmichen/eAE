@@ -1,14 +1,18 @@
-<style>
-    .txt {
-        font-family: 'Roboto', sans-serif;
-    }
-</style>
 
 <head>
 <g:javascript library='jquery' />
 <g:javascript src='eae/eae.js' />
 <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
 <r:layoutResources/>
+    <style>
+    .txt {
+        font-family: 'Roboto', sans-serif;
+    }
+    table, td {
+        border-collapse: collapse;
+        border: 1px solid black;
+    }
+    </style>
 </head>
 
 <body>
@@ -35,12 +39,6 @@
         noSelection="['':'Choose an algorithm']"
         onchange="changeEAEInput()"/>
     &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-    %{--<input--}%
-        %{--id="submitButton"--}%
-        %{--class='txt'--}%
-        %{--type="button"--}%
-        %{--value="Run Analysis"--}%
-        %{--onclick="runEAEScript()"/>--}%
 
     <hr class="myhr"/>
     </div>

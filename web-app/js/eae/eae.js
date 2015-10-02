@@ -126,21 +126,24 @@ function populateCacheDIV(){
         url: pageInfo.basePath + '/eae/getjobs',
         type: "POST",
         timeout: '600000'
-        }).done(function(serverAnswer) {
-        //var _o = $('output')
-        //var _t = $('<table/>')
-        //$.each([serverAnswer], function (i, e) {
-        //    _t.append($('<tr/>').append(
-        //        $('<td/>').val(e.nom)
-        //    ).append(
-        //        $('<td/>').append($('<a/>').attr('href', e.lien).val(e.date))
-        //    ).append(
-        //        $('<td/>').val(e.heure)
-        //    ))
-        //})
-        //_o.append(_t)
+        }).done(function(cacheJobs) {
 
-        jQuery("#cacheTable").html(serverAnswer);
+        var jsonCache= $.parseJSON(cacheJobs);
+        var _t = $('#peTable');
+        var date;
+
+        $.each(jsonCache.jobs, function (i, e) {
+            date = new Date(e.start.$date)
+            _t.append($('<tr/>').append(
+                $('<td/>').text(e.name)
+            ).append(
+                $('<td/>').text(e.status)
+            //).append(
+            //    $('<td/>').append($('<a/>').attr('href', e.lien).text("Cached result"))
+            ).append(
+                $('<td/>').text(date)
+            ))
+        })
     }).fail(function() {
         jQuery("#cacheTable").html("AJAX CALL FAILED!");
     });

@@ -17,6 +17,15 @@ class SmartRService {
     def dataQueryService
     def scriptExecutorService
 
+    /**
+     *   Renders the list for smartR default view
+     */
+    def getScriptList() {
+        def dir = getWebAppFolder() + '/Scripts/'
+        def scriptList = new File(dir).list().findAll { it != 'Wrapper.R' && it != 'Sample.R' }
+        return scriptList
+    }
+
     def queryData(parameterMap) {
         def data_cohort1 = [:]
         def data_cohort2 = [:]

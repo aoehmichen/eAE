@@ -5,8 +5,7 @@
 
 <div id='genesList' class="txt">
     <form method="post" action="">
-        <textarea id="genes" cols="25" rows="5">Enter your genes here...
-        </textarea><br>
+        <textarea id="genes" cols="25" rows="5">Enter your genes here...</textarea><br>
         <input
                 id="submitPE"
                 class='txt'
@@ -18,7 +17,15 @@
 <br/>
 
 <hr class="myhr"/>
-<div id="cacheTable"></div>
+<div id="cacheTable">
+    <table id="peTable">
+        <tr>
+            <td><b><i>Name</i></b></td>
+            <td><b><i>Date</i></b></td>
+            <td><b><i>Status</i></b></td>
+        </tr>
+    </table>
+</div>
 
 <script>
     function triggerPE() {
