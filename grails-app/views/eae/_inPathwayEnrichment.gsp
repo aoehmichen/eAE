@@ -17,12 +17,12 @@
 <br/>
 
 <hr class="myhr"/>
-<div id="cacheTable">
-    <table id="peTable">
+<div id="cacheTableDiv">
+    <table id="peTable" class ="cachetable">
         <tr>
-            <td><b><i>Name</i></b></td>
-            <td><b><i>Date</i></b></td>
-            <td><b><i>Status</i></b></td>
+            <th><b><i>Name</i></b></th>
+            <th><b><i>Date</i></b></th>
+            <th><b><i>Status</i></b></th>
         </tr>
     </table>
 </div>

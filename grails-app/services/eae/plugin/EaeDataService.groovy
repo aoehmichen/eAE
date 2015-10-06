@@ -30,24 +30,29 @@ class EaeDataService {
 //
 //    }
 
-    def  SendToHDFS (String genesList, String scriptDir, String sparkURL ) {
+    def  SendToHDFS (String username, String genesList, String scriptDir, String sparkURL ) {
         def script = scriptDir +'transferToHDFS.sh'
-        def fileToTransfer = 'geneList.txt'
+        def fileToTransfer = "geneList-" + username +".txt"
 
-        File f =new File("/tmp/eae/","geneList.txt")
+        def scriptFile = new File(script)
+        if (scriptFile.exists()) {
+            if(!scriptFile.canExecute()){
+                scriptFile.setExecutable(true)
+            }
+        }else {
+            log.error('The Script file to transfer to HDFS wasn;t found')
+        }
+
+
+        File f =new File("/tmp/eae/",fileToTransfer)
         if(f.exists()){
             f.delete()
         }
         f.withWriter('utf-8') { writer ->
             writer.writeLine genesList
         } // or << genesList
-        boolean created = f.createNewFile()
-        String fp = f.getAbsolutePath() + "geneList.txt"
-        println(f.exists())
-        println(created)
-        println(fp)
-        println(script)
-        println(fileToTransfer)
+        f.createNewFile()
+        String fp = f.getAbsolutePath()
         def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL
         println(executeCommand)
         executeCommand.execute().waitFor()

@@ -1,5 +1,6 @@
 package eae.plugin
 
+import grails.util.Environment
 import org.apache.commons.io.FilenameUtils
 
 class EaeController {
@@ -33,7 +34,7 @@ class EaeController {
         final String SPARK_URL = grailsApplication.config.com.eae.sparkURL;
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
-        final String scriptDir = grailsApplication.config.com.eae.EAEScriptDir;
+        final String scriptDir = getWebAppFolder() + 'Scripts/eae/' //grailsApplication.config.com.eae.EAEScriptDir;
         final String username = springSecurityService.getPrincipal().username;
 
         String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join('\t').trim()
@@ -44,8 +45,7 @@ class EaeController {
         if(cached == "NotCached") {
             String jobID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, saneGenesList)
             String sparkParameters = "pe.py pe_genes.txt Bonferroni " + jobID
-            eaeDataService.SendToHDFS(saneGenesList, scriptDir, SPARK_URL)
-            println("sent to HDFS")
+            eaeDataService.SendToHDFS(username, saneGenesList, scriptDir, SPARK_URL)
             eaeService.sparkSubmit(scriptDir, sparkParameters)
 
             result = "Your Job has been submitted. Please come back later for the result"
@@ -56,13 +56,13 @@ class EaeController {
             result = "Your Job has been submitted. Please come back later for the result"
         }
 
-        render template :'/eae/outPathwayEnrichement', model: [resultPE: result]
+        render template :'/eae/outPathwayEnrichment', model: [resultPE: result]
     }
 
     /**
      * Method that will create the get the list of jobs to show in the galaxy jobs tab
      */
-    def getjobs = {
+    def retieveCachedJobs = {
         def username = springSecurityService.getPrincipal().username
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
@@ -96,6 +96,26 @@ class EaeController {
             render "The Cache is empty"}
         else{
             render result
+        }
+    }
+
+
+    /**
+     *   Gets the directory where all the R scripts are located
+     *
+     *   @return {str}: path to the script folder
+     */
+    def getWebAppFolder() {
+        if (Environment.current == Environment.DEVELOPMENT) {
+            return org.codehaus.groovy.grails.plugins.GrailsPluginUtils
+                    .getPluginDirForName('smart-r')
+                    .getFile()
+                    .absolutePath + '/web-app/'
+        } else {
+            return grailsApplication
+                    .mainContext
+                    .servletContext
+                    .getRealPath('/plugins/') + '/smart-r-0.1/'
         }
     }
 }

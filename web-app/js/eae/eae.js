@@ -97,9 +97,9 @@ function changeEAEInput(){
         timeout: '600000',
         data: {'script': jQuery('#hpcscriptSelect').val()}
     }).done(function(serverAnswer) {
-        jQuery("#inputs").html(serverAnswer);
+        jQuery("#eaeinputs").html(serverAnswer);
     }).fail(function() {
-        jQuery("#inputs").html("AJAX CALL FAILED!");
+        jQuery("#eaeinputs").html("AJAX CALL FAILED!");
     });
 
 }
@@ -115,15 +115,15 @@ function runPE(list){
         timeout: '600000',
         data: {'genesList': list}
     }).done(function(serverAnswer) {
-        jQuery("#outputs").html(serverAnswer);
+        jQuery("#eaeoutputs").html(serverAnswer);
     }).fail(function() {
-        jQuery("#outputs").html("AJAX CALL FAILED!");
+        jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
     });
 }
 
 function populateCacheDIV(){
     jQuery.ajax({
-        url: pageInfo.basePath + '/eae/getjobs',
+        url: pageInfo.basePath + '/eae/retieveCachedJobs',
         type: "POST",
         timeout: '600000'
         }).done(function(cacheJobs) {
@@ -136,6 +136,7 @@ function populateCacheDIV(){
             date = new Date(e.start.$date)
             _t.append($('<tr/>').append(
                 $('<td/>').text(e.name)
+
             ).append(
                 $('<td/>').text(e.status)
             //).append(
@@ -145,7 +146,7 @@ function populateCacheDIV(){
             ))
         })
     }).fail(function() {
-        jQuery("#cacheTable").html("AJAX CALL FAILED!");
+        jQuery("#cacheTableDiv").html("AJAX CALL FAILED!");
     });
 }
 
