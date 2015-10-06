@@ -18,6 +18,8 @@ class EaeService {
             if (!scriptFile.canExecute()) {
                 scriptFile.setExecutable(true)
             }
+        }else {
+            log.error('The Script file spark submit wasn\'t found')
         }
 
         [script, sparkParameters].execute().waitFor()

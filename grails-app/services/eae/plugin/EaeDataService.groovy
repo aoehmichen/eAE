@@ -40,7 +40,7 @@ class EaeDataService {
                 scriptFile.setExecutable(true)
             }
         }else {
-            log.error('The Script file to transfer to HDFS wasn;t found')
+            log.error('The Script file to transfer to HDFS wasn\'t found')
         }
 
 
