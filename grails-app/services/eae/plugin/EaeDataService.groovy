@@ -30,9 +30,9 @@ class EaeDataService {
 //
 //    }
 
-    def  SendToHDFS (String username, String genesList, String scriptDir, String sparkURL ) {
+    def  SendToHDFS (String username, String mongoDocumentID, String genesList, String scriptDir, String sparkURL) {
         def script = scriptDir +'transferToHDFS.sh'
-        def fileToTransfer = "geneList-" + username +".txt"
+        def fileToTransfer = "geneList-" + username + "-" + mongoDocumentID + ".txt"
 
         def scriptFile = new File(script)
         if (scriptFile.exists()) {
