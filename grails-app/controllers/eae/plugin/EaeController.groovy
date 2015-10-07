@@ -44,12 +44,12 @@ class EaeController {
         String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT, "eae", saneGenesList)
         def result
         if(cached == "NotCached") {
-            String jobID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, saneGenesList)
+            String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, saneGenesList)
             String workflowSpecificParameters = "Bonferroni"
             String dataFileName = "listOfGenes.txt" //  "listOfGenes-"+ jobID + ".txt"
             eaeDataService.SendToHDFS(username, saneGenesList, scriptDir, SPARK_URL)
             println("data hdfs sent")
-            eaeService.sparkSubmit(scriptDir, SPARK_URL, "pe.py", dataFileName , workflowSpecificParameters)
+            eaeService.sparkSubmit(scriptDir, SPARK_URL, "pe.py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             println("spark job submitted")
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
