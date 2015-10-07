@@ -2,6 +2,7 @@ package eae.plugin
 
 import grails.util.Environment
 import org.apache.commons.io.FilenameUtils
+import org.json.JSONObject
 
 class EaeController {
 
@@ -46,8 +47,9 @@ class EaeController {
             String jobID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, saneGenesList)
             String sparkParameters = "pe.py pe_genes.txt Bonferroni " + jobID
             eaeDataService.SendToHDFS(username, saneGenesList, scriptDir, SPARK_URL)
+            println("data hdfs sent")
             eaeService.sparkSubmit(scriptDir, sparkParameters)
-
+            println("spark job submitted")
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
             result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", saneGenesList)
@@ -55,8 +57,13 @@ class EaeController {
         }else{
             result = "Your Job has been submitted. Please come back later for the result"
         }
+        JSONObject answer = new JSONObject();
 
-        render template :'/eae/outPathwayEnrichment', model: [resultPE: result]
+        answer.put("iscached", cached);
+        answer.put("result", result);
+
+        render answer
+        //render template :'/eae/outPathwayEnrichment', model: [resultPE: result]
     }
 
     /**

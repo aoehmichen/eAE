@@ -43,7 +43,6 @@ class EaeDataService {
             log.error('The Script file to transfer to HDFS wasn\'t found')
         }
 
-
         File f =new File("/tmp/eae/",fileToTransfer)
         if(f.exists()){
             f.delete()
@@ -52,10 +51,11 @@ class EaeDataService {
             writer.writeLine genesList
         } // or << genesList
         f.createNewFile()
+
         String fp = f.getAbsolutePath()
         def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL
         println(executeCommand)
-        [ 'bash',executeCommand].execute().waitFor()
+        executeCommand.execute().waitFor()
 
         // We cleanup
         f.delete()

@@ -22,7 +22,8 @@ class EaeService {
             log.error('The Script file spark submit wasn\'t found')
         }
         def executeCommand = script + " " + sparkParameters
-        ['bash', executeCommand].execute().waitFor()
+        println(executeCommand)
+        executeCommand.execute().waitFor()
         return 0
     }
 

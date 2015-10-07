@@ -2,6 +2,6 @@
 <script>
     var results = ${resultPE}
 
-    jQuery("#outputs").html(results);
+    jQuery("#eaeoutputs").html(results);
 
 </script>

@@ -89,7 +89,7 @@ function goToSmartRScript() {
  *   Renders the input form for entering the parameters for a visualization/script
  */
 function changeEAEInput(){
-    jQuery("#outputs").html("");
+    jQuery("#eaeoutputs").html("");
 
     jQuery.ajax({
         url: pageInfo.basePath + '/eae/renderInputs',
@@ -115,7 +115,13 @@ function runPE(list){
         timeout: '600000',
         data: {'genesList': list}
     }).done(function(serverAnswer) {
-        jQuery("#eaeoutputs").html(serverAnswer);
+        var jsonAnswer= $.parseJSON(serverAnswer);
+
+        if(jsonAnswer.iscached === "NotCached"){
+            jQuery("#eaeoutputs").html(jsonAnswer.result);
+        }else{
+            jQuery("#eaeoutputs").html("Cached but viz to do");
+        }
     }).fail(function() {
         jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
     });
@@ -126,9 +132,9 @@ function populateCacheDIV(){
         url: pageInfo.basePath + '/eae/retieveCachedJobs',
         type: "POST",
         timeout: '600000'
-        }).done(function(cacheJobs) {
+        }).done(function(cachedJobs) {
 
-        var jsonCache= $.parseJSON(cacheJobs);
+        var jsonCache= $.parseJSON(cachedJobs);
         var _t = $('#peTable');
         var date;
 
