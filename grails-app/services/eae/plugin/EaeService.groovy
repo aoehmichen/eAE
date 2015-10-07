@@ -10,7 +10,7 @@ class EaeService {
         return scriptList
     }
 
-    def sparkSubmit(String scriptDir, String sparkParameters){
+    def sparkSubmit(String scriptDir, String SparkURL, String worflowFileName, String dataFileName, String workflowSpecificParameters){
         def script = scriptDir +'executeSparkJob.sh'
 
         def scriptFile = new File(script)
@@ -21,7 +21,7 @@ class EaeService {
         }else {
             log.error('The Script file spark submit wasn\'t found')
         }
-        def executeCommand = script + " " + sparkParameters
+        def executeCommand = script + " " + SparkURL + " " + worflowFileName + " " + dataFileName + " " + workflowSpecificParameters
         println(executeCommand)
         executeCommand.execute().waitFor()
         return 0
