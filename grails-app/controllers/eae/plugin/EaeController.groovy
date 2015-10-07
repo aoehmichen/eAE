@@ -45,7 +45,7 @@ class EaeController {
         def result
         if(cached == "NotCached") {
             String jobID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, saneGenesList)
-            String sparkParameters = "pe.py pe_genes.txt Bonferroni " + jobID
+            String sparkParameters = "pe.py listOfGenes.txt Bonferroni " + jobID
             eaeDataService.SendToHDFS(username, saneGenesList, scriptDir, SPARK_URL)
             println("data hdfs sent")
             eaeService.sparkSubmit(scriptDir, sparkParameters)
