@@ -55,7 +55,7 @@ class EaeDataService {
         String fp = f.getAbsolutePath()
         def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL
         println(executeCommand)
-        executeCommand.execute().waitFor()
+        [ 'bash',executeCommand].execute().waitFor()
 
         // We cleanup
         f.delete()
