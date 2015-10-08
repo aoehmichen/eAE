@@ -4,15 +4,28 @@
 </div>
 
 <div id='genesList' class="txt">
-    <form method="post" action="">
-        <textarea id="genes" cols="25" rows="5">Enter your genes here...</textarea><br>
-        <input
-                id="submitPE"
-                class='txt'
-                type="button"
-                value="Run Enrichment"
-                onclick="triggerPE()"/>
-    </form>
+    <table id="inputeDataTable">
+        <tr>
+            <td>
+            <form method="post" action="">
+                <textarea id="genes" cols="25" rows="5">Enter your genes here...</textarea><br>
+                <input
+                        id="submitPE"
+                        class='txt'
+                        type="button"
+                        value="Run Enrichment"
+                        onclick="triggerPE()"/>
+            </form>
+            </td>
+            <td>
+                <select id="correctionSelect">
+                    <option value="Bonferroni">Bonferroni</option>
+                    <option value="HB">Holm-Bonferroni</option>
+                    <option value="Sidak">Sidak</option>
+                </select>
+            </td>
+        </tr>
+    </table>
 </div>
 <br/>
 
@@ -29,7 +42,8 @@
 
 <script>
     function triggerPE() {
-        runPE(document.getElementById("genes").value)
+        var selectedCorrection = $('#correctionSelect').options[$('#correctionSelect').selectedIndex].value;
+        runPE(document.getElementById("genes").value, selectedCorrection);
     }
 
     populateCacheDIV()

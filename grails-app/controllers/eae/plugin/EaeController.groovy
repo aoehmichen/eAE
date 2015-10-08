@@ -35,7 +35,7 @@ class EaeController {
         final String SPARK_URL = grailsApplication.config.com.eae.sparkURL;
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
-        final String scriptDir = getWebAppFolder() + 'Scripts/eae/' //grailsApplication.config.com.eae.EAEScriptDir;
+        final String scriptDir = getWebAppFolder() + 'Scripts/eae/';
         final String username = springSecurityService.getPrincipal().username;
 
         String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join('\t').trim()
@@ -45,7 +45,7 @@ class EaeController {
         def result
         if(cached == "NotCached") {
             String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, saneGenesList)
-            String workflowSpecificParameters = "Bonferroni"
+            String workflowSpecificParameters = ((String)params.selectedCorrection)
             String dataFileName = "listOfGenes.txt" //  "listOfGenes-"+ username + "-" + jobID + ".txt"
             eaeDataService.SendToHDFS(username, mongoDocumentID, saneGenesList, scriptDir, SPARK_URL)
             println("data hdfs sent")
