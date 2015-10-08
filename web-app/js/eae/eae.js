@@ -135,7 +135,7 @@ function populateCacheDIV(){
     var cacheTableHeaders = ["Name", "Date", "Status", "Cached Results"];
     var _h = $('#headersRow');
     $.each(cacheTableHeaders, function(i, e){
-        _h.append($('<td/>').text(e))
+        _h.append($('<th/>').text(e))
     });
 
     jQuery.ajax({
@@ -188,8 +188,19 @@ function showPEOutput(cacheQuery){
 
 function buildOutput(jsonRecord){
     var _o = $('#eaeoutputs');
-    _o.append($('<div/>').html("hsa05130"));
-    _o.append($('<img/>').attr('src', "http://rest.kegg.jp/get/hsa05130/image")); //.attr("width", "591").attr("height", "525"));
+    _o.append($('<table/>').attr("id","topPathways").attr("class", "cachetable")
+        .append($('<tr/>')
+            .append($('<th/>').text("Pathways"))
+            .append($('<th/>').text("Correction: " + jsonRecord.Correction))));
+    $.each(jsonRecord.topPathways, function(i, e){
+        $('#topPathways').append($('<tr/>')
+            .append($('<td/>').text(e[0]))
+            .append($('<td/>').text(e[1][1])))
+    });
+
+    var topPathway = jsonRecord.topPathways[0][0].toString();
+    _o.append($('<div/>').html(topPathway));
+    _o.append($('<img/>').attr('src', "http://rest.kegg.jp/get/"+ topPathway +"/image"));
     _o.append($('<div/>').text(jsonRecord.KeggTopPathway));
 }
 
@@ -218,79 +229,6 @@ function genesListData(){
     data.push({list: 'ListOfGenes', value: jQuery('#genes').val()});
     return data
 }
-
-//function getJobsDataForEAE(workflowSelected)
-//{
-//    eaejobsstore = new Ext.data.JsonStore({
-//        url : pageInfo.basePath+'/eae/getjobs',
-//        root : 'jobs',
-//        data : {'workflow' : workflowSelected},
-//        fields : ['name', 'status', 'startDate']
-//    });
-//
-//    eaejobsstore.on('load', eaejobsstoreLoaded);
-//    var myparams = Ext.urlEncode({jobType: 'DataExport',disableCaching: true});
-//    eaejobsstore.load({ params : myparams  });
-//}
-//
-//function eaejobsstoreLoaded()
-//{
-//    var ojobs = Ext.getCmp('ajobsgrid');
-//    if(ojobs!=null)
-//    {
-//        jQuery("#cacheTable").remove(ojobs);
-//    }
-//    var jobs = new Ext.grid.GridPanel({
-//        store: eaejobsstore,
-//        id:'ajobsgrid',
-//        columns: [
-//            {name:'name', header: "Name", width: 120, sortable: true, dataIndex: 'name',
-//                renderer: function(value, metaData, record, rowIndex, colIndex, store) {
-//                    var changedName;
-//                    if (store.getAt(rowIndex).get('status') == 'Completed') {
-//                        changedName = '<a href="#">'+value+'</a>';
-//                    } else {
-//                        changedName = value;
-//                    }
-//                    return changedName;
-//                }
-//            },
-//            {name:'status', header: "Status", width: 120, sortable: true, dataIndex: 'status'},
-//            {name:'startDate', header: "Started On", width: 120, sortable: true, dataIndex: 'startDate'}
-//        ],
-//        listeners : {cellclick : function (grid, rowIndex, columnIndex, e){
-//            var colHeader = grid.getColumnModel().getColumnHeader(columnIndex);
-//            if (colHeader == "Name") {
-//                var status = grid.getStore().getAt(rowIndex).get('status');
-//                if (status == "Error")	{
-//                    Ext.Msg.alert("Job Failure", "Unfortunately, an error occurred on this job.");
-//                } else if (status == "Cancelled")	{
-//                    Ext.Msg.alert("Job Cancelled", "The job has been cancelled");}
-//                else if (status == "Completed")	{
-//                         // Load the results into outputs from the cache
-//                }
-//                else if (status != "Completed") {
-//                    Ext.Msg.alert("There is something wrong in the status. Unknown status : " + status.toString());
-//                }
-//            }
-//        }
-//        },
-//        viewConfig:	{
-//            forceFit : true
-//        },
-//        sm : new Ext.grid.RowSelectionModel({singleSelect : true}),
-//        layout : 'fit',
-//        width : 600,
-//        buttons: [{
-//            text:'Refresh',
-//            handler: function()	{
-//                eaejobsstore.reload();
-//            }
-//        }]
-//    });
-//    jQuery("#cacheTable").add(jobs);
-//    //jQuery("#cacheTable").doLayout();
-//}
 
 
 

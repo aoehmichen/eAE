@@ -9,6 +9,7 @@ import mongo.MongoCacheFactory
 import org.bson.Document
 import org.json.JSONArray
 import org.json.JSONObject
+import static com.mongodb.client.model.Filters.*;
 
 @Transactional
 class MongoCacheService {
@@ -52,8 +53,7 @@ class MongoCacheService {
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase db = mongoClient.getDatabase( dbName );
 
-        BasicDBObject query = new BasicDBObject("ListOfgenes", paramValue);
-        def cursor = db.getCollection("pe").find(query).iterator();
+        def cursor = db.getCollection("pe").find(eq("ListOfgenes", paramValue)).iterator();
         def recordsCount = 0;
         JSONObject cacheItem;
 

@@ -64,7 +64,6 @@ class EaeController {
         answer.put("result", result);
 
         render answer
-        //render template :'/eae/outPathwayEnrichment', model: [resultPE: result]
     }
 
     /**
