@@ -100,11 +100,18 @@ class EaeController {
         }
         def result = mongoCacheService.getjobsFromMongo(MONGO_URL, MONGO_PORT, "eae", username, workflow)
 
-        if(result.get("totalCount") == 0){
-            render "The Cache is empty"}
-        else{
-            render result
-        }
+        render result
+    }
+
+    def retieveSingleCachedJob = {
+
+        final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
+        final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
+        def saneGenesList = params.cacheQuery;
+
+        def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", saneGenesList)
+
+        render result;
     }
 
 

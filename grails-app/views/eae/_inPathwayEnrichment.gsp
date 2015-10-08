@@ -31,13 +31,11 @@
 
 <hr class="myhr"/>
 <div id="cacheTableDiv">
-    <table id="peTable" class ="cachetable">
-        <tr>
-            <th><b><i>Name</i></b></th>
-            <th><b><i>Date</i></b></th>
-            <th><b><i>Status</i></b></th>
-        </tr>
-    </table>
+    <table id="peTable" class ="cachetable"></table>
+    <div id="emptyCache">The Cache is Empty</div>
+    <button type="button"
+            value="refreshCacheDiv"
+            onclick="populateCacheDIV()">Refresh</button>
 </div>
 
 <script>

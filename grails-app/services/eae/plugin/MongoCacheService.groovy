@@ -23,7 +23,7 @@ class MongoCacheService {
         def result = new JSONObject(((Document)coll.find(query).first()).toJson())
         mongoClient.close()
 
-        return result.get("KeggTopPathway");
+        return result;
     }
 
     def initJob(String mongoURL, String mongoPort, String dbName, String workflow, String user, String geneList){
@@ -33,7 +33,7 @@ class MongoCacheService {
 
         Document doc = new Document();
         doc.append("topPathways", [])
-        doc.append("corrected_pValues", [])
+        //doc.append("corrected_pValues", [])
         doc.append("KeggTopPathway", "")
         doc.append("status", "started")
         doc.append("user", user)
@@ -101,7 +101,7 @@ class MongoCacheService {
             count+=1;
         }
 
-        JSONObject res=  new JSONObject();
+        JSONObject res =  new JSONObject();
         res.put("success", true)
         res.put("totalCount",count)
         res.put("jobs", rows)

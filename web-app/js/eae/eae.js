@@ -119,7 +119,8 @@ function runPE(list, selectedCorrection){
         if(jsonAnswer.iscached === "NotCached"){
             jQuery("#eaeoutputs").html(jsonAnswer.result);
         }else{
-            jQuery("#eaeoutputs").html("Cached but viz to do");
+            buildOutput(jsonAnswer.result);
+            //jQuery("#eaeoutputs").html("Cached but viz to do");
         }
     }).fail(function() {
         jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
@@ -127,33 +128,71 @@ function runPE(list, selectedCorrection){
 }
 
 function populateCacheDIV(){
+    var _t = $('#peTable');
+    _t.empty();
+    _t.append($('<tr/>').attr("id", "headersRow"));
+
+    var cacheTableHeaders = ["Name", "Date", "Status", "Cached Results"];
+    var _h = $('#headersRow');
+    $.each(cacheTableHeaders, function(i, e){
+        _h.append($('<td/>').text(e))
+    });
+
     jQuery.ajax({
         url: pageInfo.basePath + '/eae/retieveCachedJobs',
-        type: "POST",
-        timeout: '600000'
+        type: "POST"
         }).done(function(cachedJobs) {
-
         var jsonCache= $.parseJSON(cachedJobs);
-        var _t = $('#peTable');
-        var date;
 
-        $.each(jsonCache.jobs, function (i, e) {
-            date = new Date(e.start.$date)
-            _t.append($('<tr/>').append(
-                $('<td/>').text(e.name)
+        if(jsonCache.totalCount == 0){
+            jQuery("#peTable").hide();
+            jQuery("#emptyCache").show();
+        }else {
 
-            ).append(
-                $('<td/>').text(e.status)
-            //).append(
-            //    $('<td/>').append($('<a/>').attr('href', e.lien).text("Cached result"))
-            ).append(
-                $('<td/>').text(date)
-            ))
-        })
+            var date;
+            jQuery("#peTable").show();
+            jQuery("#emptyCache").hide();
+            $.each(jsonCache.jobs, function (i, e) {
+                date = new Date(e.start.$date);
+                _t.append($('<tr/>').append(
+                    $('<td/>').text(e.name)
+                ).append(
+                    $('<td/>').text(e.status)
+                ).append(
+                    $('<td/>').text(date)
+                ).append(
+                     $('<td/>').append($('<button/>').attr('data-button', e.name).on('click',function(){
+                        var cacheQuery= $(this).attr('data-button');
+                        showPEOutput(cacheQuery);
+                     }).text("Result"))
+                ))
+            })
+        }
     }).fail(function() {
         jQuery("#cacheTableDiv").html("AJAX CALL FAILED!");
     });
 }
+
+
+function showPEOutput(cacheQuery){
+    jQuery("#eaeoutputs").html("");
+    jQuery.ajax({
+        url: pageInfo.basePath + '/eae/retieveSingleCachedJob',
+        type: "POST",
+        data: {cacheQuery: cacheQuery}
+    }).done(function(cachedJob) {
+        var jsonRecord= $.parseJSON(cachedJob);
+        buildOutput(jsonRecord)
+    })
+}
+
+function buildOutput(jsonRecord){
+    var _o = $('#eaeoutputs');
+    _o.append($('<div/>').html("hsa05130"));
+    _o.append($('<img/>').attr('src', "http://rest.kegg.jp/get/hsa05130/image")); //.attr("width", "591").attr("height", "525"));
+    _o.append($('<div/>').text(jsonRecord.KeggTopPathway));
+}
+
 
 /**
  *   get the inpu from datasetexplorer
@@ -162,8 +201,7 @@ function getClinicalMetaDataforEAE(){
 
     jQuery.ajax({
         url: pageInfo.basePath + '/eae/getClinicalMetaDataforEAE',
-        type: "POST",
-        timeout: '600000'
+        type: "POST"
     }).done(function(serverAnswer) {
         jQuery("#selectedCohort").html(serverAnswer);
     }).fail(function() {
