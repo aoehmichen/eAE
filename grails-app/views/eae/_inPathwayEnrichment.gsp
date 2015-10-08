@@ -19,7 +19,7 @@
             </td>
             <td>
                 <select id="correctionSelect">
-                    <option value="Bonferroni">Bonferroni</option>
+                    <option value="Bonferroni" selected="selected">Bonferroni</option>
                     <option value="HB">Holm-Bonferroni</option>
                     <option value="Sidak">Sidak</option>
                 </select>
@@ -42,7 +42,8 @@
 
 <script>
     function triggerPE() {
-        var selectedCorrection = $('#correctionSelect').options[$('#correctionSelect').selectedIndex].value;
+        var _s = document.getElementById('correctionSelect');
+        var selectedCorrection = _s.options[_s.selectedIndex].value;
         runPE(document.getElementById("genes").value, selectedCorrection);
     }
 

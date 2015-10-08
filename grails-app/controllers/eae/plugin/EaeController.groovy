@@ -45,7 +45,7 @@ class EaeController {
         def result
         if(cached == "NotCached") {
             String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, saneGenesList)
-            String workflowSpecificParameters = ((String)params.selectedCorrection)
+            String workflowSpecificParameters = params.selectedCorrection
             String dataFileName = "listOfGenes.txt" //  "listOfGenes-"+ username + "-" + jobID + ".txt"
             eaeDataService.SendToHDFS(username, mongoDocumentID, saneGenesList, scriptDir, SPARK_URL)
             println("data hdfs sent")

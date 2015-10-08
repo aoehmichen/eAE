@@ -112,7 +112,6 @@ function runPE(list, selectedCorrection){
     jQuery.ajax({
         url: pageInfo.basePath + '/eae/runPEForSelectedGenes',
         type: "POST",
-        timeout: '600000',
         data: {'genesList': list, 'selectedCorrection': selectedCorrection}
     }).done(function(serverAnswer) {
         var jsonAnswer= $.parseJSON(serverAnswer);
