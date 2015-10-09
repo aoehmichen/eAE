@@ -1,5 +1,6 @@
 package eae.plugin
 
+import com.mongodb.BasicDBObject
 import grails.util.Environment
 import org.apache.commons.io.FilenameUtils
 import org.json.JSONObject
@@ -41,7 +42,7 @@ class EaeController {
         String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join('\t').trim()
 
         // We check if this query has already been made before
-        String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT, "eae", saneGenesList)
+        String cached = mongoCacheService.checkIfPresentInPECache(MONGO_URL, MONGO_PORT, saneGenesList)
         def result
         if(cached == "NotCached") {
             String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, saneGenesList)
@@ -51,7 +52,8 @@ class EaeController {
             eaeService.sparkSubmit(scriptDir, SPARK_URL, "pe.py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
-            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", saneGenesList)
+            BasicDBObject query = new BasicDBObject("ListOfgenes", saneGenesList);
+            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", "pe",query);
         }else{
             result = "Your Job has been submitted. Please come back later for the result"
         }
@@ -94,7 +96,7 @@ class EaeController {
                     throw new Exception("The workflow doesn't exist.")
             }
         }
-        def result = mongoCacheService.getjobsFromMongo(MONGO_URL, MONGO_PORT, "eae", username, workflow)
+        def result = mongoCacheService.getPEjobsFromMongo(MONGO_URL, MONGO_PORT, "eae", username, workflow)
 
         render result
     }
@@ -105,11 +107,11 @@ class EaeController {
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
         def saneGenesList = params.cacheQuery;
 
-        def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", saneGenesList)
+        BasicDBObject query = new BasicDBObject("ListOfgenes", saneGenesList);
+        def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", "pe",query)
 
         render result;
     }
-
 
     /**
      *   Gets the directory where all the R scripts are located

@@ -14,13 +14,12 @@ import static com.mongodb.client.model.Filters.*;
 @Transactional
 class MongoCacheService {
 
-    def retrieveValueFromCache(String mongoURL, String mongoPort, String dbName, String paramValue) {
+    def retrieveValueFromCache(String mongoURL, String mongoPort, String dbName, String collectionName, BasicDBObject query) {
 
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort)
         MongoDatabase db = mongoClient.getDatabase( dbName )
-        MongoCollection<Document> coll = db.getCollection("pe")
+        MongoCollection<Document> coll = db.getCollection(collectionName)
 
-        BasicDBObject query = new BasicDBObject("ListOfgenes", paramValue)
         def result = new JSONObject(((Document)coll.find(query).first()).toJson())
         mongoClient.close()
 
@@ -34,7 +33,6 @@ class MongoCacheService {
 
         Document doc = new Document();
         doc.append("topPathways", [])
-        //doc.append("corrected_pValues", [])
         doc.append("KeggTopPathway", "")
         doc.append("status", "started")
         doc.append("user", user)
@@ -49,11 +47,16 @@ class MongoCacheService {
         return jobId;
     }
 
-    def checkIfPresentInCache(String mongoURL, String mongoPort, String dbName, String paramValue){
+    def checkIfPresentInPECache(String mongoURL, String mongoPort, String paramValue){
+        BasicDBObject query = new BasicDBObject("ListOfgenes", paramValue);
+        return  checkIfPresentInCache(mongoURL,mongoPort,"eae","pe",query)
+    }
+
+    def checkIfPresentInCache(String mongoURL, String mongoPort, String dbName, String collectionName, BasicDBObject query ){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase db = mongoClient.getDatabase( dbName );
 
-        def cursor = db.getCollection("pe").find(eq("ListOfgenes", paramValue)).iterator();
+        def cursor = db.getCollection(collectionName).find(query).iterator();
         def recordsCount = 0;
         JSONObject cacheItem;
 
@@ -78,7 +81,7 @@ class MongoCacheService {
     /**
      * Method that will get the list of jobs to show in the eae jobs table
      */
-    def getjobsFromMongo(String mongoURL, String mongoPort, String dbName, String userName, String workflowSelected) {
+    def getPEjobsFromMongo(String mongoURL, String mongoPort, String dbName, String userName, String workflowSelected) {
 
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase  db = mongoClient.getDatabase( dbName );
