@@ -54,6 +54,7 @@ class EaeController {
         }else if (cached == "Completed"){
             BasicDBObject query = new BasicDBObject("ListOfgenes", saneGenesList);
             result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", "pe",query);
+            mongoCacheService.duplicatePECacheForUser(MONGO_URL, MONGO_PORT,username, result)
         }else{
             result = "Your Job has been submitted. Please come back later for the result"
         }
@@ -108,7 +109,7 @@ class EaeController {
         def saneGenesList = params.cacheQuery;
 
         BasicDBObject query = new BasicDBObject("ListOfgenes", saneGenesList);
-        def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", "pe",query)
+        def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", "pe", query)
 
         render result;
     }

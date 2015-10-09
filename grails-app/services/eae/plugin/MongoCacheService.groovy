@@ -1,5 +1,4 @@
 package eae.plugin
-
 import com.mongodb.BasicDBObject
 import com.mongodb.MongoClient
 import com.mongodb.client.MongoCollection
@@ -9,7 +8,6 @@ import mongo.MongoCacheFactory
 import org.bson.Document
 import org.json.JSONArray
 import org.json.JSONObject
-import static com.mongodb.client.model.Filters.*;
 
 @Transactional
 class MongoCacheService {
@@ -112,5 +110,23 @@ class MongoCacheService {
         mongoClient.close();
 
         return res
+    }
+
+    def duplicatePECacheForUser(String mongoURL, String mongoPort, String username, JSONObject cacheRes){
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
+        MongoDatabase db = mongoClient.getDatabase("eae");
+        MongoCollection<Document> coll = db.getCollection("pe");
+
+        Document doc = new Document();
+        doc.append("topPathways", cacheRes.get("topPathways"))
+        doc.append("KeggTopPathway",cacheRes.get("KeggTopPathway") )
+        doc.append("status", "Completed")
+        doc.append("user", username)
+        doc.append("ListOfgenes",cacheRes.get("ListOfgenes") )
+        doc.append("Correction",cacheRes.get("Correction") )
+        doc.append("StartTime", new Date())
+        doc.append("EndTime", new Date())
+
+        coll.insertOne(doc)
     }
 }
