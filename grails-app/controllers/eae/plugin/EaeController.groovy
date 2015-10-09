@@ -46,7 +46,7 @@ class EaeController {
         if(cached == "NotCached") {
             String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, saneGenesList)
             String workflowSpecificParameters = params.selectedCorrection
-            String dataFileName = "listOfGenes-"+ username + "-" + mongoDocumentID + ".txt" //"listOfGenes.txt"
+            String dataFileName = "geneList-"+ username + "-" + mongoDocumentID + ".txt" //"listOfGenes.txt"
             eaeDataService.SendToHDFS(username, mongoDocumentID, saneGenesList, scriptDir, SPARK_URL)
             eaeService.sparkSubmit(scriptDir, SPARK_URL, "pe.py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
