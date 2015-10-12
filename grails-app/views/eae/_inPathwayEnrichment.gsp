@@ -45,7 +45,7 @@
         runPE(document.getElementById("genes").value, selectedCorrection);
     }
 
-    populateCacheDIV()
+    populateCacheDIV("pe")
 
 </script>
 

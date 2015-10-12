@@ -67,54 +67,6 @@ class EaeController {
     }
 
     /**
-     * Method that will create the get the list of jobs to show in the galaxy jobs tab
-     */
-    def retieveCachedJobs = {
-        def username = springSecurityService.getPrincipal().username
-        final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
-        final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
-        def workflow = ""
-
-
-        if(params.script == null) {
-        workflow = "pe"
-        }else {
-
-            switch (params.script) {
-                case "Pathway Enrichment":
-                    workflow = "pe";
-                    break;
-                case "General Testing":
-                    workflow = "gt";
-                    break;
-                case "Cross Validation":
-                    workflow = "cv";
-                    break;
-                case "Label Propagation":
-                    workflow = "lp";
-                    break;
-                default:
-                    throw new Exception("The workflow doesn't exist.")
-            }
-        }
-        def result = mongoCacheService.getPEjobsFromMongo(MONGO_URL, MONGO_PORT, "eae", username, workflow)
-
-        render result
-    }
-
-    def retieveSingleCachedJob = {
-
-        final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
-        final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
-        def saneGenesList = params.cacheQuery;
-
-        BasicDBObject query = new BasicDBObject("ListOfgenes", saneGenesList);
-        def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", "pe", query)
-
-        render result;
-    }
-
-    /**
      *   Gets the directory where all the R scripts are located
      *
      *   @return {str}: path to the script folder

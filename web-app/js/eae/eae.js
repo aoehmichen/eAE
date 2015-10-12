@@ -127,7 +127,7 @@ function runPE(list, selectedCorrection){
     });
 }
 
-function populateCacheDIV(){
+function populateCacheDIV(currentworkflow){
     var _t = $('#peTable');
     _t.empty();
     _t.append($('<tr/>').attr("id", "headersRow"));
@@ -139,8 +139,9 @@ function populateCacheDIV(){
     });
 
     jQuery.ajax({
-        url: pageInfo.basePath + '/eae/retieveCachedJobs',
-        type: "POST"
+        url: pageInfo.basePath + '/mongoCache/retrieveCachedJobs',
+        type: "POST",
+        data:{workflow: currentworkflow}
         }).done(function(cachedJobs) {
         var jsonCache= $.parseJSON(cachedJobs);
 
@@ -177,9 +178,9 @@ function populateCacheDIV(){
 function showPEOutput(cacheQuery){
     jQuery("#eaeoutputs").html("");
     jQuery.ajax({
-        url: pageInfo.basePath + '/eae/retieveSingleCachedJob',
+        url: pageInfo.basePath + '/mongoCache/retrieveSingleCachedJob',
         type: "POST",
-        data: {cacheQuery: cacheQuery}
+        data: {cacheQuery: cacheQuery, workflow: "pe"}
     }).done(function(cachedJob) {
         var jsonRecord= $.parseJSON(cachedJob);
         buildOutput(jsonRecord)

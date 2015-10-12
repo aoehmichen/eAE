@@ -2,6 +2,7 @@ package eae.plugin
 import com.mongodb.BasicDBObject
 import com.mongodb.MongoClient
 import com.mongodb.client.MongoCollection
+import com.mongodb.client.MongoCursor
 import com.mongodb.client.MongoDatabase
 import grails.transaction.Transactional
 import mongo.MongoCacheFactory
@@ -79,18 +80,45 @@ class MongoCacheService {
     /**
      * Method that will get the list of jobs to show in the eae jobs table
      */
-    def getPEjobsFromMongo(String mongoURL, String mongoPort, String dbName, String userName, String workflowSelected) {
+    def getjobsFromMongo(String mongoURL, String mongoPort, String dbName, String userName, String workflowSelected) {
 
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase  db = mongoClient.getDatabase( dbName );
         MongoCollection coll = db.getCollection(workflowSelected);
 
-        JSONObject result;
-        JSONArray rows = new JSONArray();
         BasicDBObject query = new BasicDBObject("user", userName);
         def cursor = coll.find(query).iterator();
-        def count = 0;
+        def rows;
 
+        switch (workflowSelected) {
+            case "pe":
+                rows = retrieveRowsForPE(cursor);
+                break;
+            case "gt":
+                rows = retrieveRowsForGT(cursor);
+                break;
+            case "cv":
+                rows = retrieveRowsForCV(cursor);
+                break;
+            case "lp":
+                rows = retrieveRowsForLP(cursor);
+                break;
+        }
+
+        JSONObject res =  new JSONObject();
+        res.put("success", true)
+        res.put("totalCount", rows[1])
+        res.put("jobs", rows[0])
+
+        mongoClient.close();
+
+        return res
+    }
+
+    def retrieveRowsForPE(MongoCursor cursor){
+        def rows = new JSONArray();
+        JSONObject result;
+        def count = 0;
         while(cursor.hasNext()) {
             JSONObject obj =  new JSONObject(cursor.next().toJson());
             result = new JSONObject();
@@ -102,14 +130,7 @@ class MongoCacheService {
             count+=1;
         }
 
-        JSONObject res =  new JSONObject();
-        res.put("success", true)
-        res.put("totalCount",count)
-        res.put("jobs", rows)
-
-        mongoClient.close();
-
-        return res
+        return [rows, count]
     }
 
     def duplicatePECacheForUser(String mongoURL, String mongoPort, String username, JSONObject cacheRes){
