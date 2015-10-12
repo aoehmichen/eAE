@@ -195,7 +195,7 @@ function buildOutput(jsonRecord){
     $.each(jsonRecord.topPathways, function(i, e){
         $('#topPathways').append($('<tr/>')
             .append($('<td/>').text(e[0]))
-            .append($('<td/>').text(e[1][1])))
+            .append($('<td/>').text(e[1])))
     });
 
     var topPathway = jsonRecord.topPathways[0][0].toString();

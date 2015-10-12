@@ -117,8 +117,14 @@ class MongoCacheService {
         MongoDatabase db = mongoClient.getDatabase("eae");
         MongoCollection<Document> coll = db.getCollection("pe");
 
+        def arrayList = new ArrayList();
+        def topPath = (JSONArray)cacheRes.get("topPathways")
+        for(int i =0; i < topPath.length();i++){
+            arrayList.add(i,[topPath.get(i).get(0),topPath.get(i).get(1)])
+       }
+
         Document doc = new Document();
-        doc.append("topPathways", cacheRes.get("topPathways"))
+        doc.append("topPathways", arrayList)
         doc.append("KeggTopPathway",cacheRes.get("KeggTopPathway") )
         doc.append("status", "Completed")
         doc.append("user", username)
@@ -128,5 +134,7 @@ class MongoCacheService {
         doc.append("EndTime", new Date())
 
         coll.insertOne(doc)
+
+        return 0
     }
 }

@@ -39,7 +39,7 @@ class EaeController {
         final String scriptDir = getWebAppFolder() + 'Scripts/eae/';
         final String username = springSecurityService.getPrincipal().username;
 
-        String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join('\t').trim()
+        String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join(' ').trim()
 
         // We check if this query has already been made before
         String cached = mongoCacheService.checkIfPresentInPECache(MONGO_URL, MONGO_PORT, saneGenesList)
