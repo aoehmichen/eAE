@@ -60,10 +60,6 @@ class EaeDataService {
         f.delete()
 
         return 0
-
-//              This code would work but requires the installation of the hadoop stack on the host with all the utils to work....
-//                FileSystem hdfs =FileSystem.get(new URI("hdfs://146.169.32.196:8020"), new Configuration())
-//                hdfs.copyFromLocalFile(fp,new Path('/home/hdfs/'))
     }
 
 

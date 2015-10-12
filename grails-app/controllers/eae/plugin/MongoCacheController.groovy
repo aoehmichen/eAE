@@ -18,25 +18,6 @@ class MongoCacheController {
         if(params.workflow == null) {
             throw new RuntimeException("The params in MongoCacheController are Null")
         }
-        //else {
-//
-//            switch (params.script) {
-//                case "Pathway Enrichment":
-//                    workflow = "pe";
-//                    break;
-//                case "General Testing":
-//                    workflow = "gt";
-//                    break;
-//                case "Cross Validation":
-//                    workflow = "cv";
-//                    break;
-//                case "Label Propagation":
-//                    workflow = "lp";
-//                    break;
-//                default:
-//                    throw new Exception("The workflow doesn't exist.")
-//            }
-//        }
         def result = mongoCacheService.getjobsFromMongo(MONGO_URL, MONGO_PORT, "eae", username, params.workflow )
 
         render result
