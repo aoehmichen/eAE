@@ -26,17 +26,6 @@ function dropTree(source, e, data) {
 
     return true
 }
-/**
- *   Clears drag & drop selections from the given div
- *
- *   @param {string} divName: name of the div element to clear
- */
-function clearVarSelection(divName) {
-    var div = Ext.get(divName).dom;
-    while (div.firstChild) {
-        div.removeChild(div.firstChild);
-    }
-}
 
 /**
  *   Returns the concepts defined via drag & drop from the given div
@@ -104,31 +93,12 @@ function changeEAEInput(){
 
 }
 
-
 /**
- *   Run a pathway enrichment from the eae
+ * This function pulls all the available cache records for the user for the select workflow
+ * @param currentworkflow - from the available eae workflows
  */
-function runPE(list, selectedCorrection){
-    jQuery.ajax({
-        url: pageInfo.basePath + '/eae/runPEForSelectedGenes',
-        type: "POST",
-        data: {'genesList': list, 'selectedCorrection': selectedCorrection}
-    }).done(function(serverAnswer) {
-        var jsonAnswer= $.parseJSON(serverAnswer);
-
-        if(jsonAnswer.iscached === "NotCached"){
-            jQuery("#eaeoutputs").html(jsonAnswer.result);
-        }else{
-            buildOutput(jsonAnswer.result);
-            //jQuery("#eaeoutputs").html("Cached but viz to do");
-        }
-    }).fail(function() {
-        jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
-    });
-}
-
 function populateCacheDIV(currentworkflow){
-    var _t = $('#peTable');
+    var _t = $('#mongocachetable');
     _t.empty();
     _t.append($('<tr/>').attr("id", "headersRow"));
 
@@ -146,12 +116,12 @@ function populateCacheDIV(currentworkflow){
         var jsonCache= $.parseJSON(cachedJobs);
 
         if(jsonCache.totalCount == 0){
-            jQuery("#peTable").hide();
+            jQuery("#mongocachetable").hide();
             jQuery("#emptyCache").show();
         }else {
 
             var date;
-            jQuery("#peTable").show();
+            jQuery("#mongocachetable").show();
             jQuery("#emptyCache").hide();
             $.each(jsonCache.jobs, function (i, e) {
                 date = new Date(e.start.$date);
@@ -164,7 +134,7 @@ function populateCacheDIV(currentworkflow){
                 ).append(
                      $('<td/>').append($('<button/>').attr('data-button', e.name).on('click',function(){
                         var cacheQuery= $(this).attr('data-button');
-                        showPEOutput(cacheQuery);
+                         showWorkflowOutput(currentworkflow,cacheQuery);
                      }).text("Result"))
                 ))
             })
@@ -174,20 +144,33 @@ function populateCacheDIV(currentworkflow){
     });
 }
 
-
-function showPEOutput(cacheQuery){
+/**
+ *
+ * @param currentworkflow
+ * @param cacheQuery
+ */
+function showWorkflowOutput(currentworkflow, cacheQuery){
     jQuery("#eaeoutputs").html("");
     jQuery.ajax({
         url: pageInfo.basePath + '/mongoCache/retrieveSingleCachedJob',
         type: "POST",
-        data: {cacheQuery: cacheQuery, workflow: "pe"}
+        data: {cacheQuery: cacheQuery, workflow: currentworkflow}
     }).done(function(cachedJob) {
         var jsonRecord= $.parseJSON(cachedJob);
-        buildOutput(jsonRecord)
+        switch (currentworkflow){
+            case "pe":
+                buildPEOutput(jsonRecord)
+                break;
+            case "cv":
+                buildCVOutput(jsonRecord);
+                break;
+            default:
+                console.log("The workflow selected:" + currentworkflow.toString() + " doesn't exist.")
+        }
     })
 }
 
-function buildOutput(jsonRecord){
+function buildPEOutput(jsonRecord){
     var _o = $('#eaeoutputs');
     _o.append($('<table/>').attr("id","topPathways").attr("class", "cachetable")
         .append($('<tr/>')
@@ -205,9 +188,42 @@ function buildOutput(jsonRecord){
     _o.append($('<div/>').text(jsonRecord.KeggTopPathway));
 }
 
+/**
+*   Display the result retieved from the cache
+*   @param cacheQuery
+*/
+function buildCVOutput(cacheQuery){
+    var _o = $('#eaeoutputs');
+    // TODO
+    console.log("TODO buildCVOutput")
+}
+
 
 /**
- *   get the inpu from datasetexplorer
+ *   Run a pathway enrichment from the eae
+ */
+function runPE(list, selectedCorrection){
+    jQuery.ajax({
+        url: pageInfo.basePath + '/eae/runPEForSelectedGenes',
+        type: "POST",
+        data: {'genesList': list, 'selectedCorrection': selectedCorrection}
+    }).done(function(serverAnswer) {
+        var jsonAnswer= $.parseJSON(serverAnswer);
+
+        if(jsonAnswer.iscached === "NotCached"){
+            jQuery("#eaeoutputs").html(jsonAnswer.result);
+        }else{
+            buildPEOutput(jsonAnswer.result);
+            //jQuery("#eaeoutputs").html("Cached but viz to do");
+        }
+    }).fail(function() {
+        jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
+    });
+}
+
+
+/**
+ *   get the input from datasetexplorer
  */
 function getClinicalMetaDataforEAE(){
 

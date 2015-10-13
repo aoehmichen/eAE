@@ -31,11 +31,11 @@
 
 <hr class="myhr"/>
 <div id="cacheTableDiv">
-    <table id="peTable" class ="cachetable"></table>
+    <table id="mongocachetable" class ="cachetable"></table>
     <div id="emptyCache">The Cache is Empty</div>
     <button type="button"
             value="refreshCacheDiv"
-            onclick="populateCacheDIV()">Refresh</button>
+            onclick="refreshPECache()">Refresh</button>
 </div>
 
 <script>
@@ -43,6 +43,10 @@
         var _s = document.getElementById('correctionSelect');
         var selectedCorrection = _s.options[_s.selectedIndex].value;
         runPE(document.getElementById("genes").value, selectedCorrection);
+    }
+
+    function refreshPECache(){
+        populateCacheDIV("pe")
     }
 
     populateCacheDIV("pe")

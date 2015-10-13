@@ -20,13 +20,27 @@
 </div>
 <br/>
 
+<hr class="myhr"/>
+<div id="cacheTableDiv">
+    <table id="mongocachetable" class ="cachetable"></table>
+    <div id="emptyCache">The Cache is Empty</div>
+    <button type="button"
+            value="refreshCacheDiv"
+            onclick="refreshCVCache()">Refresh</button>
+</div>
+
 <script>
     activateDragAndDropEAE('highDimData');
 
     registerConceptBoxEAE('highDimData', 1, 'alphaicon', 0, undefined);
 
     function triggerCV() {
-        runCV(document.getElementById("genes").value)
+        runCV()
     }
 
+    function refreshCVCache(){
+        populateCacheDIV("cv")
+    }
+
+    populateCacheDIV("cv")
 </script>
