@@ -8,7 +8,7 @@
     <form method="post" action="">
         <td style='padding-right: 2em; padding-bottom: 1em'>
             <div id='highDimDataCV' class="queryGroupIncludeSmall"></div>
-            <input type="button" class='txt' onclick="clearVarSelection('highDimData')" value="Clear Window">
+            <input type="button" class='txt' onclick="clearVarSelection('highDimDataCV')" value="Clear Window">
         </td>
         <input
                 id="submitCV"
@@ -32,7 +32,9 @@
 <script>
     activateDragAndDropEAE('highDimDataCV');
 
-    registerConceptBoxEAE('highDimDataCV', 1, 'hleaficon', 0, 1);
+    function register() {
+        registerConceptBoxEAE('highDimDataCV', 1, 'hleaficon', 0, 1);
+    }
 
     function triggerCV() {
         runCV()
@@ -42,5 +44,5 @@
         populateCacheDIV("cv")
     }
 
-    //populateCacheDIV("cv")
+    populateCacheDIV("cv")
 </script>

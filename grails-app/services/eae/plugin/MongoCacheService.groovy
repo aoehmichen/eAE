@@ -25,7 +25,7 @@ class MongoCacheService {
         return result;
     }
 
-    def initJob(String mongoURL, String mongoPort, String dbName, String workflow, String user, String geneList){
+    def initJob(String mongoURL, String mongoPort, String dbName, String workflow, String user, String paramKey){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase db = mongoClient.getDatabase( dbName );
         MongoCollection<Document> coll = db.getCollection(workflow);
@@ -35,7 +35,7 @@ class MongoCacheService {
         doc.append("KeggTopPathway", "")
         doc.append("status", "started")
         doc.append("user", user)
-        doc.append("ListOfgenes", geneList)
+        doc.append("ListOfgenes", paramKey)
         doc.append("Correction", "")
         doc.append("StartTime", new Date())
         doc.append("EndTime", new Date())
@@ -157,5 +157,28 @@ class MongoCacheService {
         coll.insertOne(doc)
 
         return 0
+    }
+
+    def checkIfPresentInCVCache(mongoURL, mongoPort, paramValue){
+        BasicDBObject query = new BasicDBObject("ListOfgenes", paramValue);// TODO change to the right key!
+        return  checkIfPresentInCache(mongoURL,mongoPort,"eae","cv",query)
+    }
+
+    def retrieveRowsForCV(MongoCursor cursor){
+        def rows = new JSONArray();
+        JSONObject result;
+        def count = 0;
+        while(cursor.hasNext()) {
+            JSONObject obj =  new JSONObject(cursor.next().toJson());
+            result = new JSONObject();
+            String name =  obj.get("ListOfgenes");// TODO change to the right key!
+            result.put("status", obj.get("status"));
+            result.put("start", obj.get("StartTime"));
+            result.put("name", name);
+            rows.put(result);
+            count+=1;
+        }
+
+        return [rows, count]
     }
 }

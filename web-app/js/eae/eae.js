@@ -27,6 +27,24 @@ function getConcepts(divName) {
     return variables;
 }
 
+/**
+ *   Checks whether the given div only contains the specified icon/leaf
+ *
+ *   @param {string} divName: name of the div to check
+ *   @param {string} icon: icon type to look for (i.e. valueicon or hleaficon)
+ *   @return {bool}: true if div only contains the specified icon type
+ */
+function containsOnly(divName, icon) {
+    var div = Ext.get(divName).dom;
+    for (var i = 0, len = div.childNodes.length; i < len; i++) {
+        if (div.childNodes[i].getAttribute('setnodetype') !== icon &&
+            icon !== 'alphaicon') { // FIXME: this is just here so SmartR works on the current master branch
+            return false;
+        }
+    }
+    return true;
+}
+
 var conceptBoxes = [];
 var sanityCheckErrors = [];
 function registerConceptBoxEAE(name, cohorts, type, min, max) {
@@ -221,6 +239,32 @@ function runPE(list, selectedCorrection){
     });
 }
 
+function runCV(){
+    register();
+
+    // if no subset IDs exist compute them
+    if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !( isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
+        runAllQueries(runCV);
+        return false;
+    }
+
+    jQuery.ajax({
+        url: pageInfo.basePath + '/eae/runCV',
+        type: "POST",
+        data: {'genesList': list, 'selectedCorrection': selectedCorrection}
+    }).done(function(serverAnswer) {
+        var jsonAnswer= $.parseJSON(serverAnswer);
+
+        if(jsonAnswer.iscached === "NotCached"){
+            jQuery("#eaeoutputs").html(jsonAnswer.result);
+        }else{
+            buildPEOutput(jsonAnswer.result);
+            //jQuery("#eaeoutputs").html("Cached but viz to do");
+        }
+    }).fail(function() {
+        jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
+    });
+}
 
 /**
  *   get the input from datasetexplorer
