@@ -27,7 +27,7 @@ class EaeController {
         if (! params.script) {
             render 'Please select a script to execute.'
         } else {
-            render template: '/eae/' + 'in' + FilenameUtils.getBaseName(params.script).replaceAll("\\s","")
+            render template: '/eae/in' + FilenameUtils.getBaseName(params.script).replaceAll("\\s","")
         }
     }
 

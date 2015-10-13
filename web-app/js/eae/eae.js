@@ -5,26 +5,10 @@
  *   @param {string} divName: name of the div element to activate drag and drop for
  */
 function activateDragAndDropEAE(divName) {
+    //console.log('Activating drag and drop')
     var div = Ext.get(divName);
     var dtgI = new Ext.dd.DropTarget(div, {ddGroup: 'makeQuery'});
-    dtgI.notifyDrop = dropTree;
-}
-
-function dropTree(source, e, data) {
-    var targetdiv=this.el;
-    //This tells us whether it is a numeric or character node.
-    var val = data.node.attributes.oktousevalues;
-
-    //Reset the alpha/numeric flag so we don't get the popup for entering a value.
-    data.node.attributes.oktousevalues = "N";
-
-    //Add the item to the input.
-    var concept = createPanelItemNew(targetdiv, convertNodeToConcept(data.node));
-
-    //Set back to original value
-    data.node.attributes.oktousevalues = val;
-
-    return true
+    dtgI.notifyDrop = dropOntoCategorySelection;
 }
 
 /**
@@ -45,19 +29,35 @@ function getConcepts(divName) {
 
 var conceptBoxes = [];
 var sanityCheckErrors = [];
-function registerConceptBoxEAE(name, cohort, type, min, max) {
+function registerConceptBoxEAE(name, cohorts, type, min, max) {
+    //console.log('registering concept')
     var concepts = getConcepts(name);
-    var check1 = containsOnly(name, type);
+    console.log('Hello: ', concepts)
+    var check1 = type === undefined || containsOnly(name, type);
     var check2 = min === undefined || concepts.length >= min;
     var check3 = max === undefined || concepts.length <= max;
-    var check4 = concepts.length === 0 || !isSubsetEmpty(cohort);
     sanityCheckErrors.push(
         !check1 ? 'Concept box (' + name + ') contains concepts with invalid type! Valid type: ' + type :
             !check2 ? 'Concept box (' + name + ') contains too few concepts! Valid range: ' + min + ' - ' + max :
-                !check3 ? 'Concept box (' + name + ') contains too many concepts! Valid range: ' + min + ' - ' + max :
-                    !check4 ? 'Concept box (' + name + ') contains concepts but you have not specified any cohort for it!' : '');
-    conceptBoxes.push({name: name, cohort: cohort, type: type, concepts: concepts});
+                !check3 ? 'Concept box (' + name + ') contains too many concepts! Valid range: ' + min + ' - ' + max : '');
+    conceptBoxes.push({name: name, cohorts: cohorts, type: type, concepts: concepts});
 }
+
+/**
+ *   Prepares data for the AJAX call containing all neccesary information for computation
+ *
+ *   @return {[]}: array of objects containing the information for server side computations
+ */
+function prepareFormData() {
+    var data = [];
+    data.push({name: 'conceptBoxes', value: JSON.stringify(conceptBoxes)});
+    data.push({name: 'result_instance_id1', value: GLOBAL.CurrentSubsetIDs[1]});
+    data.push({name: 'result_instance_id2', value: GLOBAL.CurrentSubsetIDs[2]});
+    data.push({name: 'settings', value: JSON.stringify(getSettings())});
+    console.log(JSON.stringify(getSettings()));
+    return data;
+}
+
 
 /**
  *   Renders the input form for entering the parameters for a visualization/script

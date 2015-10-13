@@ -4,10 +4,10 @@
     This Workflow triggers a cross validation workflow coupled with a model builder algrorithm.
 </div>
 
-<div id='geneExp' class="txt">
+<div id='highDimDataBox' class="txt">
     <form method="post" action="">
         <td style='padding-right: 2em; padding-bottom: 1em'>
-            <div id='highDimData' class="queryGroupIncludeSmall"></div>
+            <div id='highDimDataCV' class="queryGroupIncludeSmall"></div>
             <input type="button" class='txt' onclick="clearVarSelection('highDimData')" value="Clear Window">
         </td>
         <input
@@ -30,9 +30,9 @@
 </div>
 
 <script>
-    activateDragAndDropEAE('highDimData');
+    activateDragAndDropEAE('highDimDataCV');
 
-    registerConceptBoxEAE('highDimData', 1, 'alphaicon', 0, undefined);
+    registerConceptBoxEAE('highDimDataCV', 1, 'hleaficon', 0, 1);
 
     function triggerCV() {
         runCV()
@@ -42,5 +42,5 @@
         populateCacheDIV("cv")
     }
 
-    populateCacheDIV("cv")
+    //populateCacheDIV("cv")
 </script>
