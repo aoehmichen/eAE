@@ -21,8 +21,8 @@ class SmartRService {
      *   Renders the list for smartR default view
      */
     def getScriptList() {
-        def dir = getWebAppFolder() + '/Scripts/'
-        def scriptList = new File(dir).list().findAll { it != 'Wrapper.R' && it != 'Sample.R' }
+        def dir = getWebAppFolder() + '/Scripts/smartR/'
+        def scriptList = new File(dir).list().findAll { it != 'Wrapper.R' && it != 'Sample.R'}
         return scriptList
     }
 
