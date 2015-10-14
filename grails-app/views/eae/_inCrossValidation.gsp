@@ -34,7 +34,7 @@
     activateDragAndDropEAE('highDimDataCV');
 
     function register() {
-        registerConceptBoxEAE('highDimDataCV', [1], 'hleaficon', 0, 1);
+        registerConceptBoxEAE('highDimDataCV', [1, 2], 'hleaficon', 1, 1);
     }
 
     function triggerCV() {

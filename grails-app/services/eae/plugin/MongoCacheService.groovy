@@ -25,30 +25,35 @@ class MongoCacheService {
         return result;
     }
 
-    def initJob(String mongoURL, String mongoPort, String dbName, String workflow, String user, BasicDBObject query){
+    def initJob(String mongoURL, String mongoPort, String dbName, String workflowSelected, String user, BasicDBObject query){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase db = mongoClient.getDatabase( dbName );
-        MongoCollection<Document> coll = db.getCollection(workflow);
+        MongoCollection<Document> coll = db.getCollection(workflowSelected);
 
         Document doc = new Document();
-        doc.append("topPathways", [])
-        doc.append("KeggTopPathway", "")
-        doc.append("status", "started")
-        doc.append("user", user)
-        doc.append("ListOfgenes", query.get("ListOfgenes"))
-        doc.append("Correction", "")
-        doc.append("StartTime", new Date())
-        doc.append("EndTime", new Date())
+        doc.append("status", "started");
+        doc.append("user", user);
+        doc.append("StartTime", new Date());
+        doc.append("EndTime", new Date());
+        switch (workflowSelected) {
+            case "pe":
+                doc = initJobPE(cursor);
+                break;
+            case "gt":
+                doc = initJobGT(cursor);
+                break;
+            case "cv":
+                doc = initJobCV(cursor);
+                break;
+            case "lp":
+                doc = initJobLP(cursor);
+                break;
+        }
 
         coll.insertOne(doc)
         def jobId = doc.get( "_id" );
 
         return jobId;
-    }
-
-    def checkIfPresentInPECache(String mongoURL, String mongoPort, String paramValue){
-        BasicDBObject query = new BasicDBObject("ListOfgenes", paramValue);
-        return  checkIfPresentInCache(mongoURL,mongoPort,"eae","pe",query)
     }
 
     def checkIfPresentInCache(String mongoURL, String mongoPort, String dbName, String collectionName, BasicDBObject query ){
@@ -115,6 +120,22 @@ class MongoCacheService {
         return res
     }
 
+    /************************************************************************************************
+     *                                                                                              *
+     *  Pathway Enrichement section                                                                    *
+     *                                                                                              *
+     ************************************************************************************************/
+
+    def initJobPE(Document doc, query){
+        doc.append("topPathways", [])
+        doc.append("KeggTopPathway", "")
+
+        doc.append("ListOfgenes", query.get("ListOfgenes"))
+        doc.append("Correction", "")
+
+        return doc;
+    }
+
     def retrieveRowsForPE(MongoCursor cursor){
         def rows = new JSONArray();
         JSONObject result;
@@ -159,10 +180,21 @@ class MongoCacheService {
         return 0
     }
 
-//    def checkIfPresentInCVCache(mongoURL, mongoPort, paramValue){
-//        BasicDBObject query = new BasicDBObject("ListOfgenes", paramValue);// TODO change to the right key(s)!
-//        return  checkIfPresentInCache(mongoURL,mongoPort,"eae","cv",query)
-//    }
+/************************************************************************************************
+ *                                                                                              *
+ *  Cross Validation section                                                                    *
+ *                                                                                              *
+ ************************************************************************************************/
+
+    def initJobCV(Document doc, query){
+        doc.append("HighDimData", [])
+        doc.append("KeggTopPathway", "")
+
+        doc.append("ListOfgenes", query.get("ListOfgenes"))
+        doc.append("Correction", "")
+
+        return doc;
+    }
 
     def retrieveRowsForCV(MongoCursor cursor){
         def rows = new JSONArray();

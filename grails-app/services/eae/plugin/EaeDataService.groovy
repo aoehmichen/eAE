@@ -4,6 +4,7 @@ import grails.util.Environment
 import grails.util.Holders
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import smartR.plugin.DataQueryService
 
 class EaeDataService {
 
@@ -13,9 +14,12 @@ class EaeDataService {
     def grailsApplication = Holders.grailsApplication
     def springSecurityService
     def i2b2HelperService
+    def dataQueryService
 
 
-    def queryData(parameterMap) {
+    def queryData(params) {
+
+        def parameterMap = createParameterMap(params)
         def data_cohort1 = [:]
         def data_cohort2 = [:]
 
@@ -72,11 +76,23 @@ class EaeDataService {
         return parameterMap
     }
 
-    def buildMongoQuery(params){
 
+    def createParameterMap(params){
+        def parameterMap = [:]
+        parameterMap['result_instance_id1'] = params.result_instance_id1
+        parameterMap['result_instance_id2'] = params.result_instance_id2
+        parameterMap['conceptBoxes'] = new JsonSlurper().parseText(params.conceptBoxes)
+        parameterMap['DEBUG'] = DEBUG
+        return parameterMap
+    }
+
+    def buildMongoQuery(params){
         def result_instance_id1 = params.result_instance_id1;
         def result_instance_id2 = params.result_instance_id2;
         def highDimParam = new JsonSlurper().parseText(params.conceptBoxes);
+
+
+        return parameterMap
     }
 
     def  SendToHDFS (String username, String mongoDocumentID, String genesList, String scriptDir, String sparkURL) {

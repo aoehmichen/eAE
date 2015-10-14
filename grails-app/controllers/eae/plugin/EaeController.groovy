@@ -76,6 +76,12 @@ class EaeController {
 
         println(params);
 
+
+
+
+
+        def parameterMap = eaeDataService.queryData(params)
+
         def query = eaeDataService.buildMongoQuery(params)
 
         // We check if this query has already been made before
