@@ -30,10 +30,11 @@
 </div>
 
 <script>
+    populateCacheDIV("cv")
     activateDragAndDropEAE('highDimDataCV');
 
     function register() {
-        registerConceptBoxEAE('highDimDataCV', 1, 'hleaficon', 0, 1);
+        registerConceptBoxEAE('highDimDataCV', [1], 'hleaficon', 0, 1);
     }
 
     function triggerCV() {
@@ -44,5 +45,7 @@
         populateCacheDIV("cv")
     }
 
-    populateCacheDIV("cv")
+    function customSanityCheck() {
+        return true;
+    }
 </script>

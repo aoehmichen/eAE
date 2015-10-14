@@ -31,28 +31,32 @@ class EaeController {
         }
     }
 
-    def runPEForSelectedGenes = {
-
+    def cacheParams(){
         final String SPARK_URL = grailsApplication.config.com.eae.sparkURL;
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
         final String scriptDir = getWebAppFolder() + 'Scripts/eae/';
         final String username = springSecurityService.getPrincipal().username;
 
+        return [SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username];
+    }
+
+    def runPEForSelectedGenes = {
+        final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
         String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join(' ').trim()
 
+        BasicDBObject query = new BasicDBObject("ListOfgenes", saneGenesList);
         // We check if this query has already been made before
-        String cached = mongoCacheService.checkIfPresentInPECache(MONGO_URL, MONGO_PORT, saneGenesList)
+        String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT, query)
         def result
         if(cached == "NotCached") {
-            String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, saneGenesList)
+            String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, query)
             String workflowSpecificParameters = params.selectedCorrection
             String dataFileName = "geneList-"+ username + "-" + mongoDocumentID + ".txt" //"listOfGenes.txt"
             eaeDataService.SendToHDFS(username, mongoDocumentID, saneGenesList, scriptDir, SPARK_URL)
             eaeService.sparkSubmit(scriptDir, SPARK_URL, "pe.py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
-            BasicDBObject query = new BasicDBObject("ListOfgenes", saneGenesList);
             result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", "pe",query);
             mongoCacheService.duplicatePECacheForUser(MONGO_URL, MONGO_PORT,username, result)
         }else{
@@ -68,25 +72,25 @@ class EaeController {
 
 
     def runCV = {
-        final String SPARK_URL = grailsApplication.config.com.eae.sparkURL;
-        final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
-        final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
-        final String scriptDir = getWebAppFolder() + 'Scripts/eae/';
-        final String username = springSecurityService.getPrincipal().username;
+        final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
+
+        println(params);
+
+        def query = eaeDataService.buildMongoQuery(params)
 
         // We check if this query has already been made before
-        String cached = mongoCacheService.checkIfPresentInCVCache(MONGO_URL, MONGO_PORT, saneGenesList)
+        String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT, query)
         def result
         if(cached == "NotCached") {
-            String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "cv", username, saneGenesList)
+            String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "cv", username, query)
             String dataFileName = "CVData-"+ username + "-" + mongoDocumentID + ".txt"
-            eaeDataService.SendToHDFS(username, mongoDocumentID, saneGenesList, scriptDir, SPARK_URL)
+            eaeDataService.SendToHDFS(username, mongoDocumentID, query, scriptDir, SPARK_URL)
             eaeService.sparkSubmit(scriptDir, SPARK_URL, "cv.py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
-            BasicDBObject query = new BasicDBObject("ListOfgenes", saneGenesList);
+
             result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", "cv",query);
-            mongoCacheService.duplicatePECacheForUser(MONGO_URL, MONGO_PORT,username, result)
+            mongoCacheService.duplicateCVCacheForUser(MONGO_URL, MONGO_PORT,username, result)
         }else{
             result = "Your Job has been submitted. Please come back later for the result"
         }

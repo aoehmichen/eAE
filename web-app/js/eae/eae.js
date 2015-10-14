@@ -1,3 +1,17 @@
+/**
+ *   Renders the input form for entering the parameters for a visualization/script
+ */
+function goToSmartRScript() {
+    jQuery.ajax({
+        url: pageInfo.basePath + '/eae/goToSmartR' ,
+        type: "POST",
+        timeout: '600000'
+    }).done(function(serverAnswer) {
+        jQuery("#index").html(serverAnswer);
+    }).fail(function() {
+        jQuery("#index").html("AJAX CALL FAILED!");
+    });
+}
 
 /**
  *   Activating drag and drop for a given div
@@ -48,9 +62,8 @@ function containsOnly(divName, icon) {
 var conceptBoxes = [];
 var sanityCheckErrors = [];
 function registerConceptBoxEAE(name, cohorts, type, min, max) {
-    //console.log('registering concept')
     var concepts = getConcepts(name);
-    console.log('Hello: ', concepts)
+    console.log('concepts: ', concepts, 'name: ', name, 'type: ', type);
     var check1 = type === undefined || containsOnly(name, type);
     var check2 = min === undefined || concepts.length >= min;
     var check3 = max === undefined || concepts.length <= max;
@@ -66,31 +79,35 @@ function registerConceptBoxEAE(name, cohorts, type, min, max) {
  *
  *   @return {[]}: array of objects containing the information for server side computations
  */
-function prepareFormData() {
+function prepareFormDataEAE() {
     var data = [];
     data.push({name: 'conceptBoxes', value: JSON.stringify(conceptBoxes)});
     data.push({name: 'result_instance_id1', value: GLOBAL.CurrentSubsetIDs[1]});
     data.push({name: 'result_instance_id2', value: GLOBAL.CurrentSubsetIDs[2]});
-    data.push({name: 'settings', value: JSON.stringify(getSettings())});
-    console.log(JSON.stringify(getSettings()));
     return data;
 }
 
-
 /**
- *   Renders the input form for entering the parameters for a visualization/script
+ *   Checks for general sanity of all parameters and decided which script specific sanity check to call
+ *
+ *   @return {bool}: returns true if everything is fine, false otherwise
  */
-function goToSmartRScript() {
-    jQuery.ajax({
-        url: pageInfo.basePath + '/eae/goToSmartR' ,
-        type: "POST",
-        timeout: '600000'
-    }).done(function(serverAnswer) {
-        jQuery("#index").html(serverAnswer);
-    }).fail(function() {
-        jQuery("#index").html("AJAX CALL FAILED!");
-    });
+function saneEAE() { // FIXME: somehow check for subset2 to be non empty iff two cohorts are needed
+    if (isSubsetEmpty(1) && isSubsetEmpty(2)) {
+        alert('No cohorts have been selected. Please drag&drop cohorts to the fields within the "Comparison" tab');
+        return false;
+    }
+
+    for (var i = 0; i < sanityCheckErrors.length; i++) {
+        var sanityCheckError = sanityCheckErrors[i];
+        if (sanityCheckError !== '') {
+            alert(sanityCheckError);
+            return false;
+        }
+    }
+    return customSanityCheck(); // method MUST be implemented by _inFoobarAnalysis.gsp
 }
+
 
 /**
  *   Renders the input form for entering the parameters for a visualization/script
@@ -227,12 +244,10 @@ function runPE(list, selectedCorrection){
         data: {'genesList': list, 'selectedCorrection': selectedCorrection}
     }).done(function(serverAnswer) {
         var jsonAnswer= $.parseJSON(serverAnswer);
-
         if(jsonAnswer.iscached === "NotCached"){
             jQuery("#eaeoutputs").html(jsonAnswer.result);
         }else{
             buildPEOutput(jsonAnswer.result);
-            //jQuery("#eaeoutputs").html("Cached but viz to do");
         }
     }).fail(function() {
         jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
@@ -240,10 +255,16 @@ function runPE(list, selectedCorrection){
 }
 
 function runCV(){
+    conceptBoxes = [];
+    sanityCheckErrors = [];
     register();
 
+    if(!saneEAE()){
+     return false;
+    }
+;
     // if no subset IDs exist compute them
-    if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !( isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
+    if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !(isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
         runAllQueries(runCV);
         return false;
     }
@@ -251,15 +272,13 @@ function runCV(){
     jQuery.ajax({
         url: pageInfo.basePath + '/eae/runCV',
         type: "POST",
-        data: {'genesList': list, 'selectedCorrection': selectedCorrection}
+        data:prepareFormDataEAE(),
     }).done(function(serverAnswer) {
         var jsonAnswer= $.parseJSON(serverAnswer);
-
         if(jsonAnswer.iscached === "NotCached"){
             jQuery("#eaeoutputs").html(jsonAnswer.result);
         }else{
             buildPEOutput(jsonAnswer.result);
-            //jQuery("#eaeoutputs").html("Cached but viz to do");
         }
     }).fail(function() {
         jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
