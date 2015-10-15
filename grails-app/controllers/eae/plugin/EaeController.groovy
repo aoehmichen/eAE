@@ -47,13 +47,13 @@ class EaeController {
 
         BasicDBObject query = new BasicDBObject("ListOfgenes", saneGenesList);
         // We check if this query has already been made before
-        String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT, query)
+        String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT,"eae", "pe", query)
         def result
         if(cached == "NotCached") {
             String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, query)
             String workflowSpecificParameters = params.selectedCorrection
             String dataFileName = "geneList-"+ username + "-" + mongoDocumentID + ".txt" //"listOfGenes.txt"
-            eaeDataService.SendToHDFS(username, mongoDocumentID, saneGenesList, scriptDir, SPARK_URL)
+            eaeDataService.SendToHDFS(username, mongoDocumentID, "pe", saneGenesList, scriptDir, SPARK_URL)
             eaeService.sparkSubmit(scriptDir, SPARK_URL, "pe.py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
@@ -76,25 +76,20 @@ class EaeController {
 
         println(params);
 
-
-
-
-
         def parameterMap = eaeDataService.queryData(params)
 
-        def query = eaeDataService.buildMongoQuery(params)
+        def query = mongoCacheService.buildMongoQuery(params)
 
         // We check if this query has already been made before
-        String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT, query)
+        String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_URL, (String)MONGO_PORT, "eae", "cv", query)
         def result
         if(cached == "NotCached") {
             String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "cv", username, query)
             String dataFileName = "CVData-"+ username + "-" + mongoDocumentID + ".txt"
-            eaeDataService.SendToHDFS(username, mongoDocumentID, query, scriptDir, SPARK_URL)
+            eaeDataService.SendToHDFS(username, mongoDocumentID, "cv", parameterMap, scriptDir, SPARK_URL)
             eaeService.sparkSubmit(scriptDir, SPARK_URL, "cv.py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
-
             result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", "cv",query);
             mongoCacheService.duplicateCVCacheForUser(MONGO_URL, MONGO_PORT,username, result)
         }else{

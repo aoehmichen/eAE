@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoCursor
 import com.mongodb.client.MongoDatabase
 import grails.transaction.Transactional
+import groovy.json.JsonSlurper
 import mongo.MongoCacheFactory
 import org.bson.Document
 import org.json.JSONArray
@@ -82,6 +83,14 @@ class MongoCacheService {
         }
     }
 
+    def buildMongoQuery(params){
+        def conceptBoxes = new JsonSlurper().parseText(params.conceptBoxes)
+        BasicDBObject query = new BasicDBObject();
+        query.append('result_instance_id1', params.result_instance_id1);
+        query.append('result_instance_id2', params.result_instance_id1);
+        query.append('conceptBoxes', conceptBoxes);
+        return query
+    }
     /**
      * Method that will get the list of jobs to show in the eae jobs table
      */

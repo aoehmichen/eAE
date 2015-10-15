@@ -4,7 +4,6 @@ import grails.util.Environment
 import grails.util.Holders
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
-import smartR.plugin.DataQueryService
 
 class EaeDataService {
 
@@ -86,20 +85,12 @@ class EaeDataService {
         return parameterMap
     }
 
-    def buildMongoQuery(params){
-        def result_instance_id1 = params.result_instance_id1;
-        def result_instance_id2 = params.result_instance_id2;
-        def highDimParam = new JsonSlurper().parseText(params.conceptBoxes);
+    def  SendToHDFS (String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL) {
+        def script = scriptDir +'transferToHDFS.sh';
+        def fileToTransfer = workflow + "-" + username + "-" + mongoDocumentID + ".txt";
+        String fp;
 
-
-        return parameterMap
-    }
-
-    def  SendToHDFS (String username, String mongoDocumentID, String genesList, String scriptDir, String sparkURL) {
-        def script = scriptDir +'transferToHDFS.sh'
-        def fileToTransfer = "geneList-" + username + "-" + mongoDocumentID + ".txt"
-
-        def scriptFile = new File(script)
+        def scriptFile = new File(script);
         if (scriptFile.exists()) {
             if(!scriptFile.canExecute()){
                 scriptFile.setExecutable(true)
@@ -108,24 +99,51 @@ class EaeDataService {
             log.error('The Script file to transfer to HDFS wasn\'t found')
         }
 
-        File f =new File("/tmp/eae/",fileToTransfer)
+        File f =new File("/tmp/eae/",fileToTransfer);
         if(f.exists()){
-            f.delete()
+            f.delete();
         }
-        f.withWriter('utf-8') { writer ->
-            writer.writeLine genesList
-        } // or << genesList
-        f.createNewFile()
 
-        String fp = f.getAbsolutePath()
-        def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL
-        executeCommand.execute().waitFor()
+        switch (workflow) {
+            case "pe":
+                fp = writePEFile(f, data);
+                break;
+            case "gt":
+                fp = writeGTFile(f, data);
+                break;
+            case "cv":
+                fp = writeCVFile(f, data);
+                break;
+            case "lp":
+                fp = writeLPFile(f, data);
+                break;
+        }
+
+        def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL;
+        executeCommand.execute().waitFor();
 
         // We cleanup
-        f.delete()
+        f.delete();
 
         return 0
     }
 
+    def writePEFile(File f, genesList){
+
+        f.withWriter('utf-8') { writer ->
+            writer.writeLine genesList
+        }
+
+        f.createNewFile()
+        String fp = f.getAbsolutePath()
+        return fp
+    }
+
+    def writeCVFile(File f, data){
+
+        f.createNewFile()
+        String fp = f.getAbsolutePath()
+        return fp
+    }
 
 }
