@@ -31,6 +31,7 @@ class MongoCacheService {
         MongoDatabase db = mongoClient.getDatabase( dbName );
         MongoCollection<Document> coll = db.getCollection(workflowSelected);
 
+        Document cacheRecord = new Document();
         Document doc = new Document();
         doc.append("status", "started");
         doc.append("user", user);
@@ -38,20 +39,20 @@ class MongoCacheService {
         doc.append("EndTime", new Date());
         switch (workflowSelected) {
             case "pe":
-                doc = initJobPE(cursor);
+                cacheRecord = initJobPE(doc);
                 break;
             case "gt":
-                doc = initJobGT(cursor);
+                cacheRecord = initJobGT(doc);
                 break;
             case "cv":
-                doc = initJobCV(cursor);
+                cacheRecord = initJobCV(doc);
                 break;
             case "lp":
-                doc = initJobLP(cursor);
+                cacheRecord = initJobLP(doc);
                 break;
         }
 
-        coll.insertOne(doc)
+        coll.insertOne(cacheRecord)
         def jobId = doc.get( "_id" );
 
         return jobId;

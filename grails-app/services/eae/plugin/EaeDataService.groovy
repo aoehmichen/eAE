@@ -57,6 +57,7 @@ class EaeDataService {
                             conceptBox.concepts,
                             patientIDs,
                             rIID as Long)
+                    println(conceptBox)
                     data[conceptBox.name] = rawData
                 } else {
                     throw new IllegalArgumentException()
@@ -64,9 +65,12 @@ class EaeDataService {
             }
         }
 
+        println("I am done pulling out the data")
         parameterMap['data_cohort1'] = new JsonBuilder(data_cohort1).toString()
         parameterMap['data_cohort2'] = new JsonBuilder(data_cohort2).toString()
-
+        println(DEBUG)
+        println(parameterMap['data_cohort1'])
+        println(parameterMap['data_cohort2'])
         if (DEBUG) {
             new File(DEBUG_TMP_DIR + 'data1.json').write(parameterMap['data_cohort1'])
             new File(DEBUG_TMP_DIR + 'data2.json').write(parameterMap['data_cohort2'])
