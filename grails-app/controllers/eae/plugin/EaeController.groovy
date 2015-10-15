@@ -80,11 +80,12 @@ class EaeController {
         println(params);
 
         def parameterMap = eaeDataService.queryData(params)
-
+        println("I am getting out of queryData")
         def query = mongoCacheService.buildMongoQuery(params)
-
+        println("I am getting out of buildMongoQuery")
         // We check if this query has already been made before
         String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_URL, (String)MONGO_PORT, database, worflow, query)
+        println("I am getting out of checkIfPresentInCache")
         def result
         if(cached == "NotCached") {
             String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, worflow, username, query)

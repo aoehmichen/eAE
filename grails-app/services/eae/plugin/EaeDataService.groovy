@@ -71,7 +71,7 @@ class EaeDataService {
         println(DEBUG)
         println(parameterMap['data_cohort1'])
         println(parameterMap['data_cohort2'])
-        if (DEBUG) {
+        if (true) { // should be DEBUG
             new File(DEBUG_TMP_DIR + 'data1.json').write(parameterMap['data_cohort1'])
             new File(DEBUG_TMP_DIR + 'data2.json').write(parameterMap['data_cohort2'])
         }
