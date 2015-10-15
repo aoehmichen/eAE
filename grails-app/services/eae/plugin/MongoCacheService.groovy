@@ -86,7 +86,7 @@ class MongoCacheService {
 
     def buildMongoQuery(params){
         def conceptBoxes = new JsonSlurper().parseText(params.conceptBoxes)
-        println("conceptboxes": conceptBoxes);
+        println("conceptboxes:" + conceptBoxes);
         BasicDBObject query = new BasicDBObject();
         query.append('result_instance_id1', params.result_instance_id1);
         query.append('result_instance_id2', params.result_instance_id1);
@@ -198,7 +198,7 @@ class MongoCacheService {
  ************************************************************************************************/
 
     def initJobCV(Document doc, query){
-        doc.append("HighDimData", query.get("conceptBoxes"))
+        doc.append("HighDimData", query.get("conceptBoxes")[0])
         doc.append("result_instance_id1", query.get("result_instance_id1"))
         doc.append("result_instance_id2", query.get("result_instance_id2"))
         return doc;

@@ -7,7 +7,7 @@ import groovy.json.JsonSlurper
 
 class EaeDataService {
 
-    def DEBUG = Environment.current == Environment.DEVELOPMENT
+    def DEBUG =  true //Environment.current == Environment.DEVELOPMENT
     def DEBUG_TMP_DIR = '/tmp/'
 
     def grailsApplication = Holders.grailsApplication
@@ -26,7 +26,12 @@ class EaeDataService {
         def rIID2 = parameterMap['result_instance_id2'].toString()
 
         def patientIDs_cohort1 = rIID1 ? i2b2HelperService.getSubjectsAsList(rIID1).collect { it.toLong() } : []
+        def size_cohort1 = patientIDs_cohort1.size();
         def patientIDs_cohort2 = rIID2 ? i2b2HelperService.getSubjectsAsList(rIID2).collect { it.toLong() } : []
+        def size_cohort2 = patientIDs_cohort2.size();
+
+        parameterMap['size_cohort1'] = size_cohort1
+        parameterMap['size_cohort2'] = size_cohort2
 
         parameterMap['conceptBoxes'].each { conceptBox ->
             conceptBox.cohorts.each { cohort ->
@@ -65,13 +70,13 @@ class EaeDataService {
             }
         }
 
-        println("I am done pulling out the data")
         parameterMap['data_cohort1'] = new JsonBuilder(data_cohort1).toString()
         parameterMap['data_cohort2'] = new JsonBuilder(data_cohort2).toString()
-        println(DEBUG)
+
+
         println(parameterMap['data_cohort1'])
         println(parameterMap['data_cohort2'])
-        if (true) { // should be DEBUG
+        if (DEBUG) {
             new File(DEBUG_TMP_DIR + 'data1.json').write(parameterMap['data_cohort1'])
             new File(DEBUG_TMP_DIR + 'data2.json').write(parameterMap['data_cohort2'])
         }
@@ -143,7 +148,15 @@ class EaeDataService {
         return fp
     }
 
-    def writeCVFile(File f, data){
+    def writeCVFile(File f, parameterMap){
+
+        def size_cohort1 = parameterMap['size_cohort1'];
+        def size_cohort2 = parameterMap['size_cohort2'];
+        def data_cohort1 = parameterMap['data_cohort1'];
+        def data_cohort2 = parameterMap['data_cohort1'];
+
+        println(size_cohort1)
+        println(data_cohort1)
 
         f.createNewFile()
         String fp = f.getAbsolutePath()
