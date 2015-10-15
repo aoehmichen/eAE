@@ -1,0 +1,6 @@
+.cachetable {
+    border-collapse: collapse;
+}
+.cachetable td, .cachetable th, .cachetable tr {
+    border: 1px solid black;
+}

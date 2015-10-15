@@ -1,6 +1,6 @@
 package smartR.plugin
 
-import grails.converters.JSON
+import groovy.json.JsonBuilder
 import org.apache.commons.io.FilenameUtils
 
 class SmartRController {
@@ -11,23 +11,28 @@ class SmartRController {
     /**
      *   Renders the actual visualization based on the chosen script and the results computed
      */
-    def renderOutputDIV = {
+	def renderOutputDIV = {
         params.init = params.init == null ? true : params.init // defaults to true
-        def (success, results) = smartRService.runJob(params)
-        if (!success) {
+        def (success, results) = smartRService.runScript(params)
+        if (! success) {
             render results
         } else {
-            render template: '/visualizations/' + 'out' + FilenameUtils.getBaseName(params.script),
-                    model: [results: results as JSON]
+            render template: "/visualizations/out${FilenameUtils.getBaseName(params.script)}",
+                    model: [results: results]
         }
     }
+	
 
     def updateOutputDIV = {
         params.init = false
-        def (success, results) = smartRService.runJob(params)
-        def answer = success ? results : [error: [results]]
-        render answer as JSON
+        def (success, results) = smartRService.runScript(params)
+        if (! success) {
+            render new JsonBuilder([error: results]).toString()
+        } else {
+            render results
+        }
     }
+
 
     def recomputeOutputDIV = {
         params.init = false
@@ -40,10 +45,10 @@ class SmartRController {
      *   Renders the input form for initial script parameters
      */
     def renderInputDIV = {
-        if (!params.script) {
+        if (! params.script) {
             render 'Please select a script to execute.'
         } else {
-            render template: '/smartR/' + 'in' + FilenameUtils.getBaseName(params.script)
+           render template: "/smartR/in${FilenameUtils.getBaseName(params.script)}"
         }
     }
 

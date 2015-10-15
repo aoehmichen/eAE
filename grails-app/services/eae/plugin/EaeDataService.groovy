@@ -1,66 +1,149 @@
 package eae.plugin
-//import org.apache.hadoop.fs.Path
+
+import grails.util.Environment
+import grails.util.Holders
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 
 class EaeDataService {
 
-    def jobDataMap = [:]
+    def DEBUG = Environment.current == Environment.DEVELOPMENT
+    def DEBUG_TMP_DIR = '/tmp/'
 
-//    def studiesResourceService
-//    def conceptsResourceService
-//    def clinicalDataResourceService
-//    def highDimExportService
-//    def exportMetadataService
+    def grailsApplication = Holders.grailsApplication
+    def springSecurityService
+    def i2b2HelperService
+    def dataQueryService
 
 
-//    def getAllLowDim(){
-//
-//        def data = [:]
-//        def rIID1 = jobDataMap['result_instance_id1']
-//        def rIID2 = jobDataMap['result_instance_id2']
-//        def cohort1 = rIID1 ? i2b2HelperService.getSubjectsAsList(rIID1).collect { it.toLong() } : []
-//        def cohort2 = rIID2 ? i2b2HelperService.getSubjectsAsList(rIID2).collect { it.toLong() } : []
-//        def cohorts = [cohort1, cohort2]
-//
-//        def toto = new File(jobDataMap['lowDimFile']).write(new JsonBuilder(data).toPrettyString())
-//    }
-//
-//
-//    def getClinicalMetaDataForEAE(Long resultInstanceId1, Long resultInstanceId2) {
-//        return exportMetadataService.getClinicalMetaData(resultInstanceId1,resultInstanceId2)
-//
-//    }
+    def queryData(params) {
 
-    def  SendToHDFS (String genesList, String scriptDir, String sparkURL ) {
-        def script = scriptDir +'transferToHDFS.sh'
-        def fileToTransfer = 'geneList.txt'
+        def parameterMap = createParameterMap(params)
+        def data_cohort1 = [:]
+        def data_cohort2 = [:]
 
-        File f =new File("/tmp/eae/","geneList.txt")
-        if(f.exists()){
-            f.delete()
+        def rIID1 = parameterMap['result_instance_id1'].toString()
+        def rIID2 = parameterMap['result_instance_id2'].toString()
+
+        def patientIDs_cohort1 = rIID1 ? i2b2HelperService.getSubjectsAsList(rIID1).collect { it.toLong() } : []
+        def patientIDs_cohort2 = rIID2 ? i2b2HelperService.getSubjectsAsList(rIID2).collect { it.toLong() } : []
+
+        parameterMap['conceptBoxes'].each { conceptBox ->
+            conceptBox.cohorts.each { cohort ->
+                def rIID
+                def data
+                def patientIDs
+
+                if (cohort == 1) {
+                    rIID = rIID1
+                    patientIDs = patientIDs_cohort1
+                    data = data_cohort1
+                } else {
+                    rIID = rIID2
+                    patientIDs = patientIDs_cohort2
+                    data = data_cohort2
+                }
+
+                if (! rIID || ! patientIDs) {
+                    return
+                }
+
+                if (conceptBox.concepts.size() == 0) {
+                    data[conceptBox.name] = [:]
+                } else if (conceptBox.type == 'valueicon' || conceptBox.type == 'alphaicon') {
+                    data[conceptBox.name] = dataQueryService.getAllData(conceptBox.concepts, patientIDs)
+                } else if (conceptBox.type == 'hleaficon') {
+                    def rawData = dataQueryService.exportHighDimData(
+                            conceptBox.concepts,
+                            patientIDs,
+                            rIID as Long)
+                    data[conceptBox.name] = rawData
+                } else {
+                    throw new IllegalArgumentException()
+                }
+            }
         }
-        f.withWriter('utf-8') { writer ->
-            writer.writeLine genesList
-        } // or << genesList
-        boolean created = f.createNewFile()
-        String fp = f.getAbsolutePath() + "geneList.txt"
-        println(f.exists())
-        println(created)
-        println(fp)
-        println(script)
-        println(fileToTransfer)
-        def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL
-        println(executeCommand)
-        executeCommand.execute().waitFor()
 
-        // We cleanup
-        f.delete()
+        parameterMap['data_cohort1'] = new JsonBuilder(data_cohort1).toString()
+        parameterMap['data_cohort2'] = new JsonBuilder(data_cohort2).toString()
 
-        return 0
+        if (DEBUG) {
+            new File(DEBUG_TMP_DIR + 'data1.json').write(parameterMap['data_cohort1'])
+            new File(DEBUG_TMP_DIR + 'data2.json').write(parameterMap['data_cohort2'])
+        }
 
-//              This code would work but requires the installation of the hadoop stack on the host with all the utils to work....
-//                FileSystem hdfs =FileSystem.get(new URI("hdfs://146.169.32.196:8020"), new Configuration())
-//                hdfs.copyFromLocalFile(fp,new Path('/home/hdfs/'))
+        return parameterMap
     }
 
+
+    def createParameterMap(params){
+        def parameterMap = [:]
+        parameterMap['result_instance_id1'] = params.result_instance_id1
+        parameterMap['result_instance_id2'] = params.result_instance_id2
+        parameterMap['conceptBoxes'] = new JsonSlurper().parseText(params.conceptBoxes)
+        parameterMap['DEBUG'] = DEBUG
+        return parameterMap
+    }
+
+    def  SendToHDFS (String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL) {
+        def script = scriptDir +'transferToHDFS.sh';
+        def fileToTransfer = workflow + "-" + username + "-" + mongoDocumentID + ".txt";
+        String fp;
+
+        def scriptFile = new File(script);
+        if (scriptFile.exists()) {
+            if(!scriptFile.canExecute()){
+                scriptFile.setExecutable(true)
+            }
+        }else {
+            log.error('The Script file to transfer to HDFS wasn\'t found')
+        }
+
+        File f =new File("/tmp/eae/",fileToTransfer);
+        if(f.exists()){
+            f.delete();
+        }
+
+        switch (workflow) {
+            case "pe":
+                fp = writePEFile(f, data);
+                break;
+            case "gt":
+                fp = writeGTFile(f, data);
+                break;
+            case "cv":
+                fp = writeCVFile(f, data);
+                break;
+            case "lp":
+                fp = writeLPFile(f, data);
+                break;
+        }
+
+        def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL;
+        executeCommand.execute().waitFor();
+
+        // We cleanup
+        f.delete();
+
+        return 0
+    }
+
+    def writePEFile(File f, genesList){
+
+        f.withWriter('utf-8') { writer ->
+            writer.writeLine genesList
+        }
+
+        f.createNewFile()
+        String fp = f.getAbsolutePath()
+        return fp
+    }
+
+    def writeCVFile(File f, data){
+
+        f.createNewFile()
+        String fp = f.getAbsolutePath()
+        return fp
+    }
 
 }

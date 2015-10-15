@@ -1,14 +1,15 @@
-<style>
-    .txt {
-        font-family: 'Roboto', sans-serif;
-    }
-</style>
 
 <head>
 <g:javascript library='jquery' />
 <g:javascript src='eae/eae.js' />
 <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+<link href='<g:resource dir="css" file="eae.css" />' rel='stylesheet' type='text/css'>
 <r:layoutResources/>
+    <style>
+    .txt {
+        font-family: 'Roboto', sans-serif;
+    }
+    </style>
 </head>
 
 <body>
@@ -25,7 +26,7 @@
         <span style='color:red' class='txt'>Welcome to the danger zone!! https://www.youtube.com/watch?v=kyAn3fSs8_A </span><br/>
         <hr class="myhr"/>
 
-        <div id="inputs" class='txt' style="text-align: left">Please select a script to execute.</div>
+        <div id="eaeinputs" class='txt' style="text-align: left">Please select a script to execute.</div>
 
         <hr class="myhr"/>
         <g:select
@@ -35,17 +36,11 @@
         noSelection="['':'Choose an algorithm']"
         onchange="changeEAEInput()"/>
     &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-    %{--<input--}%
-        %{--id="submitButton"--}%
-        %{--class='txt'--}%
-        %{--type="button"--}%
-        %{--value="Run Analysis"--}%
-        %{--onclick="runEAEScript()"/>--}%
 
     <hr class="myhr"/>
     </div>
 
-    <div id="outputs" ></div>
+    <div id="eaeoutputs" ></div>
 </body>
 
 <script>

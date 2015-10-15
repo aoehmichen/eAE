@@ -1,6 +1,9 @@
 package eae.plugin
 
+import com.mongodb.BasicDBObject
+import grails.util.Environment
 import org.apache.commons.io.FilenameUtils
+import org.json.JSONObject
 
 class EaeController {
 
@@ -24,78 +27,99 @@ class EaeController {
         if (! params.script) {
             render 'Please select a script to execute.'
         } else {
-            render template: '/eae/' + 'in' + FilenameUtils.getBaseName(params.script).replaceAll("\\s","")
+            render template: '/eae/in' + FilenameUtils.getBaseName(params.script).replaceAll("\\s","")
         }
     }
 
-    def runPEForSelectedGenes = {
-
+    def cacheParams(){
         final String SPARK_URL = grailsApplication.config.com.eae.sparkURL;
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
-        final String scriptDir = grailsApplication.config.com.eae.EAEScriptDir;
+        final String scriptDir = getWebAppFolder() + 'Scripts/eae/';
         final String username = springSecurityService.getPrincipal().username;
 
-        String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join('\t').trim()
+        return [SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username];
+    }
 
+    def runPEForSelectedGenes = {
+        final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
+        String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join(' ').trim()
+
+        BasicDBObject query = new BasicDBObject("ListOfgenes", saneGenesList);
         // We check if this query has already been made before
-        String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT, "eae", saneGenesList)
+        String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT,"eae", "pe", query)
         def result
         if(cached == "NotCached") {
-            String jobID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, saneGenesList)
-            String sparkParameters = "pe.py pe_genes.txt Bonferroni " + jobID
-            eaeDataService.SendToHDFS(saneGenesList, scriptDir, SPARK_URL)
-            println("sent to HDFS")
-            eaeService.sparkSubmit(scriptDir, sparkParameters)
-
+            String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "pe", username, query)
+            String workflowSpecificParameters = params.selectedCorrection
+            String dataFileName = "geneList-"+ username + "-" + mongoDocumentID + ".txt" //"listOfGenes.txt"
+            eaeDataService.SendToHDFS(username, mongoDocumentID, "pe", saneGenesList, scriptDir, SPARK_URL)
+            eaeService.sparkSubmit(scriptDir, SPARK_URL, "pe.py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
-            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", saneGenesList)
-            println(result)
+            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", "pe",query);
+            mongoCacheService.duplicatePECacheForUser(MONGO_URL, MONGO_PORT,username, result)
+        }else{
+            result = "Your Job has been submitted. Please come back later for the result"
+        }
+        JSONObject answer = new JSONObject();
+
+        answer.put("iscached", cached);
+        answer.put("result", result);
+
+        render answer
+    }
+
+
+    def runCV = {
+        final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
+
+        println(params);
+
+        def parameterMap = eaeDataService.queryData(params)
+
+        def query = mongoCacheService.buildMongoQuery(params)
+
+        // We check if this query has already been made before
+        String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_URL, (String)MONGO_PORT, "eae", "cv", query)
+        def result
+        if(cached == "NotCached") {
+            String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, "eae", "cv", username, query)
+            String dataFileName = "CVData-"+ username + "-" + mongoDocumentID + ".txt"
+            eaeDataService.SendToHDFS(username, mongoDocumentID, "cv", parameterMap, scriptDir, SPARK_URL)
+            eaeService.sparkSubmit(scriptDir, SPARK_URL, "cv.py", dataFileName , workflowSpecificParameters, mongoDocumentID)
+            result = "Your Job has been submitted. Please come back later for the result"
+        }else if (cached == "Completed"){
+            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", "cv",query);
+            mongoCacheService.duplicateCVCacheForUser(MONGO_URL, MONGO_PORT,username, result)
         }else{
             result = "Your Job has been submitted. Please come back later for the result"
         }
 
-        render template :'/eae/outPathwayEnrichement', model: [resultPE: result]
+        JSONObject answer = new JSONObject();
+
+        answer.put("iscached", cached);
+        answer.put("result", result);
+
+        render answer
     }
 
     /**
-     * Method that will create the get the list of jobs to show in the galaxy jobs tab
+     *   Gets the directory where all the R scripts are located
+     *
+     *   @return {str}: path to the script folder
      */
-    def getjobs = {
-        def username = springSecurityService.getPrincipal().username
-        final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
-        final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
-        def workflow = ""
-
-
-        if(params.script == null) {
-        workflow = "pe"
-        }else {
-
-            switch (params.script) {
-                case "Pathway Enrichment":
-                    workflow = "pe";
-                    break;
-                case "General Testing":
-                    workflow = "gt";
-                    break;
-                case "Cross Validation":
-                    workflow = "cv";
-                    break;
-                case "Label Propagation":
-                    workflow = "lp";
-                    break;
-                default:
-                    throw new Exception("The workflow doesn't exist.")
-            }
-        }
-        def result = mongoCacheService.getjobsFromMongo(MONGO_URL, MONGO_PORT, "eae", username, workflow)
-
-        if(result.get("totalCount") == 0){
-            render "The Cache is empty"}
-        else{
-            render result
+    def getWebAppFolder() {
+        if (Environment.current == Environment.DEVELOPMENT) {
+            return org.codehaus.groovy.grails.plugins.GrailsPluginUtils
+                    .getPluginDirForName('smart-r')
+                    .getFile()
+                    .absolutePath + '/web-app/'
+        } else {
+            return grailsApplication
+                    .mainContext
+                    .servletContext
+                    .getRealPath('/plugins/') + '/smart-r-0.1/'
         }
     }
 }
