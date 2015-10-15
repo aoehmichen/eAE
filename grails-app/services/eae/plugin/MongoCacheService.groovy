@@ -39,16 +39,16 @@ class MongoCacheService {
         doc.append("EndTime", new Date());
         switch (workflowSelected) {
             case "pe":
-                cacheRecord = initJobPE(doc);
+                cacheRecord = initJobPE(doc, query);
                 break;
             case "gt":
-                cacheRecord = initJobGT(doc);
+                cacheRecord = initJobGT(doc, query);
                 break;
             case "cv":
-                cacheRecord = initJobCV(doc);
+                cacheRecord = initJobCV(doc, query);
                 break;
             case "lp":
-                cacheRecord = initJobLP(doc);
+                cacheRecord = initJobLP(doc, query);
                 break;
         }
 
