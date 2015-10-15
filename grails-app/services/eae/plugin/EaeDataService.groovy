@@ -103,7 +103,7 @@ class EaeDataService {
             log.error('The Script file to transfer to HDFS wasn\'t found')
         }
 
-        File f =new File("/tmp/eae/",fileToTransfer);
+        File f = new File("/tmp/eae/",fileToTransfer);
         if(f.exists()){
             f.delete();
         }
