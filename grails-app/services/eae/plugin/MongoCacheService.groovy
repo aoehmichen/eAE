@@ -215,7 +215,7 @@ class MongoCacheService {
             String highDimName =  obj.get("HighDimData");
             String result_instance_id1 =  obj.get("result_instance_id1");
             String result_instance_id2 =  obj.get("result_instance_id2");
-            String name = "HighDim Data: " +  highDimName + "\\n cohort 1 : " + result_instance_id1 + "\\n cohort 2 : " + result_instance_id2;
+            String name = "HighDim Data: " +  highDimName + "<br /> cohort 1 : " + result_instance_id1 + "<br /> cohort 2 : " + result_instance_id2;
             result.put("status", obj.get("status"));
             result.put("start", obj.get("StartTime"));
             result.put("name", name);

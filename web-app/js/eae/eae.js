@@ -161,7 +161,7 @@ function populateCacheDIV(currentworkflow){
             $.each(jsonCache.jobs, function (i, e) {
                 date = new Date(e.start.$date);
                 _t.append($('<tr/>').append(
-                    $('<td/>').text(e.name)
+                    $('<td/>').html(e.name)
                 ).append(
                     $('<td/>').text(e.status)
                 ).append(
