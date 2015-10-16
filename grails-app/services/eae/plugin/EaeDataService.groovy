@@ -121,7 +121,14 @@ class EaeDataService {
                 fp = writeGTFile(f, data);
                 break;
             case "cv":
-                fp = writeCVFile(f, data);
+                int size_cohort1 = (int)data['size_cohort1'];
+                int size_cohort2 = (int)data['size_cohort2'];
+                def data_cohort1 = data['data_cohort1'];
+                def data_cohort2 = data['data_cohort1'];
+                f = writeCVFile(f, size_cohort1, data_cohort1, 0);
+                f = writeCVFile(f, size_cohort2, data_cohort2, 1);
+                f.createNewFile()
+                fp = f.getAbsolutePath()
                 break;
             case "lp":
                 fp = writeLPFile(f, data);
@@ -148,19 +155,23 @@ class EaeDataService {
         return fp
     }
 
-    def writeCVFile(File f, parameterMap){
+    def writeCVFile(File f, int size_cohort, data_cohort, int k){
+        def JSONcohort = new JsonSlurper().parseText(data_cohort);
+        def data_value = JSONcohort.highDimDataCV.VALUE as Float[];
+        def data_size = data_value.size()
+        int chunkSize = data_size/size_cohort;
 
-        def size_cohort1 = parameterMap['size_cohort1'];
-        def size_cohort2 = parameterMap['size_cohort2'];
-        def data_cohort1 = parameterMap['data_cohort1'];
-        def data_cohort2 = parameterMap['data_cohort1'];
+        for (int i=0; i<size_cohort; i++){
+            Float[] subArray = data_value[i*chunkSize..(i+1)*chunkSize];
+            println(subArray.size())
+            String line = k + ' ' + subArray.join(' ') + ' ' + '\n';
+            f.withWriter('utf-8') { writer ->
+                writer.writeLine line
+            }
+        }
 
-        println(size_cohort1)
-        println(data_cohort1)
-
-        f.createNewFile()
-        String fp = f.getAbsolutePath()
-        return fp
+        return f
     }
+
 
 }

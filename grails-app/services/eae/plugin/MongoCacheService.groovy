@@ -198,9 +198,10 @@ class MongoCacheService {
  ************************************************************************************************/
 
     def initJobCV(Document doc, query){
-        doc.append("HighDimData", query.get("conceptBoxes")[0])
-        doc.append("result_instance_id1", query.get("result_instance_id1"))
-        doc.append("result_instance_id2", query.get("result_instance_id2"))
+        def highDimDataName =  query.get("conceptBoxes")[0][0];
+        doc.append("HighDimData", highDimDataName);
+        doc.append("result_instance_id1", query.get("result_instance_id1"));
+        doc.append("result_instance_id2", query.get("result_instance_id2"));
         return doc;
     }
 
