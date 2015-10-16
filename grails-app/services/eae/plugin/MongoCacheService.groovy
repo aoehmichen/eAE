@@ -89,7 +89,7 @@ class MongoCacheService {
         println("conceptboxes:" + conceptBoxes);
         BasicDBObject query = new BasicDBObject();
         query.append('result_instance_id1', params.result_instance_id1);
-        query.append('result_instance_id2', params.result_instance_id1);
+        query.append('result_instance_id2', params.result_instance_id2);
         query.append('conceptBoxes', conceptBoxes.concepts);
         return query
     }
@@ -215,7 +215,7 @@ class MongoCacheService {
             String highDimName =  obj.get("HighDimData");
             String result_instance_id1 =  obj.get("result_instance_id1");
             String result_instance_id2 =  obj.get("result_instance_id2");
-            String name = "HighDim Data: " +  highDimName + " ; cohort 1 : " + result_instance_id1 + " ; cohort 2 : " + result_instance_id2;
+            String name = "HighDim Data: " +  highDimName + "\\n cohort 1 : " + result_instance_id1 + "\\n cohort 2 : " + result_instance_id2;
             result.put("status", obj.get("status"));
             result.put("start", obj.get("StartTime"));
             result.put("name", name);

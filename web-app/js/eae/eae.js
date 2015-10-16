@@ -137,7 +137,7 @@ function populateCacheDIV(currentworkflow){
     _t.empty();
     _t.append($('<tr/>').attr("id", "headersRow"));
 
-    var cacheTableHeaders = ["Name", "Date", "Status", "Cached Results"];
+    var cacheTableHeaders = ["Query", "Date", "Status", "Cached Results"];
     var _h = $('#headersRow');
     $.each(cacheTableHeaders, function(i, e){
         _h.append($('<th/>').text(e))
