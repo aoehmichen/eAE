@@ -162,7 +162,7 @@ class EaeDataService {
         int chunkSize = data_size/size_cohort;
 
         for (int i=0; i<size_cohort; i++){
-            Float[] subArray = data_value[i*chunkSize..(i+1)*chunkSize];
+            Float[] subArray = data_value[i*chunkSize..(i+1)*chunkSize-1];
             println(subArray.size())
             String line = k + ' ' + subArray.join(' ') + ' ' + '\n';
             f.withWriter('utf-8') { writer ->

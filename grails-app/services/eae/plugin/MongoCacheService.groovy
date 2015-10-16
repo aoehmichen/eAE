@@ -212,7 +212,10 @@ class MongoCacheService {
         while(cursor.hasNext()) {
             JSONObject obj =  new JSONObject(cursor.next().toJson());
             result = new JSONObject();
-            String name =  obj.get("ListOfgenes");// TODO change to the right key!
+            String highDimName =  obj.get("HighDimData");
+            String result_instance_id1 =  obj.get("result_instance_id1");
+            String result_instance_id2 =  obj.get("result_instance_id2");
+            String name = "HighDim Data: " +  highDimName + " ; cohort 1 : " + result_instance_id1 + " ; cohort 2 : " + result_instance_id2;
             result.put("status", obj.get("status"));
             result.put("start", obj.get("StartTime"));
             result.put("name", name);
