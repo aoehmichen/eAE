@@ -285,30 +285,30 @@ function runCV(){
     });
 }
 
-/**
- *   get the input from datasetexplorer
- */
-function getClinicalMetaDataforEAE(){
-
-    jQuery.ajax({
-        url: pageInfo.basePath + '/eae/getClinicalMetaDataforEAE',
-        type: "POST"
-    }).done(function(serverAnswer) {
-        jQuery("#selectedCohort").html(serverAnswer);
-    }).fail(function() {
-        jQuery("#selectedCohort").html("AJAX CALL FAILED!");
-    });
-}
-
-/**
- *  Get the input List from the user
- */
-
-function genesListData(){
-    var data = [];
-    data.push({list: 'ListOfGenes', value: jQuery('#genes').val()});
-    return data
-}
+///**
+// *   get the input from datasetexplorer
+// */
+//function getClinicalMetaDataforEAE(){
+//
+//    jQuery.ajax({
+//        url: pageInfo.basePath + '/eae/getClinicalMetaDataforEAE',
+//        type: "POST"
+//    }).done(function(serverAnswer) {
+//        jQuery("#selectedCohort").html(serverAnswer);
+//    }).fail(function() {
+//        jQuery("#selectedCohort").html("AJAX CALL FAILED!");
+//    });
+//}
+//
+///**
+// *  Get the input List from the user
+// */
+//
+//function genesListData(){
+//    var data = [];
+//    data.push({list: 'ListOfGenes', value: jQuery('#genes').val()});
+//    return data
+//}
 
 
 

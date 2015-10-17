@@ -2,6 +2,7 @@
 <head>
 <g:javascript library='jquery' />
 <g:javascript src='eae/eae.js' />
+<g:javascript src="resource/d3.js"/>
 <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
 <link href='<g:resource dir="css" file="eae.css" />' rel='stylesheet' type='text/css'>
 <r:layoutResources/>
