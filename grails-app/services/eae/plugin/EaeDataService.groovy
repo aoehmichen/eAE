@@ -165,7 +165,7 @@ class EaeDataService {
             Float[] subArray = data_value[i*chunkSize..(i+1)*chunkSize-1];
             println(subArray.size())
             String line = k + ' ' + subArray.join(' ') + ' ' + '\n';
-            f.withWriter('utf-8') { writer ->
+            f.withWriterAppend('utf-8') { writer ->
                 writer.writeLine line
             }
         }
