@@ -168,8 +168,10 @@ class EaeDataService {
     def writeCVFile(File f, int size_cohort, data_cohort, String k){
         def JSONcohort = new JsonSlurper().parseText(data_cohort);
         def data_value = JSONcohort.highDimDataCV.VALUE as Float[];
-        def data_size = data_value.size()
+        def data_size = data_value.size();
         int chunkSize = data_size/size_cohort;
+        println(data_size)
+        print(size_cohort)
 
         for (int i=0; i<size_cohort; i++){
             Float[] subArray = data_value[i*chunkSize..(i+1)*chunkSize-1];

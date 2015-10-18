@@ -77,10 +77,8 @@ class EaeController {
         final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
         String database = "eae"
         String worflow = "cv";
-        println(params);
 
         def parameterMap = eaeDataService.queryData(params)
-        println(parameterMap)
         def query = mongoCacheService.buildMongoQuery(params)
 
         // We check if this query has already been made before
