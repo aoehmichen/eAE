@@ -278,7 +278,7 @@ function runCV(){
         if(jsonAnswer.iscached === "NotCached"){
             jQuery("#eaeoutputs").html(jsonAnswer.result);
         }else{
-            buildPEOutput(jsonAnswer.result);
+            buildCVOutput(jsonAnswer.result);
         }
     }).fail(function() {
         jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
