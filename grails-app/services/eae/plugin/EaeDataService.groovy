@@ -134,7 +134,7 @@ class EaeDataService {
                 int size_cohort1 = (int)data['size_cohort1'];
                 int size_cohort2 = (int)data['size_cohort2'];
                 def data_cohort1 = data['data_cohort1'];
-                def data_cohort2 = data['data_cohort1'];
+                def data_cohort2 = data['data_cohort2'];
                 f = writeCVFile(f, size_cohort1, data_cohort1, "0");
                 f = writeCVFile(f, size_cohort2, data_cohort2, "1");
                 f.createNewFile()
@@ -170,8 +170,9 @@ class EaeDataService {
         def data_value = JSONcohort.highDimDataCV.VALUE as Float[];
         def data_size = data_value.size();
         int chunkSize = data_size/size_cohort;
-        println(data_size)
-        print(size_cohort)
+        println("datasize "  + data_size)
+        println("size_cohort" + size_cohort)
+        println(data_size/size_cohort)
 
         for (int i=0; i<size_cohort; i++){
             Float[] subArray = data_value[i*chunkSize..(i+1)*chunkSize-1];
