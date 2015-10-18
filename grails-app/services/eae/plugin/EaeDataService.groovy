@@ -175,7 +175,7 @@ class EaeDataService {
 
         for (int i=0; i<size_cohort; i++){
             Float[] subArray = data_value[i*chunkSize..(i+1)*chunkSize-1];
-            println(subArray.size())
+            println("subARRAY: "+ subArray.size())
             String line = k + ' ' + subArray.join(' ');
             f.withWriterAppend('utf-8') { writer ->
                 writer.writeLine line
