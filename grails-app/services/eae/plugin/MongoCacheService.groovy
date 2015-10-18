@@ -11,9 +11,6 @@ import org.bson.Document
 import org.json.JSONArray
 import org.json.JSONObject
 
-import static com.mongodb.client.model.Filters.eq
-import static com.mongodb.client.model.Filters.and
-
 @Transactional
 class MongoCacheService {
 
@@ -89,14 +86,11 @@ class MongoCacheService {
 
     def buildMongoQuery(params){
         def conceptBoxes = new JsonSlurper().parseText(params.conceptBoxes)
-        def query = and(eq("result_instance_id1",  params.result_instance_id1),
-                        eq("result_instance_id2", params.result_instance_id2),
-                        eq("conceptBoxes", conceptBoxes.concepts[0][0]));
-
-//        BasicDBObject query = new BasicDBObject();
-//        query.append('result_instance_id1', params.result_instance_id1);
-//        query.append('result_instance_id2', params.result_instance_id2);
-//        query.append('conceptBoxes', conceptBoxes.concepts[0][0]);
+        String HighDimData = conceptBoxes.concepts[0][0];
+        BasicDBObject query = new BasicDBObject();
+        query.append('result_instance_id1', params.result_instance_id1);
+        query.append('result_instance_id2', params.result_instance_id2);
+        query.append('HighDimData', HighDimData);
         return query
     }
     /**
@@ -203,8 +197,8 @@ class MongoCacheService {
  *                                                                                              *
  ************************************************************************************************/
 
-    def initJobCV(Document doc, query){
-        doc.append("HighDimData", query.get("conceptBoxes"));
+    def initJobCV(Document doc, BasicDBObject query){
+        doc.append("HighDimData", query.get("HighDimData"));
         doc.append("result_instance_id1", query.get("result_instance_id1"));
         doc.append("result_instance_id2", query.get("result_instance_id2"));
         return doc;
