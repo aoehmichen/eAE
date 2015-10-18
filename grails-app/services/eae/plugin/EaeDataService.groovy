@@ -7,7 +7,7 @@ import groovy.json.JsonSlurper
 
 class EaeDataService {
 
-    def DEBUG =  true //Environment.current == Environment.DEVELOPMENT
+    def DEBUG =  Environment.current == Environment.DEVELOPMENT
     def DEBUG_TMP_DIR = '/tmp/'
 
     def grailsApplication = Holders.grailsApplication
@@ -94,7 +94,21 @@ class EaeDataService {
         return parameterMap
     }
 
-    def  SendToHDFS (String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL) {
+    def sendToHDFS(String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL, String typeOfFile){
+        def fileToTransfer = "";
+        switch (typeOfFile) {
+            case "data":
+                fileToTransfer = sendDataToHDFS( username, mongoDocumentID, workflow, data,  scriptDir, sparkURL);
+                break;
+            case "additional":
+                fileToTransfer = sendAdditionalToHDFS( username, mongoDocumentID, workflow, data,  scriptDir, sparkURL);
+                break;
+        }
+        return fileToTransfer;
+    }
+
+
+    def  sendDataToHDFS (String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL) {
         def script = scriptDir +'transferToHDFS.sh';
         def fileToTransfer = workflow + "-" + username + "-" + mongoDocumentID + ".txt";
         String fp;
@@ -125,8 +139,8 @@ class EaeDataService {
                 int size_cohort2 = (int)data['size_cohort2'];
                 def data_cohort1 = data['data_cohort1'];
                 def data_cohort2 = data['data_cohort1'];
-                f = writeCVFile(f, size_cohort1, data_cohort1, 0);
-                f = writeCVFile(f, size_cohort2, data_cohort2, 1);
+                f = writeCVFile(f, size_cohort1, data_cohort1, "0");
+                f = writeCVFile(f, size_cohort2, data_cohort2, "1");
                 f.createNewFile()
                 fp = f.getAbsolutePath()
                 break;
@@ -141,7 +155,7 @@ class EaeDataService {
         // We cleanup
         f.delete();
 
-        return 0
+        return fileToTransfer
     }
 
     def writePEFile(File f, genesList){
@@ -155,7 +169,7 @@ class EaeDataService {
         return fp
     }
 
-    def writeCVFile(File f, int size_cohort, data_cohort, int k){
+    def writeCVFile(File f, int size_cohort, data_cohort, String k){
         def JSONcohort = new JsonSlurper().parseText(data_cohort);
         def data_value = JSONcohort.highDimDataCV.VALUE as Float[];
         def data_size = data_value.size()
@@ -173,5 +187,57 @@ class EaeDataService {
         return f
     }
 
+
+    def  sendAdditionalToHDFS(String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL){
+        def script = scriptDir +'transferToHDFS.sh';
+        def fileToTransfer = workflow + "-additional" + "-" + username + "-" + mongoDocumentID + ".txt";
+        String fp;
+
+        def scriptFile = new File(script);
+        if (scriptFile.exists()) {
+            if(!scriptFile.canExecute()){
+                scriptFile.setExecutable(true)
+            }
+        }else {
+            log.error('The Script file to transfer to HDFS wasn\'t found')
+        }
+
+        File f = new File("/tmp/eae/",fileToTransfer);
+        if(f.exists()){
+            f.delete();
+        }
+
+        switch (workflow) {
+            case "gt":
+                fp = writeGTFile(f, data);
+                break;
+            case "cv":
+                int size_cohort = (int)data['size_cohort1'];
+                def JSONcohort = new JsonSlurper().parseText(data['data_cohort1']);
+                def data_value = JSONcohort.highDimDataCV.PROBE as String[];
+                def data_size = data_value.size();
+                int chunkSize = data_size/size_cohort;
+                String[] subArray = data_value[0..chunkSize-1];
+                println(subArray.size());
+                String line = subArray.join(' ');
+                f.withWriterAppend('utf-8') { writer ->
+                    writer.writeLine line
+                }
+                break;
+            case "lp":
+                fp = writeLPFile(f, data);
+                break;
+        }
+
+        f.createNewFile()
+        fp = f.getAbsolutePath()
+        def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL;
+        executeCommand.execute().waitFor();
+
+        // We cleanup
+        f.delete();
+
+        return fileToTransfer
+    }
 
 }
