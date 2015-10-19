@@ -100,7 +100,7 @@ class EaeController {
             eaeService.sparkSubmit(scriptDir, SPARK_URL, "cv.py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
-            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, database, worflow,query);
+            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, database, worflow, query);
             //mongoCacheService.duplicateCVCacheForUser(MONGO_URL, MONGO_PORT,username, result)
         }else{
             result = "Your Job has been submitted. Please come back later for the result"

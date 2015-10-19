@@ -42,16 +42,13 @@ class MongoCacheController {
                 query = new BasicDBObject("ListOfgenes", saneGenesList);
                 break;
             case "gt":
-                query = new BasicDBObject();
                 break;
             case "cv":
-                query = new BasicDBObject();
-                query.append("HighDimData", query.get("HighDimData"));
-                query.append("result_instance_id1", query.get("result_instance_id1"));
-                query.append("result_instance_id2", query.get("result_instance_id2"));
+                query.append("HighDimData", params.high_dim_data);
+                query.append("result_instance_id1", params.result_instance_id1);
+                query.append("result_instance_id2", params.result_instance_id2);
                 break;
             case "lp":
-                query = new BasicDBObject();
                 break;
         }
         return query

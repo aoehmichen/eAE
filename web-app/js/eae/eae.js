@@ -26,6 +26,18 @@ function activateDragAndDropEAE(divName) {
 }
 
 /**
+ *   Clears drag & drop selections from the given div
+ *
+ *   @param {string} divName: name of the div element to clear
+ */
+function clearVarSelection(divName) {
+    var div = Ext.get(divName).dom;
+    while (div.firstChild) {
+        div.removeChild(div.firstChild);
+    }
+}
+
+/**
  *   Returns the concepts defined via drag & drop from the given div
  *
  *   @param {string} divName: name of the div to get the selected concepts from
@@ -194,10 +206,11 @@ function populateCacheDIV(currentworkflow){
  */
 function showWorkflowOutput(currentworkflow, cacheQuery){
     jQuery("#eaeoutputs").html("");
+
     jQuery.ajax({
         url: pageInfo.basePath + '/mongoCache/retrieveSingleCachedJob',
         type: "POST",
-        data: {cacheQuery: cacheQuery, workflow: currentworkflow}
+        data: prepareDataForMongoRetrievale(currentworkflow, cacheQuery)
     }).done(function(cachedJob) {
         var jsonRecord= $.parseJSON(cachedJob);
         switch (currentworkflow){
@@ -211,6 +224,27 @@ function showWorkflowOutput(currentworkflow, cacheQuery){
                 console.log("The workflow selected:" + currentworkflow.toString() + " doesn't exist.")
         }
     })
+}
+
+function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
+    var data ;
+    switch (currentworkflow){
+        case "pe":
+            data = cacheQuery;
+            return data;
+        case "cv":
+            var tmpData = [];
+            var splitTerms = cacheQuery.split('<br />');
+            $.each(splitTerms, function(i, e){
+                var chunk = e.split(':');
+                tmpData.push(chunk[1].trim());
+            });
+            data = {workflow: currentworkflow, high_dim_data: tmpData[0], result_instance_id1: tmpData[1], result_instance_id2: tmpData[2]  }
+            console.log(data);
+            return data;
+        default:
+            console.log("The workflow selected:" + currentworkflow.toString() + " doesn't exist.")
+    }
 }
 
 function buildPEOutput(jsonRecord){
@@ -236,10 +270,29 @@ function buildPEOutput(jsonRecord){
 *   Display the result retieved from the cache
 *   @param cacheQuery
 */
-function buildCVOutput(cacheQuery){
+function buildCVOutput(jsonRecord){
     var _o = $('#eaeoutputs');
-    // TODO
-    console.log("TODO buildCVOutput")
+
+    var startdate = new Date(jsonRecord.StartTime.$date);
+    var endDate = new Date(jsonRecord.EndTime.$date);
+
+    console.log('start date',startdate);
+    console.log('start date',endDate);
+
+    _o.append($('<table/>').attr("id","cvtable").attr("class", "cachetable")
+        .append($('<tr/>')
+            .append($('<th/>').text("Algorithm used"))
+            .append($('<th/>').text("Iterations step"))
+            .append($('<th/>').text("Resampling"))
+            .append($('<th/>').text("Computation time"))
+        ));
+    $('#cvtable').append($('<tr/>')
+        .append($('<td/>').text(jsonRecord.algorithmUsed))
+        .append($('<td/>').text(jsonRecord.numberOfFeaturesToRemove))
+        .append($('<td/>').text(jsonRecord.resampling))
+            .append($('<td/>').text("Hello"))
+    );
+
 }
 
 
@@ -271,7 +324,7 @@ function runCV(){
     if(!saneEAE()){
      return false;
     }
-;
+
     // if no subset IDs exist compute them
     if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !(isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
         runAllQueries(runCV);
@@ -293,31 +346,6 @@ function runCV(){
         jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
     });
 }
-
-///**
-// *   get the input from datasetexplorer
-// */
-//function getClinicalMetaDataforEAE(){
-//
-//    jQuery.ajax({
-//        url: pageInfo.basePath + '/eae/getClinicalMetaDataforEAE',
-//        type: "POST"
-//    }).done(function(serverAnswer) {
-//        jQuery("#selectedCohort").html(serverAnswer);
-//    }).fail(function() {
-//        jQuery("#selectedCohort").html("AJAX CALL FAILED!");
-//    });
-//}
-//
-///**
-// *  Get the input List from the user
-// */
-//
-//function genesListData(){
-//    var data = [];
-//    data.push({list: 'ListOfGenes', value: jQuery('#genes').val()});
-//    return data
-//}
 
 
 
