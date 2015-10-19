@@ -19,10 +19,21 @@ function goToSmartRScript() {
  *   @param {string} divName: name of the div element to activate drag and drop for
  */
 function activateDragAndDropEAE(divName) {
-    //console.log('Activating drag and drop')
     var div = Ext.get(divName);
     var dtgI = new Ext.dd.DropTarget(div, {ddGroup: 'makeQuery'});
     dtgI.notifyDrop = dropOntoCategorySelection;
+}
+
+/**
+ *   Clears drag & drop selections from the given div
+ *
+ *   @param {string} divName: name of the div element to clear
+ */
+function clearVarSelection(divName) {
+    var div = Ext.get(divName).dom;
+    while (div.firstChild) {
+        div.removeChild(div.firstChild);
+    }
 }
 
 /**
@@ -63,7 +74,6 @@ var conceptBoxes = [];
 var sanityCheckErrors = [];
 function registerConceptBoxEAE(name, cohorts, type, min, max) {
     var concepts = getConcepts(name);
-    console.log('concepts: ', concepts, 'name: ', name, 'type: ', type);
     var check1 = type === undefined || containsOnly(name, type);
     var check2 = min === undefined || concepts.length >= min;
     var check3 = max === undefined || concepts.length <= max;
@@ -108,6 +118,21 @@ function saneEAE() { // FIXME: somehow check for subset2 to be non empty iff two
     return customSanityCheck(); // method MUST be implemented by _inFoobarAnalysis.gsp
 }
 
+/**
+ *
+ * @param eae
+ * @returns {Array}
+ */
+
+function formatData(eae) {
+    var data = [];
+    for (var i = 0; i < eae.length; i++)
+        data.push({
+            x: eae[i][0],
+            y: eae[i][1]
+        })
+    return data
+}
 
 /**
  *   Renders the input form for entering the parameters for a visualization/script
@@ -137,7 +162,7 @@ function populateCacheDIV(currentworkflow){
     _t.empty();
     _t.append($('<tr/>').attr("id", "headersRow"));
 
-    var cacheTableHeaders = ["Name", "Date", "Status", "Cached Results"];
+    var cacheTableHeaders = ["Query", "Date", "Status", "Cached Results"];
     var _h = $('#headersRow');
     $.each(cacheTableHeaders, function(i, e){
         _h.append($('<th/>').text(e))
@@ -160,14 +185,22 @@ function populateCacheDIV(currentworkflow){
             jQuery("#emptyCache").hide();
             $.each(jsonCache.jobs, function (i, e) {
                 date = new Date(e.start.$date);
-                _t.append($('<tr/>').append(
-                    $('<td/>').text(e.name)
-                ).append(
+                var holder = $('<td/>');
+                if(currentworkflow == "pe") {
+                    $.each(e.name.split(' '), function (i, e) {
+                        holder.append(
+                            $('<span />').addClass('eae_genetag').text(e)
+                        )
+                    });
+                }else{
+                    holder.html(e.name)
+                }
+                _t.append($('<tr/>').append(holder).append(
                     $('<td/>').text(e.status)
                 ).append(
                     $('<td/>').text(date)
                 ).append(
-                     $('<td/>').append($('<button/>').attr('data-button', e.name).on('click',function(){
+                     $('<td/>').append($('<button/>').addClass('flatbutton').attr('data-button', e.name).on('click',function(){
                         var cacheQuery= $(this).attr('data-button');
                          showWorkflowOutput(currentworkflow,cacheQuery);
                      }).text("Result"))
@@ -186,10 +219,11 @@ function populateCacheDIV(currentworkflow){
  */
 function showWorkflowOutput(currentworkflow, cacheQuery){
     jQuery("#eaeoutputs").html("");
+
     jQuery.ajax({
         url: pageInfo.basePath + '/mongoCache/retrieveSingleCachedJob',
         type: "POST",
-        data: {cacheQuery: cacheQuery, workflow: currentworkflow}
+        data: prepareDataForMongoRetrievale(currentworkflow, cacheQuery)
     }).done(function(cachedJob) {
         var jsonRecord= $.parseJSON(cachedJob);
         switch (currentworkflow){
@@ -205,6 +239,26 @@ function showWorkflowOutput(currentworkflow, cacheQuery){
     })
 }
 
+function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
+    var data ;
+    switch (currentworkflow){
+        case "pe":
+            data = {workflow: currentworkflow, listOfGenes:cacheQuery};
+            return data;
+        case "cv":
+            var tmpData = [];
+            var splitTerms = cacheQuery.split('<br />');
+            $.each(splitTerms, function(i, e){
+                var chunk = e.split(':');
+                tmpData.push(chunk[1].trim());
+            });
+            data = {workflow: currentworkflow, high_dim_data: tmpData[0], result_instance_id1: tmpData[1], result_instance_id2: tmpData[2]};
+            return data;
+        default:
+            console.log("The workflow selected:" + currentworkflow.toString() + " doesn't exist.")
+    }
+}
+
 function buildPEOutput(jsonRecord){
     var _o = $('#eaeoutputs');
     _o.append($('<table/>').attr("id","topPathways").attr("class", "cachetable")
@@ -218,21 +272,170 @@ function buildPEOutput(jsonRecord){
     });
 
     var topPathway = jsonRecord.topPathways[0][0].toString();
+    _o.append($('<br/>').html("&nbsp"));
     _o.append($('<div/>').html(topPathway));
     _o.append($('<img/>').attr('src', "http://rest.kegg.jp/get/"+ topPathway +"/image"));
-    _o.append($('<div/>').text(jsonRecord.KeggTopPathway));
+    _o.append($('<div/>').html(jsonRecord.KeggTopPathway.replace(/\n/g, '<br/>')));
 }
 
 /**
 *   Display the result retieved from the cache
 *   @param cacheQuery
 */
-function buildCVOutput(cacheQuery){
+function buildCVOutput(jsonRecord){
     var _o = $('#eaeoutputs');
-    // TODO
-    console.log("TODO buildCVOutput")
+
+    var startdate = new Date(jsonRecord.StartTime.$date);
+    var endDate = new Date(jsonRecord.EndTime.$date);
+    var duration = (endDate - startdate)/1000
+
+    _o.append($('<table/>').attr("id","cvtable").attr("class", "cachetable")
+        .append($('<tr/>')
+            .append($('<th/>').text("Algorithm used"))
+            .append($('<th/>').text("Iterations step"))
+            .append($('<th/>').text("Resampling"))
+            .append($('<th/>').text("Computation time"))
+        ));
+    $('#cvtable').append($('<tr/>')
+        .append($('<td/>').text(jsonRecord.algorithmUsed))
+        .append($('<td/>').text(jsonRecord.numberOfFeaturesToRemove*100 + '%'))
+        .append($('<td/>').text(jsonRecord.resampling))
+            .append($('<td/>').text(duration+ 's'))
+    );
+
+    _o.append($('<div/>').attr('id', "cvPerformanceGraph"));
+
+
+    var chart = scatterPlot()
+        .x(function(d) {
+            return +d.x;
+        })
+        .y(function(d) {
+            return +d.y;
+        })
+        .height(250);
+
+    console.log(jsonRecord.performanceCurve);
+    d3.select('#cvPerformanceGraph').datum(formatData(jsonRecord.performanceCurve)).call(chart);
 }
 
+
+function scatterPlot() {
+    var margin = {
+            top: 10,
+            right: 25,
+            bottom: 25,
+            left: 40
+        },
+        width = 600,
+        height = 400,
+        raduis = 4,
+        xValue = function(d) {
+            return d[0];
+        },
+        yValue = function(d) {
+            return d[1];
+        },
+        xScale = d3.scale.linear(),
+        yScale = d3.scale.linear(),
+        xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 1);
+    yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 1);
+
+    function chart(selection) {
+        selection.each(function(data) {
+            data = data.map(function(d, i) {
+                return [xValue.call(data, d, i),
+                    yValue.call(data, d, i)
+                ];
+            });
+
+            xScale
+                .domain(d3.extent(data, function(d) {
+                    return d[0];
+                }))
+                .range([0, width - margin.left - margin.right]);
+
+            yScale
+                .domain([0, d3.max(data, function(d) {
+                    return d[1];
+                })])
+                .range([height - margin.top - margin.bottom, 0]);
+
+            var svg = d3.select(this).selectAll("svg").data([data]);
+
+            var gEnter = svg.enter().append("svg").append("g");
+            gEnter.append("g").attr("class", "points");
+            gEnter.append("g").attr("class", "x axis");
+            gEnter.append("g").attr("class", "y axis");
+
+            // Update the outer dimensions.
+            svg.attr("width", width)
+                .attr("height", height);
+
+            var g = svg.select("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            g.select("g.points")
+                .selectAll("circles.point")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("class", "point")
+                .attr("r", raduis)
+                .attr("transform", function(d) {
+                    return "translate(" + xScale(d[0]) + "," + yScale(d[1]) + ")";
+                });
+
+            g.select(".x.axis")
+                .attr("transform", "translate(0," + yScale.range()[0] + ")")
+                .call(xAxis);
+
+            g.select(".y.axis")
+                .attr("transform", "translate(0," + xScale.range()[0] + ")")
+                .call(yAxis);
+        });
+    }
+
+    function X(d) {
+        return xScale(d[0]);
+    }
+
+    function Y(d) {
+        return yScale(d[1]);
+    }
+
+    chart.margin = function(_) {
+        if (!arguments.length) return margin;
+        margin = _;
+        return chart;
+    };
+
+    chart.width = function(_) {
+        if (!arguments.length) return width;
+        width = _;
+        return chart;
+    };
+
+    chart.height = function(_) {
+        if (!arguments.length) return height;
+        height = _;
+        return chart;
+    };
+
+    chart.x = function(_) {
+        if (!arguments.length) return xValue;
+        xValue = _;
+        return chart;
+    };
+
+    chart.y = function(_) {
+        if (!arguments.length) return yValue;
+        yValue = _;
+        return chart;
+    };
+
+    return chart;
+}
 
 /**
  *   Run a pathway enrichment from the eae
@@ -262,7 +465,7 @@ function runCV(){
     if(!saneEAE()){
      return false;
     }
-;
+
     // if no subset IDs exist compute them
     if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !(isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
         runAllQueries(runCV);
@@ -278,36 +481,11 @@ function runCV(){
         if(jsonAnswer.iscached === "NotCached"){
             jQuery("#eaeoutputs").html(jsonAnswer.result);
         }else{
-            buildPEOutput(jsonAnswer.result);
+            buildCVOutput(jsonAnswer.result);
         }
     }).fail(function() {
         jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
     });
-}
-
-/**
- *   get the input from datasetexplorer
- */
-function getClinicalMetaDataforEAE(){
-
-    jQuery.ajax({
-        url: pageInfo.basePath + '/eae/getClinicalMetaDataforEAE',
-        type: "POST"
-    }).done(function(serverAnswer) {
-        jQuery("#selectedCohort").html(serverAnswer);
-    }).fail(function() {
-        jQuery("#selectedCohort").html("AJAX CALL FAILED!");
-    });
-}
-
-/**
- *  Get the input List from the user
- */
-
-function genesListData(){
-    var data = [];
-    data.push({list: 'ListOfGenes', value: jQuery('#genes').val()});
-    return data
 }
 
 

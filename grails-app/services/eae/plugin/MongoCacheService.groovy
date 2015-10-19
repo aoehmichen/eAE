@@ -26,38 +26,58 @@ class MongoCacheService {
         return result;
     }
 
+    def copyPresentInCache(String mongoURL, String mongoPort, String dbName, String collectionName, BasicDBObject query) {
+
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort)
+        MongoDatabase db = mongoClient.getDatabase( dbName )
+        MongoCollection<Document> coll = db.getCollection(collectionName)
+
+        def cursor = coll.find(query).iterator();
+        def copyExists = false;
+
+        while(cursor.hasNext()) {
+            copyExists= true ;
+            return copyExists
+        }
+        mongoClient.close()
+
+        return copyExists;
+    }
+
     def initJob(String mongoURL, String mongoPort, String dbName, String workflowSelected, String user, BasicDBObject query){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase db = mongoClient.getDatabase( dbName );
         MongoCollection<Document> coll = db.getCollection(workflowSelected);
 
+        Document cacheRecord = new Document();
         Document doc = new Document();
         doc.append("status", "started");
         doc.append("user", user);
         doc.append("StartTime", new Date());
         doc.append("EndTime", new Date());
+        doc.append("DocumentType", "Original")
         switch (workflowSelected) {
             case "pe":
-                doc = initJobPE(cursor);
+                cacheRecord = initJobPE(doc, query);
                 break;
             case "gt":
-                doc = initJobGT(cursor);
+                cacheRecord = initJobGT(doc, query);
                 break;
             case "cv":
-                doc = initJobCV(cursor);
+                cacheRecord = initJobCV(doc, query);
                 break;
             case "lp":
-                doc = initJobLP(cursor);
+                cacheRecord = initJobLP(doc, query);
                 break;
         }
 
-        coll.insertOne(doc)
+        coll.insertOne(cacheRecord)
         def jobId = doc.get( "_id" );
 
         return jobId;
     }
 
-    def checkIfPresentInCache(String mongoURL, String mongoPort, String dbName, String collectionName, BasicDBObject query ){
+    def checkIfPresentInCache(String mongoURL, String mongoPort, String dbName, String collectionName, query ){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase db = mongoClient.getDatabase( dbName );
 
@@ -71,7 +91,7 @@ class MongoCacheService {
         }
         mongoClient.close();
         if(recordsCount>1){
-            throw new Exception("Invalid number of records in the mongoDB")
+           throw new Exception("Invalid number of records in the mongoDB")
         }else{
             if (recordsCount == 0){
                 return "NotCached"
@@ -85,10 +105,12 @@ class MongoCacheService {
 
     def buildMongoQuery(params){
         def conceptBoxes = new JsonSlurper().parseText(params.conceptBoxes)
+        String HighDimData = conceptBoxes.concepts[0][0];
         BasicDBObject query = new BasicDBObject();
         query.append('result_instance_id1', params.result_instance_id1);
-        query.append('result_instance_id2', params.result_instance_id1);
-        query.append('conceptBoxes', conceptBoxes);
+        query.append('result_instance_id2', params.result_instance_id2);
+        query.append('HighDimData', HighDimData);
+        query.append("DocumentType", "Original")
         return query
     }
     /**
@@ -183,6 +205,7 @@ class MongoCacheService {
         doc.append("Correction",cacheRes.get("Correction") )
         doc.append("StartTime", new Date())
         doc.append("EndTime", new Date())
+        doc.append("DocumentType", "Copy")
 
         coll.insertOne(doc)
 
@@ -195,13 +218,10 @@ class MongoCacheService {
  *                                                                                              *
  ************************************************************************************************/
 
-    def initJobCV(Document doc, query){
-        doc.append("HighDimData", [])
-        doc.append("KeggTopPathway", "")
-
-        doc.append("ListOfgenes", query.get("ListOfgenes"))
-        doc.append("Correction", "")
-
+    def initJobCV(Document doc, BasicDBObject query){
+        doc.append("HighDimData", query.get("HighDimData"));
+        doc.append("result_instance_id1", query.get("result_instance_id1"));
+        doc.append("result_instance_id2", query.get("result_instance_id2"));
         return doc;
     }
 
@@ -212,7 +232,10 @@ class MongoCacheService {
         while(cursor.hasNext()) {
             JSONObject obj =  new JSONObject(cursor.next().toJson());
             result = new JSONObject();
-            String name =  obj.get("ListOfgenes");// TODO change to the right key!
+            String highDimName =  obj.get("HighDimData");
+            String result_instance_id1 =  obj.get("result_instance_id1");
+            String result_instance_id2 =  obj.get("result_instance_id2");
+            String name = "HighDim Data: " +  highDimName + "<br /> cohort 1 : " + result_instance_id1 + "<br /> cohort 2 : " + result_instance_id2;
             result.put("status", obj.get("status"));
             result.put("start", obj.get("StartTime"));
             result.put("name", name);

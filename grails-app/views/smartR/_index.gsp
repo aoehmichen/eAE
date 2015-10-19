@@ -15,7 +15,7 @@
     <div id="switch" style="text-align: right">
     <input
             id="goEAE"
-            class='txt'
+            class='txt flatbutton'
             type="button"
             value="Go To EAE"
             onclick="goToEAE()"/>

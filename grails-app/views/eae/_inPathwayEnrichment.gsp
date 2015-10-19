@@ -8,10 +8,10 @@
         <tr>
             <td>
             <form method="post" action="">
-                <textarea id="genes" cols="25" rows="5">Enter your genes here...</textarea><br>
+                <textarea id="genes" cols="25" rows="5" placeholder="Enter your genes here..."></textarea><br>
                 <input
                         id="submitPE"
-                        class='txt'
+                        class='txt flatbutton'
                         type="button"
                         value="Run Enrichment"
                         onclick="triggerPE()"/>
@@ -35,7 +35,8 @@
     <div id="emptyCache">The Cache is Empty</div>
     <button type="button"
             value="refreshCacheDiv"
-            onclick="refreshPECache()">Refresh</button>
+            onclick="refreshPECache()"
+            class="flatbutton" >Refresh</button>
 </div>
 
 <script>

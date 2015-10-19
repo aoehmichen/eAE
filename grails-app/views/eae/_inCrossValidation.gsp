@@ -12,7 +12,7 @@
         </td>
         <input
                 id="submitCV"
-                class='txt'
+                class='txt flatbutton'
                 type="button"
                 value="Run CV"
                 onclick="triggerCV()"/>
@@ -26,11 +26,12 @@
     <div id="emptyCache">The Cache is Empty</div>
     <button type="button"
             value="refreshCacheDiv"
-            onclick="refreshCVCache()">Refresh</button>
+            onclick="refreshCVCache()"
+            class="flatbutton">Refresh</button>
 </div>
 
 <script>
-    populateCacheDIV("cv")
+    populateCacheDIV("cv");
     activateDragAndDropEAE('highDimDataCV');
 
     function register() {
