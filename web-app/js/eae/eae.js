@@ -89,8 +89,9 @@ function registerConceptBoxEAE(name, cohorts, type, min, max) {
  *
  *   @return {[]}: array of objects containing the information for server side computations
  */
-function prepareFormDataEAE() {
+function prepareFormDataEAE(doEnrichment) {
     var data = [];
+    data.push({name: 'doEnrichment', value: doEnrichment});
     data.push({name: 'conceptBoxes', value: JSON.stringify(conceptBoxes)});
     data.push({name: 'result_instance_id1', value: GLOBAL.CurrentSubsetIDs[1]});
     data.push({name: 'result_instance_id2', value: GLOBAL.CurrentSubsetIDs[2]});
@@ -243,7 +244,7 @@ function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
     var data ;
     switch (currentworkflow){
         case "pe":
-            data = {workflow: currentworkflow, listOfGenes:cacheQuery};
+            data = {workflow: currentworkflow, ListOfGenes:cacheQuery};
             return data;
         case "cv":
             var tmpData = [];
@@ -472,10 +473,12 @@ function runCV(){
         return false;
     }
 
+    var doEnrichement = $('#addPE').is(":checked");
+
     jQuery.ajax({
         url: pageInfo.basePath + '/eae/runCV',
         type: "POST",
-        data:prepareFormDataEAE(),
+        data: prepareFormDataEAE(doEnrichement)
     }).done(function(serverAnswer) {
         var jsonAnswer= $.parseJSON(serverAnswer);
         if(jsonAnswer.iscached === "NotCached"){

@@ -161,7 +161,7 @@ class MongoCacheService {
         doc.append("topPathways", [])
         doc.append("KeggTopPathway", "")
 
-        doc.append("ListOfgenes", query.get("ListOfgenes"))
+        doc.append("ListOfGenes", query.get("ListOfGenes"))
         doc.append("Correction", "")
 
         return doc;
@@ -174,7 +174,7 @@ class MongoCacheService {
         while(cursor.hasNext()) {
             JSONObject obj =  new JSONObject(cursor.next().toJson());
             result = new JSONObject();
-            String name =  obj.get("ListOfgenes");
+            String name =  obj.get("ListOfGenes");
             result.put("status", obj.get("status"));
             result.put("start", obj.get("StartTime"));
             result.put("name", name);
@@ -201,7 +201,7 @@ class MongoCacheService {
         doc.append("KeggTopPathway",cacheRes.get("KeggTopPathway") )
         doc.append("status", "Completed")
         doc.append("user", username)
-        doc.append("ListOfgenes",cacheRes.get("ListOfgenes") )
+        doc.append("ListOfGenes",cacheRes.get("ListOfGenes") )
         doc.append("Correction",cacheRes.get("Correction") )
         doc.append("StartTime", new Date())
         doc.append("EndTime", new Date())

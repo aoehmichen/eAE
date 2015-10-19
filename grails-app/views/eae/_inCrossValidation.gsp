@@ -5,18 +5,26 @@
 </div>
 
 <div id='highDimDataBox' class="txt">
-    <form method="post" action="">
-        <td style='padding-right: 2em; padding-bottom: 1em'>
-            <div id='highDimDataCV' class="queryGroupIncludeSmall"></div>
-            <input type="button" class='txt' onclick="clearVarSelection('highDimDataCV')" value="Clear Window">
-        </td>
-        <input
-                id="submitCV"
-                class='txt flatbutton'
-                type="button"
-                value="Run CV"
-                onclick="triggerCV()"/>
-    </form>
+    <table id="inputeDataTable">
+        <tr>
+            <td style='padding-right: 2em; padding-bottom: 1em'>
+                <form method="post" action="">
+                    <div id='highDimDataCV' class="queryGroupIncludeSmall"></div>
+                </form>
+                <input type="button" class='txt' onclick="clearVarSelection('highDimDataCV')" value="Clear Window">
+                <input
+                        id="submitCV"
+                        class='txt flatbutton'
+                        type="button"
+                        value="Run CV"
+                        onclick="triggerCV()"/>
+            </td>
+            <td style='padding-right: 2em; padding-bottom: 1em'>
+                <div class="peCheckBox"></div>
+                <input type="checkbox" id="addPE" checked> Do a pathway enrichment<br>
+            </td>
+        </tr>
+    </table>
 </div>
 <br/>
 

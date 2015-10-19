@@ -38,7 +38,7 @@ class MongoCacheController {
         BasicDBObject query = new BasicDBObject();
         switch (workflowSelected){
             case "pe":
-                query = new BasicDBObject("ListOfgenes", params.listOfGenes);
+                query = new BasicDBObject("ListOfGenes", params.ListOfGenes);
                 break;
             case "gt":
                 break;

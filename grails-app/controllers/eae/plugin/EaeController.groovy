@@ -47,7 +47,7 @@ class EaeController {
         String worflow = "pe";
         String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join(' ').trim()
 
-        BasicDBObject query = new BasicDBObject("ListOfgenes", saneGenesList);
+        BasicDBObject query = new BasicDBObject("ListOfGenes", saneGenesList);
         query.append("DocumentType", "Original")
         // We check if this query has already been made before
         String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT,database, worflow, query)
@@ -61,7 +61,7 @@ class EaeController {
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
             result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,database, worflow, query);
-            BasicDBObject userQuery = new BasicDBObject("ListOfgenes", saneGenesList);
+            BasicDBObject userQuery = new BasicDBObject("ListOfGenes", saneGenesList);
             userQuery.append("user", username);
             Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_URL, MONGO_PORT,database, worflow, userQuery);
             if(!copyAlreadyExists) {
@@ -91,11 +91,16 @@ class EaeController {
         String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_URL, (String)MONGO_PORT, database, worflow, query)
         def result
         if(cached == "NotCached") {
+            String PEParameters = "false abcd0000" // fake mongoId
+            if(parameterMap['doEnrichment']){
+                String mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, "pe", username, new BasicDBObject("ListOfGenes" , ""))
+                PEParameters = "true " + mongoDocumentIDPE
+            }
             String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, worflow, username, query)
             //String dataFileName = worflow+ "-" + username + "-" + mongoDocumentID + ".txt"
             String dataFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, parameterMap, scriptDir, SPARK_URL, "data")
             String additionalFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, parameterMap, scriptDir, SPARK_URL, "additional")
-            String workflowSpecificParameters = "SVM featuresList.txt 0.2 1 0.4" // "SVM" + additionalFileName + "0.2 1 0.5"
+            String workflowSpecificParameters = "SVM featuresList.txt 0.2 1 0.5 " + PEParameters // "SVM" + additionalFileName + "0.2 1 0.5"
             dataFileName = "GSE31773.txt" // this is a hack before i figure out the tm data shit.
             eaeService.sparkSubmit(scriptDir, SPARK_URL, "cv.py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
