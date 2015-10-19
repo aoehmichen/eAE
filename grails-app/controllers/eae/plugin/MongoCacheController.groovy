@@ -46,6 +46,9 @@ class MongoCacheController {
                 break;
             case "cv":
                 query = new BasicDBObject();
+                query.append("HighDimData", query.get("HighDimData"));
+                query.append("result_instance_id1", query.get("result_instance_id1"));
+                query.append("result_instance_id2", query.get("result_instance_id2"));
                 break;
             case "lp":
                 query = new BasicDBObject();

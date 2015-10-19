@@ -48,6 +48,7 @@ class EaeController {
         String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join(' ').trim()
 
         BasicDBObject query = new BasicDBObject("ListOfgenes", saneGenesList);
+        query.append("DocumentType", "Original")
         // We check if this query has already been made before
         String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_PORT,database, worflow, query)
         def result
@@ -60,9 +61,11 @@ class EaeController {
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
             result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,database, worflow, query);
-            mongoCacheService.duplicatePECacheForUser(MONGO_URL, MONGO_PORT,username, result)
+            if(result.get("user") != username) {
+                mongoCacheService.duplicatePECacheForUser(MONGO_URL, MONGO_PORT, username, result);
+            }
         }else{
-            result = "Your Job has been submitted. Please come back later for the result"
+            result = "The job requested has been submitted by another user and is now computing. Please try again later for the result."
         }
         JSONObject answer = new JSONObject();
 

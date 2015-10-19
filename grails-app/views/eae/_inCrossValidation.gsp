@@ -31,7 +31,7 @@
 </div>
 
 <script>
-    populateCacheDIV("cv")
+    populateCacheDIV("cv");
     activateDragAndDropEAE('highDimDataCV');
 
     function register() {

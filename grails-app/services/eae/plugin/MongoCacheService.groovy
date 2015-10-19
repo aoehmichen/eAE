@@ -37,6 +37,7 @@ class MongoCacheService {
         doc.append("user", user);
         doc.append("StartTime", new Date());
         doc.append("EndTime", new Date());
+        doc.append("DocumentType", "Original")
         switch (workflowSelected) {
             case "pe":
                 cacheRecord = initJobPE(doc, query);
@@ -72,7 +73,7 @@ class MongoCacheService {
         }
         mongoClient.close();
         if(recordsCount>1){
-            throw new Exception("Invalid number of records in the mongoDB")
+           throw new Exception("Invalid number of records in the mongoDB")
         }else{
             if (recordsCount == 0){
                 return "NotCached"
@@ -91,6 +92,7 @@ class MongoCacheService {
         query.append('result_instance_id1', params.result_instance_id1);
         query.append('result_instance_id2', params.result_instance_id2);
         query.append('HighDimData', HighDimData);
+        query.append("DocumentType", "Original")
         return query
     }
     /**
@@ -185,6 +187,7 @@ class MongoCacheService {
         doc.append("Correction",cacheRes.get("Correction") )
         doc.append("StartTime", new Date())
         doc.append("EndTime", new Date())
+        doc.append("DocumentType", "Copy")
 
         coll.insertOne(doc)
 
