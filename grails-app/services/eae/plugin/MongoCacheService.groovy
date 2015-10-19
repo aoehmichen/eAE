@@ -26,6 +26,24 @@ class MongoCacheService {
         return result;
     }
 
+    def copyPresentInCache(String mongoURL, String mongoPort, String dbName, String collectionName, BasicDBObject query) {
+
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort)
+        MongoDatabase db = mongoClient.getDatabase( dbName )
+        MongoCollection<Document> coll = db.getCollection(collectionName)
+
+        def cursor = coll.find(query).iterator();
+        def copyExists = false;
+
+        while(cursor.hasNext()) {
+            copyExists= true ;
+            return copyExists
+        }
+        mongoClient.close()
+
+        return copyExists;
+    }
+
     def initJob(String mongoURL, String mongoPort, String dbName, String workflowSelected, String user, BasicDBObject query){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase db = mongoClient.getDatabase( dbName );

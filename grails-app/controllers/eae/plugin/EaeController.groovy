@@ -61,7 +61,10 @@ class EaeController {
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
             result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,database, worflow, query);
-            if(result.get("user") != username) {
+            BasicDBObject userQuery = new BasicDBObject("ListOfgenes", saneGenesList);
+            userQuery.append("user", username);
+            Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_URL, MONGO_PORT,database, worflow, userQuery);
+            if(!copyAlreadyExists) {
                 mongoCacheService.duplicatePECacheForUser(MONGO_URL, MONGO_PORT, username, result);
             }
         }else{
