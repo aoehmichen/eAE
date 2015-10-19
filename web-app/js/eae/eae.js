@@ -160,14 +160,22 @@ function populateCacheDIV(currentworkflow){
             jQuery("#emptyCache").hide();
             $.each(jsonCache.jobs, function (i, e) {
                 date = new Date(e.start.$date);
-                _t.append($('<tr/>').append(
-                    $('<td/>').html(e.name)
-                ).append(
+                var holder = $('<td/>');
+                if(currentworkflow == "pe") {
+                    $.each(e.name.split(' '), function (i, e) {
+                        holder.append(
+                            $('<span />').addClass('eae_genetag').text(e)
+                        )
+                    });
+                }else{
+                    holder.html(e.name)
+                }
+                _t.append($('<tr/>').append(holder).append(
                     $('<td/>').text(e.status)
                 ).append(
                     $('<td/>').text(date)
                 ).append(
-                     $('<td/>').append($('<button/>').attr('data-button', e.name).on('click',function(){
+                     $('<td/>').append($('<button/>').addClass('flatbutton').attr('data-button', e.name).on('click',function(){
                         var cacheQuery= $(this).attr('data-button');
                          showWorkflowOutput(currentworkflow,cacheQuery);
                      }).text("Result"))
@@ -218,9 +226,10 @@ function buildPEOutput(jsonRecord){
     });
 
     var topPathway = jsonRecord.topPathways[0][0].toString();
+    _o.append($('<br/>').html("&nbsp"));
     _o.append($('<div/>').html(topPathway));
     _o.append($('<img/>').attr('src', "http://rest.kegg.jp/get/"+ topPathway +"/image"));
-    _o.append($('<div/>').text(jsonRecord.KeggTopPathway));
+    _o.append($('<div/>').html(jsonRecord.KeggTopPathway.replace(/\n/g, '<br/>')));
 }
 
 /**
