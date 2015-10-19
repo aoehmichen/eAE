@@ -34,3 +34,15 @@
     background-color: #d0ffd4;
     cursor: pointer;
 }
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: rgb(128, 128, 128);
+    shape-rendering: crispEdges;
+}
+
+#cvPerformanceGraph .points circle {
+    fill: rgb(128, 193, 119);
+    stroke: rgb(84, 151, 12);
+}

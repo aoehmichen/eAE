@@ -38,8 +38,7 @@ class MongoCacheController {
         BasicDBObject query = new BasicDBObject();
         switch (workflowSelected){
             case "pe":
-                def saneGenesList = params.cacheQuery;
-                query = new BasicDBObject("ListOfgenes", saneGenesList);
+                query = new BasicDBObject("ListOfgenes", params.listOfGenes);
                 break;
             case "gt":
                 break;

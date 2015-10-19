@@ -19,7 +19,6 @@ function goToSmartRScript() {
  *   @param {string} divName: name of the div element to activate drag and drop for
  */
 function activateDragAndDropEAE(divName) {
-    //console.log('Activating drag and drop')
     var div = Ext.get(divName);
     var dtgI = new Ext.dd.DropTarget(div, {ddGroup: 'makeQuery'});
     dtgI.notifyDrop = dropOntoCategorySelection;
@@ -75,7 +74,6 @@ var conceptBoxes = [];
 var sanityCheckErrors = [];
 function registerConceptBoxEAE(name, cohorts, type, min, max) {
     var concepts = getConcepts(name);
-    console.log('concepts: ', concepts, 'name: ', name, 'type: ', type);
     var check1 = type === undefined || containsOnly(name, type);
     var check2 = min === undefined || concepts.length >= min;
     var check3 = max === undefined || concepts.length <= max;
@@ -120,6 +118,21 @@ function saneEAE() { // FIXME: somehow check for subset2 to be non empty iff two
     return customSanityCheck(); // method MUST be implemented by _inFoobarAnalysis.gsp
 }
 
+/**
+ *
+ * @param eae
+ * @returns {Array}
+ */
+
+function formatData(eae) {
+    var data = [];
+    for (var i = 0; i < eae.length; i++)
+        data.push({
+            x: eae[i][0],
+            y: eae[i][1]
+        })
+    return data
+}
 
 /**
  *   Renders the input form for entering the parameters for a visualization/script
@@ -230,7 +243,7 @@ function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
     var data ;
     switch (currentworkflow){
         case "pe":
-            data = cacheQuery;
+            data = {workflow: currentworkflow, listOfGenes:cacheQuery};
             return data;
         case "cv":
             var tmpData = [];
@@ -239,8 +252,7 @@ function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
                 var chunk = e.split(':');
                 tmpData.push(chunk[1].trim());
             });
-            data = {workflow: currentworkflow, high_dim_data: tmpData[0], result_instance_id1: tmpData[1], result_instance_id2: tmpData[2]  }
-            console.log(data);
+            data = {workflow: currentworkflow, high_dim_data: tmpData[0], result_instance_id1: tmpData[1], result_instance_id2: tmpData[2]};
             return data;
         default:
             console.log("The workflow selected:" + currentworkflow.toString() + " doesn't exist.")
@@ -293,8 +305,139 @@ function buildCVOutput(jsonRecord){
             .append($('<td/>').text("Hello"))
     );
 
+    _o.append($('<div/>').attr('id', "cvPerformanceGraph"));
+
+
+    var chart = scatterPlot()
+        .x(function(d) {
+            return +d.x;
+        })
+        .y(function(d) {
+            return +d.y;
+        })
+        .height(250);
+
+    console.log(jsonRecord.performanceCurve);
+    d3.select('#cvPerformanceGraph').datum(formatData(jsonRecord.performanceCurve)).call(chart);
 }
 
+
+function scatterPlot() {
+    var margin = {
+            top: 10,
+            right: 25,
+            bottom: 25,
+            left: 40
+        },
+        width = 600,
+        height = 400,
+        raduis = 4,
+        xValue = function(d) {
+            return d[0];
+        },
+        yValue = function(d) {
+            return d[1];
+        },
+        xScale = d3.scale.linear(),
+        yScale = d3.scale.linear(),
+        xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 1);
+    yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(6, 1);
+
+    function chart(selection) {
+        selection.each(function(data) {
+            data = data.map(function(d, i) {
+                return [xValue.call(data, d, i),
+                    yValue.call(data, d, i)
+                ];
+            });
+
+            xScale
+                .domain(d3.extent(data, function(d) {
+                    return d[0];
+                }))
+                .range([0, width - margin.left - margin.right]);
+
+            yScale
+                .domain([0, d3.max(data, function(d) {
+                    return d[1];
+                })])
+                .range([height - margin.top - margin.bottom, 0]);
+
+            var svg = d3.select(this).selectAll("svg").data([data]);
+
+            var gEnter = svg.enter().append("svg").append("g");
+            gEnter.append("g").attr("class", "points");
+            gEnter.append("g").attr("class", "x axis");
+            gEnter.append("g").attr("class", "y axis");
+
+            // Update the outer dimensions.
+            svg.attr("width", width)
+                .attr("height", height);
+
+            var g = svg.select("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            g.select("g.points")
+                .selectAll("circles.point")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("class", "point")
+                .attr("r", raduis)
+                .attr("transform", function(d) {
+                    return "translate(" + xScale(d[0]) + "," + yScale(d[1]) + ")";
+                });
+
+            g.select(".x.axis")
+                .attr("transform", "translate(0," + yScale.range()[0] + ")")
+                .call(xAxis);
+
+            g.select(".y.axis")
+                .attr("transform", "translate(0," + xScale.range()[0] + ")")
+                .call(yAxis);
+        });
+    }
+
+    function X(d) {
+        return xScale(d[0]);
+    }
+
+    function Y(d) {
+        return yScale(d[1]);
+    }
+
+    chart.margin = function(_) {
+        if (!arguments.length) return margin;
+        margin = _;
+        return chart;
+    };
+
+    chart.width = function(_) {
+        if (!arguments.length) return width;
+        width = _;
+        return chart;
+    };
+
+    chart.height = function(_) {
+        if (!arguments.length) return height;
+        height = _;
+        return chart;
+    };
+
+    chart.x = function(_) {
+        if (!arguments.length) return xValue;
+        xValue = _;
+        return chart;
+    };
+
+    chart.y = function(_) {
+        if (!arguments.length) return yValue;
+        yValue = _;
+        return chart;
+    };
+
+    return chart;
+}
 
 /**
  *   Run a pathway enrichment from the eae
