@@ -287,9 +287,7 @@ function buildCVOutput(jsonRecord){
 
     var startdate = new Date(jsonRecord.StartTime.$date);
     var endDate = new Date(jsonRecord.EndTime.$date);
-
-    console.log('start date',startdate);
-    console.log('start date',endDate);
+    var duration = (endDate - startdate)/1000
 
     _o.append($('<table/>').attr("id","cvtable").attr("class", "cachetable")
         .append($('<tr/>')
@@ -300,9 +298,9 @@ function buildCVOutput(jsonRecord){
         ));
     $('#cvtable').append($('<tr/>')
         .append($('<td/>').text(jsonRecord.algorithmUsed))
-        .append($('<td/>').text(jsonRecord.numberOfFeaturesToRemove))
+        .append($('<td/>').text(jsonRecord.numberOfFeaturesToRemove*100 + '%'))
         .append($('<td/>').text(jsonRecord.resampling))
-            .append($('<td/>').text("Hello"))
+            .append($('<td/>').text(duration+ 's'))
     );
 
     _o.append($('<div/>').attr('id', "cvPerformanceGraph"));
