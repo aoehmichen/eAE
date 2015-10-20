@@ -4,6 +4,7 @@ import com.mongodb.MongoClient
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoCursor
 import com.mongodb.client.MongoDatabase
+import grails.plugins.rest.client.RestBuilder
 import grails.transaction.Transactional
 import groovy.json.JsonSlurper
 import mongo.MongoCacheFactory
@@ -22,6 +23,18 @@ class MongoCacheService {
 
         def result = new JSONObject(((Document)coll.find(query).first()).toJson())
         mongoClient.close()
+
+        if(collectionName == "pe"){
+            def topPathway = result.get('topPathways').get(0).get(0)
+            def url = "http://www.kegg.jp/pathway/" + topPathway;
+            def listOfGenesIDs = result.get('ListOfGenesIDs').split(" ");
+            for(int i=0;i<listOfGenesIDs.size();i++){
+                url += "+"+ listOfGenesIDs[i]
+            }
+            def rest = new RestBuilder();
+            def resp = rest.get(url);
+            result.put("KeggHTML", resp.text);
+        }
 
         return result;
     }

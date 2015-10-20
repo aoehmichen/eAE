@@ -275,7 +275,13 @@ function buildPEOutput(jsonRecord){
     var topPathway = jsonRecord.topPathways[0][0].toString();
     _o.append($('<br/>').html("&nbsp"));
     _o.append($('<div/>').html(topPathway));
-    _o.append($('<img/>').attr('src', "http://rest.kegg.jp/get/"+ topPathway +"/image"));
+    var html = $.parseHTML(jsonRecord.KeggHTML);
+    $.each( html, function( i, el ) {
+         if(el.nodeName == "IMG"){
+             _o.append($('<img/>').attr('src', "http://www.kegg.jp"+ el.getAttribute("src")));
+         }
+    });
+
     _o.append($('<div/>').html(jsonRecord.KeggTopPathway.replace(/\n/g, '<br/>')));
 }
 
