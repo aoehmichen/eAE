@@ -4,6 +4,7 @@ import com.mongodb.MongoClient
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoCursor
 import com.mongodb.client.MongoDatabase
+import grails.plugins.rest.client.RestBuilder
 import grails.transaction.Transactional
 import groovy.json.JsonSlurper
 import mongo.MongoCacheFactory
@@ -22,6 +23,18 @@ class MongoCacheService {
 
         def result = new JSONObject(((Document)coll.find(query).first()).toJson())
         mongoClient.close()
+
+        if(collectionName == "pe"){
+            def topPathway = result.get('topPathways').get(0).get(0)
+            def url = "http://www.kegg.jp/pathway/" + topPathway;
+            def listOfGenesIDs = result.get('ListOfGenesIDs').split(" ");
+            for(int i=0;i<listOfGenesIDs.size();i++){
+                url += "+"+ listOfGenesIDs[i]
+            }
+            def rest = new RestBuilder();
+            def resp = rest.get(url);
+            result.put("KeggHTML", resp.text);
+        }
 
         return result;
     }
@@ -161,7 +174,7 @@ class MongoCacheService {
         doc.append("topPathways", [])
         doc.append("KeggTopPathway", "")
 
-        doc.append("ListOfgenes", query.get("ListOfgenes"))
+        doc.append("ListOfGenes", query.get("ListOfGenes"))
         doc.append("Correction", "")
 
         return doc;
@@ -174,7 +187,7 @@ class MongoCacheService {
         while(cursor.hasNext()) {
             JSONObject obj =  new JSONObject(cursor.next().toJson());
             result = new JSONObject();
-            String name =  obj.get("ListOfgenes");
+            String name =  obj.get("ListOfGenes");
             result.put("status", obj.get("status"));
             result.put("start", obj.get("StartTime"));
             result.put("name", name);
@@ -201,7 +214,7 @@ class MongoCacheService {
         doc.append("KeggTopPathway",cacheRes.get("KeggTopPathway") )
         doc.append("status", "Completed")
         doc.append("user", username)
-        doc.append("ListOfgenes",cacheRes.get("ListOfgenes") )
+        doc.append("ListOfGenes",cacheRes.get("ListOfGenes") )
         doc.append("Correction",cacheRes.get("Correction") )
         doc.append("StartTime", new Date())
         doc.append("EndTime", new Date())

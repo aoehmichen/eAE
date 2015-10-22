@@ -83,6 +83,7 @@ class EaeDataService {
 
     def createParameterMap(params){
         def parameterMap = [:]
+        parameterMap['doEnrichment'] = params.doEnrichment
         parameterMap['result_instance_id1'] = params.result_instance_id1
         parameterMap['result_instance_id2'] = params.result_instance_id2
         parameterMap['conceptBoxes'] = new JsonSlurper().parseText(params.conceptBoxes)
@@ -170,13 +171,9 @@ class EaeDataService {
         def data_value = JSONcohort.highDimDataCV.VALUE as Float[];
         def data_size = data_value.size();
         int chunkSize = data_size/size_cohort;
-        println("datasize "  + data_size)
-        println("size_cohort" + size_cohort)
-        println(data_size/size_cohort)
 
         for (int i=0; i<size_cohort; i++){
             Float[] subArray = data_value[i*chunkSize..(i+1)*chunkSize-1];
-            println("subARRAY: "+ subArray.size())
             String line = k + ' ' + subArray.join(' ');
             f.withWriterAppend('utf-8') { writer ->
                 writer.writeLine line

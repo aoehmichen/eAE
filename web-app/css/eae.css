@@ -46,3 +46,7 @@
     fill: rgb(128, 193, 119);
     stroke: rgb(84, 151, 12);
 }
+
+#addPE {
+    padding: 4px;
+}

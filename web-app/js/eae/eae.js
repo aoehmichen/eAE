@@ -89,8 +89,9 @@ function registerConceptBoxEAE(name, cohorts, type, min, max) {
  *
  *   @return {[]}: array of objects containing the information for server side computations
  */
-function prepareFormDataEAE() {
+function prepareFormDataEAE(doEnrichment) {
     var data = [];
+    data.push({name: 'doEnrichment', value: doEnrichment});
     data.push({name: 'conceptBoxes', value: JSON.stringify(conceptBoxes)});
     data.push({name: 'result_instance_id1', value: GLOBAL.CurrentSubsetIDs[1]});
     data.push({name: 'result_instance_id2', value: GLOBAL.CurrentSubsetIDs[2]});
@@ -243,7 +244,7 @@ function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
     var data ;
     switch (currentworkflow){
         case "pe":
-            data = {workflow: currentworkflow, listOfGenes:cacheQuery};
+            data = {workflow: currentworkflow, ListOfGenes:cacheQuery};
             return data;
         case "cv":
             var tmpData = [];
@@ -274,7 +275,13 @@ function buildPEOutput(jsonRecord){
     var topPathway = jsonRecord.topPathways[0][0].toString();
     _o.append($('<br/>').html("&nbsp"));
     _o.append($('<div/>').html(topPathway));
-    _o.append($('<img/>').attr('src', "http://rest.kegg.jp/get/"+ topPathway +"/image"));
+    var html = $.parseHTML(jsonRecord.KeggHTML);
+    $.each( html, function( i, el ) {
+         if(el.nodeName == "IMG"){
+             _o.append($('<img/>').attr('src', "http://www.kegg.jp"+ el.getAttribute("src")));
+         }
+    });
+
     _o.append($('<div/>').html(jsonRecord.KeggTopPathway.replace(/\n/g, '<br/>')));
 }
 
@@ -472,10 +479,12 @@ function runCV(){
         return false;
     }
 
+    var doEnrichement = $('#addPE').is(":checked");
+
     jQuery.ajax({
         url: pageInfo.basePath + '/eae/runCV',
         type: "POST",
-        data:prepareFormDataEAE(),
+        data: prepareFormDataEAE(doEnrichement)
     }).done(function(serverAnswer) {
         var jsonAnswer= $.parseJSON(serverAnswer);
         if(jsonAnswer.iscached === "NotCached"){
