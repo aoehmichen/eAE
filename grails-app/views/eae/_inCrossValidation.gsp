@@ -57,4 +57,10 @@
     function customSanityCheck() {
         return true;
     }
+
+    function cacheDIVCustomName(name){
+        var holder =  $('<td/>');
+        holder.html(name);
+        return holder;
+    }
 </script>

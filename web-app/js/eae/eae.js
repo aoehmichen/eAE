@@ -180,22 +180,12 @@ function populateCacheDIV(currentworkflow){
             jQuery("#mongocachetable").hide();
             jQuery("#emptyCache").show();
         }else {
-
             var date;
             jQuery("#mongocachetable").show();
             jQuery("#emptyCache").hide();
             $.each(jsonCache.jobs, function (i, e) {
                 date = new Date(e.start.$date);
-                var holder = $('<td/>');
-                if(currentworkflow == "pe") {
-                    $.each(e.name.split(' '), function (i, e) {
-                        holder.append(
-                            $('<span />').addClass('eae_genetag').text(e)
-                        )
-                    });
-                }else{
-                    holder.html(e.name)
-                }
+                var holder = cacheDIVCustomName(e.name);
                 _t.append($('<tr/>').append(holder).append(
                     $('<td/>').text(e.status)
                 ).append(

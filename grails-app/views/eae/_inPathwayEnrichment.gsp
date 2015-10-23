@@ -50,7 +50,18 @@
         populateCacheDIV("pe")
     }
 
-    populateCacheDIV("pe")
+    populateCacheDIV("pe");
+
+    function cacheDIVCustomName(name){
+        var holder =  $('<td/>');
+        $.each(name.split(' '), function (i, e) {
+            holder.append(
+                    $('<span />').addClass('eae_genetag').text(e)
+            )
+        });
+    return holder;
+    }
+
 
 </script>
 
