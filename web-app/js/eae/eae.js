@@ -89,9 +89,8 @@ function registerConceptBoxEAE(name, cohorts, type, min, max) {
  *
  *   @return {[]}: array of objects containing the information for server side computations
  */
-function prepareFormDataEAE(doEnrichment) {
-    var data = [];
-    data.push({name: 'doEnrichment', value: doEnrichment});
+function prepareFormDataEAE() {
+    var data = customWorkflowParameters(); //method MUST be implemented by _inFoobarAnalysis.gsp
     data.push({name: 'conceptBoxes', value: JSON.stringify(conceptBoxes)});
     data.push({name: 'result_instance_id1', value: GLOBAL.CurrentSubsetIDs[1]});
     data.push({name: 'result_instance_id2', value: GLOBAL.CurrentSubsetIDs[2]});
@@ -185,7 +184,7 @@ function populateCacheDIV(currentworkflow){
             jQuery("#emptyCache").hide();
             $.each(jsonCache.jobs, function (i, e) {
                 date = new Date(e.start.$date);
-                var holder = cacheDIVCustomName(e.name);
+                var holder = cacheDIVCustomName(e.name); //method MUST be implemented by _inFoobarAnalysis.gsp
                 _t.append($('<tr/>').append(holder).append(
                     $('<td/>').text(e.status)
                 ).append(
@@ -217,17 +216,9 @@ function showWorkflowOutput(currentworkflow, cacheQuery){
         data: prepareDataForMongoRetrievale(currentworkflow, cacheQuery)
     }).done(function(cachedJob) {
         var jsonRecord= $.parseJSON(cachedJob);
-        switch (currentworkflow){
-            case "pe":
-                buildPEOutput(jsonRecord)
-                break;
-            case "cv":
-                buildCVOutput(jsonRecord);
-                break;
-            default:
-                console.log("The workflow selected:" + currentworkflow.toString() + " doesn't exist.")
+        buildOutput(jsonRecord);
         }
-    })
+    )
 }
 
 function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
@@ -249,73 +240,6 @@ function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
             console.log("The workflow selected:" + currentworkflow.toString() + " doesn't exist.")
     }
 }
-
-function buildPEOutput(jsonRecord){
-    var _o = $('#eaeoutputs');
-    _o.append($('<table/>').attr("id","topPathways").attr("class", "cachetable")
-        .append($('<tr/>')
-            .append($('<th/>').text("Pathways"))
-            .append($('<th/>').text("Correction: " + jsonRecord.Correction))));
-    $.each(jsonRecord.topPathways, function(i, e){
-        $('#topPathways').append($('<tr/>')
-            .append($('<td/>').text(e[0]))
-            .append($('<td/>').text(e[1])))
-    });
-
-    var topPathway = jsonRecord.topPathways[0][0].toString();
-    _o.append($('<br/>').html("&nbsp"));
-    _o.append($('<div/>').html(topPathway));
-    var html = $.parseHTML(jsonRecord.KeggHTML);
-    $.each( html, function( i, el ) {
-         if(el.nodeName == "IMG"){
-             _o.append($('<img/>').attr('src', "http://www.kegg.jp"+ el.getAttribute("src")));
-         }
-    });
-
-    _o.append($('<div/>').html(jsonRecord.KeggTopPathway.replace(/\n/g, '<br/>')));
-}
-
-/**
-*   Display the result retieved from the cache
-*   @param cacheQuery
-*/
-function buildCVOutput(jsonRecord){
-    var _o = $('#eaeoutputs');
-
-    var startdate = new Date(jsonRecord.StartTime.$date);
-    var endDate = new Date(jsonRecord.EndTime.$date);
-    var duration = (endDate - startdate)/1000
-
-    _o.append($('<table/>').attr("id","cvtable").attr("class", "cachetable")
-        .append($('<tr/>')
-            .append($('<th/>').text("Algorithm used"))
-            .append($('<th/>').text("Iterations step"))
-            .append($('<th/>').text("Resampling"))
-            .append($('<th/>').text("Computation time"))
-        ));
-    $('#cvtable').append($('<tr/>')
-        .append($('<td/>').text(jsonRecord.algorithmUsed))
-        .append($('<td/>').text(jsonRecord.numberOfFeaturesToRemove*100 + '%'))
-        .append($('<td/>').text(jsonRecord.resampling))
-            .append($('<td/>').text(duration+ 's'))
-    );
-
-    _o.append($('<div/>').attr('id', "cvPerformanceGraph"));
-
-
-    var chart = scatterPlot()
-        .x(function(d) {
-            return +d.x;
-        })
-        .y(function(d) {
-            return +d.y;
-        })
-        .height(250);
-
-    console.log(jsonRecord.performanceCurve);
-    d3.select('#cvPerformanceGraph').datum(formatData(jsonRecord.performanceCurve)).call(chart);
-}
-
 
 function scatterPlot() {
     var margin = {
@@ -469,12 +393,10 @@ function runCV(){
         return false;
     }
 
-    var doEnrichement = $('#addPE').is(":checked");
-
     jQuery.ajax({
         url: pageInfo.basePath + '/eae/runCV',
         type: "POST",
-        data: prepareFormDataEAE(doEnrichement)
+        data: prepareFormDataEAE()
     }).done(function(serverAnswer) {
         var jsonAnswer= $.parseJSON(serverAnswer);
         if(jsonAnswer.iscached === "NotCached"){

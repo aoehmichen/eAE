@@ -63,4 +63,53 @@
         holder.html(name);
         return holder;
     }
+
+    function customWorkflowParameters(){
+        var data = [];
+        var doEnrichement = $('#addPE').is(":checked");
+        data.push({name: 'doEnrichment', value: doEnrichement});
+        return data;
+    }
+
+    /**
+     *   Display the result retieved from the cache
+     *   @param jsonRecord
+     */
+    function buildOutput(jsonRecord){
+        var _o = $('#eaeoutputs');
+
+        var startdate = new Date(jsonRecord.StartTime.$date);
+        var endDate = new Date(jsonRecord.EndTime.$date);
+        var duration = (endDate - startdate)/1000
+
+        _o.append($('<table/>').attr("id","cvtable").attr("class", "cachetable")
+                .append($('<tr/>')
+                        .append($('<th/>').text("Algorithm used"))
+                        .append($('<th/>').text("Iterations step"))
+                        .append($('<th/>').text("Resampling"))
+                        .append($('<th/>').text("Computation time"))
+        ));
+        $('#cvtable').append($('<tr/>')
+                        .append($('<td/>').text(jsonRecord.algorithmUsed))
+                        .append($('<td/>').text(jsonRecord.numberOfFeaturesToRemove*100 + '%'))
+                        .append($('<td/>').text(jsonRecord.resampling))
+                        .append($('<td/>').text(duration+ 's'))
+        );
+
+        _o.append($('<div/>').attr('id', "cvPerformanceGraph"));
+
+
+        var chart = scatterPlot()
+                .x(function(d) {
+                    return +d.x;
+                })
+                .y(function(d) {
+                    return +d.y;
+                })
+                .height(250);
+
+        console.log(jsonRecord.performanceCurve);
+        d3.select('#cvPerformanceGraph').datum(formatData(jsonRecord.performanceCurve)).call(chart);
+    }
+
 </script>

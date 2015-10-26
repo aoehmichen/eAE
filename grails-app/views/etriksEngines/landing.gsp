@@ -27,6 +27,3 @@
 
     <div id="outputDIV" class='txt'></div>
 </body>
-
-<script>
-</script>

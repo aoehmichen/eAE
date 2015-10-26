@@ -62,6 +62,30 @@
     return holder;
     }
 
+    function buildOutput(jsonRecord){
+        var _o = $('#eaeoutputs');
+        _o.append($('<table/>').attr("id","topPathways").attr("class", "cachetable")
+                .append($('<tr/>')
+                        .append($('<th/>').text("Pathways"))
+                        .append($('<th/>').text("Correction: " + jsonRecord.Correction))));
+        $.each(jsonRecord.topPathways, function(i, e){
+            $('#topPathways').append($('<tr/>')
+                    .append($('<td/>').text(e[0]))
+                    .append($('<td/>').text(e[1])))
+        });
+
+        var topPathway = jsonRecord.topPathways[0][0].toString();
+        _o.append($('<br/>').html("&nbsp"));
+        _o.append($('<div/>').html(topPathway));
+        var html = $.parseHTML(jsonRecord.KeggHTML);
+        $.each( html, function( i, el ) {
+            if(el.nodeName == "IMG"){
+                _o.append($('<img/>').attr('src', "http://www.kegg.jp"+ el.getAttribute("src")));
+            }
+        });
+
+        _o.append($('<div/>').html(jsonRecord.KeggTopPathway.replace(/\n/g, '<br/>')));
+    }
 
 </script>
 
