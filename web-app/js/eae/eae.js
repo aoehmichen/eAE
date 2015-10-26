@@ -85,8 +85,8 @@ function registerConceptBoxEAE(name, cohorts, type, min, max) {
 }
 
 var workflowSelected = "";
-function registerWorkflowParams(worflow){
-    workflowSelected = worflow.toUpperCase();
+function registerWorkflowParams(workflow){
+    workflowSelected = workflow.toUpperCase();
 }
 
 /**
@@ -94,8 +94,9 @@ function registerWorkflowParams(worflow){
  *
  *   @return {[]}: array of objects containing the information for server side computations
  */
-function prepareFormDataEAE() {
+function prepareFormDataEAE(workflowSelected) {
     var data = customWorkflowParameters(); //method MUST be implemented by _inFoobarAnalysis.gsp
+    data.push({name: 'workflowSelected', value: workflowSelected});
     data.push({name: 'conceptBoxes', value: JSON.stringify(conceptBoxes)});
     data.push({name: 'result_instance_id1', value: GLOBAL.CurrentSubsetIDs[1]});
     data.push({name: 'result_instance_id2', value: GLOBAL.CurrentSubsetIDs[2]});
@@ -266,7 +267,7 @@ function runPE(list, selectedCorrection){
 }
 
 /**
- * Generic worflow trigger
+ * Generic workflow trigger
  * @returns {boolean}
  */
 
@@ -281,15 +282,15 @@ function runWorkflow(){
     }
 
     // if no subset IDs exist compute them
-    if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !(isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
+    if((!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !(isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) ) {
         runAllQueries(runWorkflow);
         return false;
     }
 
     jQuery.ajax({
-        url: pageInfo.basePath + '/eae/run' + workflowSelected, //runCV
+        url: pageInfo.basePath + '/eae/runWorkflow', //runCV
         type: "POST",
-        data: prepareFormDataEAE()
+        data: prepareFormDataEAE(workflowSelected)
     }).done(function(serverAnswer) {
         var jsonAnswer= $.parseJSON(serverAnswer);
         if(jsonAnswer.iscached === "NotCached"){

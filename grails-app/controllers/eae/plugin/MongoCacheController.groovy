@@ -1,10 +1,10 @@
 package eae.plugin
-
 import com.mongodb.BasicDBObject
 
 class MongoCacheController {
 
     def mongoCacheService
+    def eaeService
     def springSecurityService
 
     /**
@@ -27,8 +27,9 @@ class MongoCacheController {
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
 
-        BasicDBObject query = mongoCacheQuery(params)
-        def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,"eae", params.workflow, query)
+        BasicDBObject query = mongoCacheQuery(params);
+        def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, "eae", params.workflow, query);
+        result = eaeService.customPostProcessing(result, params.workflow)
 
         render result;
     }
@@ -40,14 +41,10 @@ class MongoCacheController {
             case "pe":
                 query = new BasicDBObject("ListOfGenes", params.ListOfGenes);
                 break;
-            case "gt":
-                break;
-            case "cv":
-                query.append("HighDimData", params.high_dim_data);
+            default :
+                query.append("WorflowData", params.WorflowData);
                 query.append("result_instance_id1", params.result_instance_id1);
                 query.append("result_instance_id2", params.result_instance_id2);
-                break;
-            case "lp":
                 break;
         }
         return query

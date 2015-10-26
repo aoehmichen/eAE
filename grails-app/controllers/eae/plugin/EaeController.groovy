@@ -79,10 +79,10 @@ class EaeController {
     }
 
 
-    def runCV = {
+    def runWorkflow = {
         final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
         String database = "eae"
-        String worflow = "cv";
+        String worflow = params.workflowSelected;
 
         def parameterMap = eaeDataService.queryData(params)
         def query = mongoCacheService.buildMongoQuery(params)
@@ -91,16 +91,10 @@ class EaeController {
         String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_URL, (String)MONGO_PORT, database, worflow, query)
         def result
         if(cached == "NotCached") {
-            String PEParameters = "false abcd0000" // fake mongoId
-            if(parameterMap['doEnrichment']){
-                String mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, "pe", username, new BasicDBObject("ListOfGenes" , ""))
-                PEParameters = "true " + mongoDocumentIDPE
-            }
+            String workflowSpecificParameters = eaeService.customPreProcessing(params, worflow, MONGO_URL, MONGO_PORT, database, username)
             String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, worflow, username, query)
-            //String dataFileName = worflow+ "-" + username + "-" + mongoDocumentID + ".txt"
             String dataFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, parameterMap, scriptDir, SPARK_URL, "data")
             String additionalFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, parameterMap, scriptDir, SPARK_URL, "additional")
-            String workflowSpecificParameters = "SVM featuresList.txt 0.2 1 0.5 " + PEParameters // "SVM" + additionalFileName + "0.2 1 0.5"
             dataFileName = "GSE31773.txt" // this is a hack before i figure out the tm data shit.
             eaeService.sparkSubmit(scriptDir, SPARK_URL, "cv.py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"

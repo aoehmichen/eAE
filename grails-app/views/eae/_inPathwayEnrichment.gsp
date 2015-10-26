@@ -40,6 +40,9 @@
 </div>
 
 <script>
+    var currentWorkflow = "pe";
+    populateCacheDIV(currentWorkflow);
+
     function triggerPE() {
         var _s = document.getElementById('correctionSelect');
         var selectedCorrection = _s.options[_s.selectedIndex].value;
@@ -47,10 +50,8 @@
     }
 
     function refreshPECache(){
-        populateCacheDIV("pe")
+        populateCacheDIV(currentWorkflow)
     }
-
-    populateCacheDIV("pe");
 
     function cacheDIVCustomName(name){
         var holder =  $('<td/>');
