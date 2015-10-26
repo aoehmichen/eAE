@@ -39,7 +39,8 @@
 </div>
 
 <script>
-    populateCacheDIV("cv");
+    var currentWorkflow = "cv";
+    populateCacheDIV(currentWorkflow);
     activateDragAndDropEAE('highDimDataCV');
 
     function register() {
@@ -47,11 +48,12 @@
     }
 
     function triggerCV() {
-        runCV()
+        registerWorkflowParams(currentWorkflow);
+        runWorkflow();
     }
 
     function refreshCVCache(){
-        populateCacheDIV("cv")
+        populateCacheDIV(currentWorkflow)
     }
 
     function customSanityCheck() {

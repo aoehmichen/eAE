@@ -84,6 +84,11 @@ function registerConceptBoxEAE(name, cohorts, type, min, max) {
     conceptBoxes.push({name: name, cohorts: cohorts, type: type, concepts: concepts});
 }
 
+var workflowSelected = "";
+function registerWorkflowParams(worflow){
+    workflowSelected = worflow.toUpperCase();
+}
+
 /**
  *   Prepares data for the AJAX call containing all neccesary information for computation
  *
@@ -227,7 +232,7 @@ function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
         case "pe":
             data = {workflow: currentworkflow, ListOfGenes:cacheQuery};
             return data;
-        case "cv":
+        default :
             var tmpData = [];
             var splitTerms = cacheQuery.split('<br />');
             $.each(splitTerms, function(i, e){
@@ -236,12 +241,74 @@ function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
             });
             data = {workflow: currentworkflow, high_dim_data: tmpData[0], result_instance_id1: tmpData[1], result_instance_id2: tmpData[2]};
             return data;
-        default:
-            console.log("The workflow selected:" + currentworkflow.toString() + " doesn't exist.")
     }
 }
 
-function scatterPlot() {
+/**
+ *   Run a pathway enrichment from the eae. I haven't integrated into the general workflow system as it runs slightly
+ *   differently than the others. ( no cohort selection, used by the marker selection etc...)
+ */
+function runPE(list, selectedCorrection){
+    jQuery.ajax({
+        url: pageInfo.basePath + '/eae/runPEForSelectedGenes',
+        type: "POST",
+        data: {'genesList': list, 'selectedCorrection': selectedCorrection}
+    }).done(function(serverAnswer) {
+        var jsonAnswer= $.parseJSON(serverAnswer);
+        if(jsonAnswer.iscached === "NotCached"){
+            jQuery("#eaeoutputs").html(jsonAnswer.result);
+        }else{
+            buildOutput(jsonAnswer.result);
+        }
+    }).fail(function() {
+        jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
+    });
+}
+
+/**
+ * Generic worflow trigger
+ * @returns {boolean}
+ */
+
+function runWorkflow(){
+    conceptBoxes = [];
+    sanityCheckErrors = [];
+    workflowSelected = "";
+    register();
+
+    if(!saneEAE()){
+     return false;
+    }
+
+    // if no subset IDs exist compute them
+    if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !(isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
+        runAllQueries(runWorkflow);
+        return false;
+    }
+
+    jQuery.ajax({
+        url: pageInfo.basePath + '/eae/run' + workflowSelected, //runCV
+        type: "POST",
+        data: prepareFormDataEAE()
+    }).done(function(serverAnswer) {
+        var jsonAnswer= $.parseJSON(serverAnswer);
+        if(jsonAnswer.iscached === "NotCached"){
+            jQuery("#eaeoutputs").html(jsonAnswer.result);
+        }else{
+            buildOutput(jsonAnswer.result);
+        }
+    }).fail(function() {
+        jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
+    });
+}
+
+/*****************************************************
+ *
+ *     D3 Section
+ *
+ ****************************************************/
+
+function scatterPlot(){
     var margin = {
             top: 10,
             right: 25,
@@ -358,56 +425,8 @@ function scatterPlot() {
     return chart;
 }
 
-/**
- *   Run a pathway enrichment from the eae
- */
-function runPE(list, selectedCorrection){
-    jQuery.ajax({
-        url: pageInfo.basePath + '/eae/runPEForSelectedGenes',
-        type: "POST",
-        data: {'genesList': list, 'selectedCorrection': selectedCorrection}
-    }).done(function(serverAnswer) {
-        var jsonAnswer= $.parseJSON(serverAnswer);
-        if(jsonAnswer.iscached === "NotCached"){
-            jQuery("#eaeoutputs").html(jsonAnswer.result);
-        }else{
-            buildPEOutput(jsonAnswer.result);
-        }
-    }).fail(function() {
-        jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
-    });
-}
 
-function runCV(){
-    conceptBoxes = [];
-    sanityCheckErrors = [];
-    register();
 
-    if(!saneEAE()){
-     return false;
-    }
-
-    // if no subset IDs exist compute them
-    if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !(isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
-        runAllQueries(runCV);
-        return false;
-    }
-
-    jQuery.ajax({
-        url: pageInfo.basePath + '/eae/runCV',
-        type: "POST",
-        data: prepareFormDataEAE()
-    }).done(function(serverAnswer) {
-        var jsonAnswer= $.parseJSON(serverAnswer);
-        if(jsonAnswer.iscached === "NotCached"){
-            jQuery("#eaeoutputs").html(jsonAnswer.result);
-        }else{
-            buildCVOutput(jsonAnswer.result);
-        }
-    }).fail(function() {
-        jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
-    });
-}
 
 
 
