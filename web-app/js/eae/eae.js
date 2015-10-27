@@ -240,7 +240,7 @@ function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
                 var chunk = e.split(':');
                 tmpData.push(chunk[1].trim());
             });
-            data = {workflow: currentworkflow, high_dim_data: tmpData[0], result_instance_id1: tmpData[1], result_instance_id2: tmpData[2]};
+            data = {workflow: currentworkflow, WorkflowData: tmpData[0], result_instance_id1: tmpData[1], result_instance_id2: tmpData[2]};
             return data;
     }
 }

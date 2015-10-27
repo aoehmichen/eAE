@@ -100,11 +100,11 @@ class MongoCacheService {
 
     def buildMongoQuery(params){
         def conceptBoxes = new JsonSlurper().parseText(params.conceptBoxes)
-        String worflowData = conceptBoxes.concepts[0][0];
+        String workflowData = conceptBoxes.concepts[0][0];
         BasicDBObject query = new BasicDBObject();
         query.append('result_instance_id1', params.result_instance_id1);
         query.append('result_instance_id2', params.result_instance_id2);
-        query.append('WorflowData', worflowData);
+        query.append('WorkflowData', workflowData);
         query.append("DocumentType", "Original")
         return query
     }
@@ -117,7 +117,7 @@ class MongoCacheService {
         MongoDatabase  db = mongoClient.getDatabase( dbName );
         MongoCollection coll = db.getCollection(workflowSelected);
 
-        BasicDBObject query = new BasicDBObject("user", userName);
+        BasicDBObject query = new BasicDBObject("User", userName);
         def cursor = coll.find(query).iterator();
         def rows;
 
@@ -209,7 +209,7 @@ class MongoCacheService {
  ************************************************************************************************/
 
     def initJobDefault(Document doc, BasicDBObject query){
-        doc.append("WorflowData", query.get("WorflowData"));
+        doc.append("WorkflowData", query.get("WorkflowData"));
         doc.append("result_instance_id1", query.get("result_instance_id1"));
         doc.append("result_instance_id2", query.get("result_instance_id2"));
         return doc;
@@ -222,7 +222,7 @@ class MongoCacheService {
         while(cursor.hasNext()) {
             JSONObject obj =  new JSONObject(cursor.next().toJson());
             result = new JSONObject();
-            String highDimName =  obj.get("WorflowData");
+            String highDimName =  obj.get("WorkflowData");
             String result_instance_id1 =  obj.get("result_instance_id1");
             String result_instance_id2 =  obj.get("result_instance_id2");
             String name = "HighDim Data: " +  highDimName + "<br /> cohort 1 : " + result_instance_id1 + "<br /> cohort 2 : " + result_instance_id2;

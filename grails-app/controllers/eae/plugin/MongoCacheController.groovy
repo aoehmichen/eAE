@@ -42,7 +42,7 @@ class MongoCacheController {
                 query = new BasicDBObject("ListOfGenes", params.ListOfGenes);
                 break;
             default :
-                query.append("WorflowData", params.WorflowData);
+                query.append("WorkflowData", params.WorkflowData);
                 query.append("result_instance_id1", params.result_instance_id1);
                 query.append("result_instance_id2", params.result_instance_id2);
                 break;

@@ -65,17 +65,17 @@
 
     function buildOutput(jsonRecord){
         var _o = $('#eaeoutputs');
-        _o.append($('<table/>').attr("id","topPathways").attr("class", "cachetable")
+        _o.append($('<table/>').attr("id","TopPathways").attr("class", "cachetable")
                 .append($('<tr/>')
                         .append($('<th/>').text("Pathways"))
                         .append($('<th/>').text("Correction: " + jsonRecord.Correction))));
-        $.each(jsonRecord.topPathways, function(i, e){
-            $('#topPathways').append($('<tr/>')
+        $.each(jsonRecord.TopPathways, function(i, e){
+            $('#TopPathways').append($('<tr/>')
                     .append($('<td/>').text(e[0]))
                     .append($('<td/>').text(e[1])))
         });
 
-        var topPathway = jsonRecord.topPathways[0][0].toString();
+        var topPathway = jsonRecord.TopPathways[0][0].toString();
         _o.append($('<br/>').html("&nbsp"));
         _o.append($('<div/>').html(topPathway));
         var html = $.parseHTML(jsonRecord.KeggHTML);

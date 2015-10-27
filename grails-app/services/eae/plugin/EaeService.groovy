@@ -70,7 +70,7 @@ class EaeService {
     }
 
     private def pePostProcessing(result){
-        def topPathway = result.get('topPathways').get(0).get(0)
+        def topPathway = result.get('TopPathways').get(0).get(0)
         def url = "http://www.kegg.jp/pathway/" + topPathway;
         def listOfGenesIDs = result.get('ListOfGenesIDs').split(" ");
 

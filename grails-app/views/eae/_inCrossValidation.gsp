@@ -92,9 +92,9 @@
                         .append($('<th/>').text("Computation time"))
         ));
         $('#cvtable').append($('<tr/>')
-                        .append($('<td/>').text(jsonRecord.algorithmUsed))
-                        .append($('<td/>').text(jsonRecord.numberOfFeaturesToRemove*100 + '%'))
-                        .append($('<td/>').text(jsonRecord.resampling))
+                        .append($('<td/>').text(jsonRecord.AlgorithmUsed))
+                        .append($('<td/>').text(jsonRecord.NumberOfFeaturesToRemove*100 + '%'))
+                        .append($('<td/>').text(jsonRecord.Resampling))
                         .append($('<td/>').text(duration+ 's'))
         );
 
@@ -109,9 +109,8 @@
                     return +d.y;
                 })
                 .height(250);
-
-        console.log(jsonRecord.performanceCurve);
-        d3.select('#cvPerformanceGraph').datum(formatData(jsonRecord.performanceCurve)).call(chart);
+        
+        d3.select('#cvPerformanceGraph').datum(formatData(jsonRecord.PerformanceCurve)).call(chart);
     }
 
 </script>
