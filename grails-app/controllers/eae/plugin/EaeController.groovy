@@ -41,6 +41,16 @@ class EaeController {
         return [SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username];
     }
 
+    def oozieParams(){
+        final String OOZIE_URL = "http://146.169.32.200:11000/oozie";
+        final String JOB_TRACKER = "eti-spark-master.novalocal";
+        final String JOB_TRACKER_PORT = "8032";
+        final String NAMENODE = "eti-spark-master.novalocal";
+        final String NAMENODE_PORT = "8020";
+
+        return [OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT];
+    }
+
     def runPEForSelectedGenes = {
         final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
         String database = "eae";
@@ -81,11 +91,12 @@ class EaeController {
 
     def runWorkflow = {
         final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
-        String OOzie_URL = "http://146.169.32.200:11000/oozie";
+        final def (OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT) = oozieParams();
+
         String database = "eae";
         String worflow = params.workflowSelected;
-        eaeService.scheduleOOzieJob(OOzie_URL);
-        return "OOzie got ok"
+
+
         def parameterMap = eaeDataService.queryData(params);
         def query = mongoCacheService.buildMongoQuery(params);
 
@@ -93,13 +104,13 @@ class EaeController {
         String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_URL, (String)MONGO_PORT, database, worflow, query)
         def result
         if(cached == "NotCached") {
-            String workflowSpecificParameters = eaeService.customPreProcessing(params, worflow, MONGO_URL, MONGO_PORT, database, username)
+            String workflowParameters = eaeService.customPreProcessing(params, worflow, MONGO_URL, MONGO_PORT, database, username)
             String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, worflow, username, query)
             String dataFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, parameterMap, scriptDir, SPARK_URL, "data")
             String additionalFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, parameterMap, scriptDir, SPARK_URL, "additional")
             dataFileName = "GSE31773.txt" // this is a hack before i figure out the tm data shit.
-
-            eaeService.sparkSubmit(scriptDir, SPARK_URL, worflow+".py", dataFileName , workflowSpecificParameters, mongoDocumentID)
+            eaeService.scheduleOOzieJob(OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT, worflow, workflowParameters);
+            //eaeService.sparkSubmit(scriptDir, SPARK_URL, worflow+".py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
             result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, database, worflow, query);

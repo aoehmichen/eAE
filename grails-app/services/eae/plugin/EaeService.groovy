@@ -18,25 +18,24 @@ class EaeService {
         return scriptList
     }
 
-    def scheduleOOzieJob(OOzie_URL){
+    def scheduleOOzieJob(String OOZIE_URL, String JOB_TRACKER, String JOB_TRACKER_PORT, String NAMENODE, String NAMENODE_PORT, String workflow, workflowSpecificParameters){
         // get a OozieClient for local Oozie
-        OozieClient wc = new OozieClient(OOzie_URL);
+        OozieClient wc = new OozieClient(OOZIE_URL);
 
         // create a workflow job configuration and set the workflow application path
         Properties conf = wc.createConfiguration();
         conf.setProperty(OozieClient.USER_NAME, "centos");
-        conf.setProperty("jobTracker", "eti-spark-master.novalocal:8032"); // the port must match yarn.resourcemanager.address's
-        conf.setProperty("queueName", "default");
-        conf.setProperty("nameNode", "hdfs://eti-spark-master.novalocal:8020")
-        conf.setProperty(OozieClient.APP_PATH, "hdfs://eti-spark-master.novalocal:8020/user/centos/examples/apps/map-reduce/workflow.xml");
-        // setting workflow parameters
-        conf.setProperty("examplesRoot", "examples")
+        conf.setProperty("jobTracker", JOB_TRACKER + ":" + JOB_TRACKER_PORT); // the port must match yarn.resourcemanager.address's
+        conf.setProperty("nameNode", "hdfs://" + NAMENODE + ":" + NAMENODE_PORT)
+        conf.setProperty(OozieClient.APP_PATH, "hdfs://"+ NAMENODE + ":" + NAMENODE_PORT + "/user/centos/worflows/" + workflow +"_workflow.xml");
 
-        //conf.setProperty("inputDir", "/usr/tucu/inputdir");
-        conf.setProperty("outputDir", "map-reduce");
+        // setting workflow parameters
+        workflowSpecificParameters.each{
+            k, v -> conf.setProperty(k,v) }
 
         // submit and start the workflow job
         String jobId = wc.run(conf);
+
         return jobId;
     }
 
@@ -76,9 +75,9 @@ class EaeService {
             PEParameters = "true " + mongoDocumentIDPE
         }
 
-        String workflowSpecificParameters = "SVM featuresList.txt 0.2 1 0.5 " + PEParameters // "SVM" + additionalFileName + "0.2 1 0.5"
+        String workflowParameters = "SVM featuresList.txt 0.2 1 0.5 " + PEParameters // "SVM" + additionalFileName + "0.2 1 0.5"
 
-        return workflowSpecificParameters;
+        return workflowParameters;
     }
 
 
