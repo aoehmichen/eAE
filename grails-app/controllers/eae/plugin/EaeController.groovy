@@ -81,8 +81,8 @@ class EaeController {
 
     def runWorkflow = {
         final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
-        String OOzie_URL = "http://localhost:11000/oozie"
-        String database = "eae"
+        String OOzie_URL = "http://localhost:11000/oozie";
+        String database = "eae";
         String worflow = params.workflowSelected;
 
         def parameterMap = eaeDataService.queryData(params)

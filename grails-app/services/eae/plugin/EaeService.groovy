@@ -28,7 +28,7 @@ class EaeService {
         // setting workflow parameters
         conf.setProperty("jobTracker", "eti-spark-master.novalocal:8032");
         //conf.setProperty("inputDir", "/usr/tucu/inputdir");
-        conf.setProperty("outputDir", "/usr/tucu/outputdir");
+        conf.setProperty("outputDir", "map-reduce");
 
         // submit and start the workflow job
         String jobId = wc.run(conf);
