@@ -25,9 +25,13 @@ class EaeService {
         // create a workflow job configuration and set the workflow application path
         Properties conf = wc.createConfiguration();
         conf.setProperty(OozieClient.USER_NAME, "centos");
+        conf.setProperty("jobTracker", "eti-spark-master.novalocal:8032"); // the port must match yarn.resourcemanager.address's
+        conf.setProperty("queueName", "default");
+        conf.setProperty("nameNode", "hdfs://eti-spark-master.novalocal:8020")
         conf.setProperty(OozieClient.APP_PATH, "hdfs://eti-spark-master.novalocal:8020/user/centos/examples/apps/map-reduce/workflow.xml");
         // setting workflow parameters
-        conf.setProperty("jobTracker", "eti-spark-master.novalocal:8032"); // the port must match yarn.resourcemanager.address's
+        conf.setProperty("examplesRoot", "examples")
+
         //conf.setProperty("inputDir", "/usr/tucu/inputdir");
         conf.setProperty("outputDir", "map-reduce");
 
