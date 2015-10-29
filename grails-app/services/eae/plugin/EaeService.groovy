@@ -18,7 +18,7 @@ class EaeService {
         return scriptList
     }
 
-    def scheduleOOzieJob(String OOZIE_URL, String JOB_TRACKER, String JOB_TRACKER_PORT, String NAMENODE, String NAMENODE_PORT, String workflow, workflowSpecificParameters){
+    def scheduleOOzieJob(String OOZIE_URL, String JOB_TRACKER, String JOB_TRACKER_PORT, String NAMENODE, String NAMENODE_PORT, String workflow, workflowParameters){
         // get a OozieClient for local Oozie
         OozieClient wc = new OozieClient(OOZIE_URL);
 
@@ -30,7 +30,7 @@ class EaeService {
         conf.setProperty(OozieClient.APP_PATH, "hdfs://"+ NAMENODE + ":" + NAMENODE_PORT + "/user/centos/worflows/" + workflow +"_workflow.xml");
 
         // setting workflow parameters
-        workflowSpecificParameters.each{
+        workflowParameters.each{
             k, v -> conf.setProperty(k,v) }
 
         // submit and start the workflow job
@@ -68,14 +68,19 @@ class EaeService {
     }
 
     private def cvPreprocessing(params, MONGO_URL,MONGO_PORT,database,username){
-
-        String PEParameters = "false abcd0000" // fake mongoId
+        def workflowParameters = [:]
+        String mongoDocumentIDPE = "abcd0000" // fake mongoId
+        String doEnrichement = "false"
         if( params.doEnrichment){
-            String mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, "pe", username, new BasicDBObject("ListOfGenes" , ""))
-            PEParameters = "true " + mongoDocumentIDPE
+            mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, "pe", username, new BasicDBObject("ListOfGenes" , ""))
+            doEnrichement = "true"
         }
-
-        String workflowParameters = "SVM featuresList.txt 0.2 1 0.5 " + PEParameters // "SVM" + additionalFileName + "0.2 1 0.5"
+        workflowParameters['algorithmToUse'] = "SVM";
+        workflowParameters['kfold'] = "0.2";
+        workflowParameters['resampling'] = "1";
+        workflowParameters['numberOfFeaturesToremove'] = "0.5";
+        workflowParameters['mongoDocIdPE'] = mongoDocumentIDPE.toString();
+        workflowParameters['doEnrichement'] = doEnrichement;
 
         return workflowParameters;
     }
