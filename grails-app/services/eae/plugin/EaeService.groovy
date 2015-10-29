@@ -3,6 +3,7 @@ package eae.plugin
 import com.mongodb.BasicDBObject
 import grails.plugins.rest.client.RestBuilder
 import grails.transaction.Transactional
+import org.apache.oozie.client.OozieClient
 
 @Transactional
 class EaeService {
@@ -15,6 +16,23 @@ class EaeService {
     def getHpcScriptList() {
         def scriptList = ['Cross Validation', 'Pathway Enrichment'] //['Cross Validation', 'GWAS - LP', 'Pathway Enrichment', 'General Testing']
         return scriptList
+    }
+
+    def scheduleOOzieJob(OOzie_URL){
+        // get a OozieClient for local Oozie
+        OozieClient wc = new OozieClient(OOzie_URL);
+
+        // create a workflow job configuration and set the workflow application path
+        Properties conf = wc.createConfiguration();
+        conf.setProperty(OozieClient.APP_PATH, "hdfs://eti-spark-master.novalocal:8020/user/centos/examples/apps/map-reduce/workflow.xml");
+        // setting workflow parameters
+        conf.setProperty("jobTracker", "eti-spark-master.novalocal:8032");
+        //conf.setProperty("inputDir", "/usr/tucu/inputdir");
+        conf.setProperty("outputDir", "/usr/tucu/outputdir");
+
+        // submit and start the workflow job
+        String jobId = wc.run(conf);
+        return jobId;
     }
 
     def sparkSubmit(String scriptDir, String SparkURL, String worflowFileName, String dataFileName, String workflowSpecificParameters, String mongoDocumentID){
