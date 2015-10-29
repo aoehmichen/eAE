@@ -215,7 +215,6 @@ class EaeDataService {
                 def data_size = data_value.size();
                 int chunkSize = data_size/size_cohort;
                 String[] subArray = data_value[0..chunkSize-1];
-                println(subArray.size());
                 String line = subArray.join(' ');
                 f.withWriterAppend('utf-8') { writer ->
                     writer.writeLine line
