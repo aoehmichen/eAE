@@ -92,10 +92,8 @@ class EaeController {
     def runWorkflow = {
         final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
         final def (OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT) = oozieParams();
-
         String database = "eae";
         String worflow = params.workflowSelected;
-
 
         def parameterMap = eaeDataService.queryData(params);
         def query = mongoCacheService.buildMongoQuery(params);
