@@ -90,7 +90,7 @@ class MongoCacheService {
         }else{
             if (recordsCount == 0){
                 return "NotCached"
-            }else if(cacheItem.get("status") == "started" ){
+            }else if(cacheItem.get("Status") == "started" ){
                 return "started"
             }else{
                 return "Completed"
