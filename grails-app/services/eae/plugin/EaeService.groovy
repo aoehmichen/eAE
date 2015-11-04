@@ -78,7 +78,7 @@ class EaeService {
         workflowParameters['algorithmToUse'] = "SVM";
         workflowParameters['kfold'] = "0.2";
         workflowParameters['resampling'] = "1";
-        workflowParameters['numberOfFeaturesToremove'] = "0.5";
+        workflowParameters['numberOfFeaturesToRemove'] = "0.5";
         workflowParameters['mongoDocIdPE'] = mongoDocumentIDPE.toString();
         workflowParameters['doEnrichement'] = doEnrichement;
 
