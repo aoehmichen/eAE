@@ -93,28 +93,28 @@ class EaeController {
         final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
         final def (OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT) = oozieParams();
         String database = "eae";
-        String worflow = params.workflow;
+        String workflow = params.workflow;
 
         def parameterMap = eaeDataService.queryData(params);
         def query = mongoCacheService.buildMongoQuery(params);
 
         // We check if this query has already been made before
-        String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_URL, (String)MONGO_PORT, database, worflow, query)
+        String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_URL, (String)MONGO_PORT, database, workflow, query)
         def result
         if(cached == "NotCached") {
-            def workflowParameters = eaeService.customPreProcessing(params, worflow, MONGO_URL, MONGO_PORT, database, username)
-            String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, worflow, username, query)
-            String dataFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, parameterMap, scriptDir, SPARK_URL, "data")
-            String additionalFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, parameterMap, scriptDir, SPARK_URL, "additional")
+            def workflowParameters = eaeService.customPreProcessing(params, workflow, MONGO_URL, MONGO_PORT, database, username)
+            String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, workflow, username, query)
+            String dataFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "data")
+            String additionalFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "additional")
             dataFileName = "GSE31773.txt" // this is a hack before i figure out the tm data shit.
             workflowParameters['mongoDocId'] = mongoDocumentID;
             workflowParameters['dataFile'] = dataFileName;
             workflowParameters['featuresFile'] = additionalFileName;
-            eaeService.scheduleOOzieJob(OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT, worflow, workflowParameters);
-            //eaeService.sparkSubmit(scriptDir, SPARK_URL, worflow+".py", dataFileName , workflowSpecificParameters, mongoDocumentID)
+            eaeService.scheduleOOzieJob(OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT, workflow, workflowParameters);
+            //eaeService.sparkSubmit(scriptDir, SPARK_URL, workflow+".py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
-            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, database, worflow, query);
+            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, database, workflow, query);
             //mongoCacheService.duplicateCVCacheForUser(MONGO_URL, MONGO_PORT,username, result)
         }else{
             result = "Your Job has been submitted. Please come back later for the result"

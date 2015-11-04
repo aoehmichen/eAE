@@ -27,7 +27,7 @@ class EaeService {
         conf.setProperty(OozieClient.USER_NAME, "centos");
         conf.setProperty("jobTracker", JOB_TRACKER + ":" + JOB_TRACKER_PORT); // the port must match yarn.resourcemanager.address's
         conf.setProperty("nameNode", "hdfs://" + NAMENODE + ":" + NAMENODE_PORT)
-        conf.setProperty(OozieClient.APP_PATH, "hdfs://"+ NAMENODE + ":" + NAMENODE_PORT + "/user/centos/worflows/" + workflow +"_workflow.xml");
+        conf.setProperty(OozieClient.APP_PATH, "hdfs://"+ NAMENODE + ":" + NAMENODE_PORT + "/user/centos/workflows/" + workflow +"_workflow.xml");
 
         // setting workflow parameters
         workflowParameters.each{
@@ -39,7 +39,7 @@ class EaeService {
         return jobId;
     }
 
-    def sparkSubmit(String scriptDir, String SparkURL, String worflowFileName, String dataFileName, String workflowSpecificParameters, String mongoDocumentID){
+    def sparkSubmit(String scriptDir, String SparkURL, String workflowFileName, String dataFileName, String workflowSpecificParameters, String mongoDocumentID){
         def script = scriptDir +'executeSparkJob.sh'
 
         def scriptFile = new File(script)
@@ -50,7 +50,7 @@ class EaeService {
         }else {
             log.error('The Script file spark submit wasn\'t found')
         }
-        def executeCommand = script + " " + SparkURL + " " + worflowFileName + " " + dataFileName + " " + workflowSpecificParameters + " " + mongoDocumentID
+        def executeCommand = script + " " + SparkURL + " " + workflowFileName + " " + dataFileName + " " + workflowSpecificParameters + " " + mongoDocumentID
         println(executeCommand)
         executeCommand.execute().waitFor()
         return 0
