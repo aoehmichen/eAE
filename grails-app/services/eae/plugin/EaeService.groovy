@@ -75,7 +75,7 @@ class EaeService {
             mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, "pe", username, new BasicDBObject("ListOfGenes" , ""))
             doEnrichement = "true"
         }
-        workflowParameters['worflow'] = "cv.py";
+        workflowParameters['workflow'] = "cv.py";
         workflowParameters['algorithmToUse'] = "SVM";
         workflowParameters['kfold'] = "0.2";
         workflowParameters['resampling'] = "1";
