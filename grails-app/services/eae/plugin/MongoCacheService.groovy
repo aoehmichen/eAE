@@ -189,7 +189,7 @@ class MongoCacheService {
         Document doc = new Document();
         doc.append("TopPathways", arrayList)
         doc.append("KeggTopPathway",cacheRes.get("KeggTopPathway") )
-        doc.append("status", "Completed")
+        doc.append("Status", "Completed")
         doc.append("User", username)
         doc.append("ListOfGenes",cacheRes.get("ListOfGenes") )
         doc.append("Correction",cacheRes.get("Correction") )
