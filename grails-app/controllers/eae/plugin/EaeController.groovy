@@ -42,10 +42,10 @@ class EaeController {
     }
 
     def oozieParams(){
-        final String OOZIE_URL = "http://146.169.32.200:11000/oozie";
-        final String JOB_TRACKER = "eti-spark-master.novalocal";
+        final String OOZIE_URL = "http://146.169.32.106:11000/oozie";
+        final String JOB_TRACKER = "eti-spark-master";
         final String JOB_TRACKER_PORT = "8032";
-        final String NAMENODE = "eti-spark-master.novalocal";
+        final String NAMENODE = "eti-spark-master";
         final String NAMENODE_PORT = "8020";
 
         return [OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT];
