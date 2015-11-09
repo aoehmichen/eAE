@@ -46,7 +46,7 @@ class EaeController {
         final String JOB_TRACKER = grailsApplication.config.com.eae.jobTracker; //"eti-spark-master.novalocal";
         final String JOB_TRACKER_PORT = grailsApplication.config.com.eae.jobTrackerPort;// "8032";
         final String NAMENODE = grailsApplication.config.com.eae.hdfsNamenode; //"eti-spark-master.novalocal";
-        final String NAMENODE_PORT =grailsApplication.config.com.eae.namenodePort; //"8020"
+        final String NAMENODE_PORT =grailsApplication.config.com.eae.hdfsNamenodePort; //"8020"
 
         return [OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT];
     }
