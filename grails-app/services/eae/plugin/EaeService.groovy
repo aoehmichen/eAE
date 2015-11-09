@@ -24,10 +24,10 @@ class EaeService {
 
         // create a workflow job configuration and set the workflow application path
         Properties conf = wc.createConfiguration();
-        conf.setProperty(OozieClient.USER_NAME, "centos");
+        conf.setProperty(OozieClient.USER_NAME, "ubuntu");
         conf.setProperty("jobTracker", JOB_TRACKER + ":" + JOB_TRACKER_PORT); // the port must match yarn.resourcemanager.address's
         conf.setProperty("nameNode", "hdfs://" + NAMENODE + ":" + NAMENODE_PORT)
-        conf.setProperty(OozieClient.APP_PATH, "hdfs://"+ NAMENODE + ":" + NAMENODE_PORT + "/user/centos/workflows/" + workflow +"_workflow.xml");
+        conf.setProperty(OozieClient.APP_PATH, "hdfs://"+ NAMENODE + ":" + NAMENODE_PORT + "/user/ubuntu/workflows/" + workflow +"_workflow.xml");
 
         // setting workflow parameters
         workflowParameters.each{

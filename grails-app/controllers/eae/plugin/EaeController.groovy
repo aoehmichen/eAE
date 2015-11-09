@@ -42,11 +42,11 @@ class EaeController {
     }
 
     def oozieParams(){
-        final String OOZIE_URL = "http://146.169.32.200:11000/oozie";
-        final String JOB_TRACKER = "eti-spark-master.novalocal";
-        final String JOB_TRACKER_PORT = "8032";
-        final String NAMENODE = "eti-spark-master.novalocal";
-        final String NAMENODE_PORT = "8020";
+        final String OOZIE_URL = grailsApplication.config.com.eae.OOzieURL; //"http://146.169.32.200:11000/oozie";
+        final String JOB_TRACKER = grailsApplication.config.com.eae.jobTracker; //"eti-spark-master.novalocal";
+        final String JOB_TRACKER_PORT = grailsApplication.config.com.eae.jobTrackerPort;// "8032";
+        final String NAMENODE = grailsApplication.config.com.eae.hdfsNamenode; //"eti-spark-master.novalocal";
+        final String NAMENODE_PORT =grailsApplication.config.com.eae.namenodePort; //"8020"
 
         return [OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT];
     }
