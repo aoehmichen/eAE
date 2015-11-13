@@ -27,9 +27,9 @@ class EaeService {
         conf.setProperty(OozieClient.USER_NAME, "ubuntu");
         conf.setProperty("jobTracker", JOB_TRACKER + ":" + JOB_TRACKER_PORT); // the port must match yarn.resourcemanager.address's
         //conf.setProperty("nameNode", "hdfs://" + NAMENODE + ":" + NAMENODE_PORT); this is for the regular install but mapr needs maprfs ....
-        conf.setProperty("nameNode", "maprfs:///" + NAMENODE + ":" + NAMENODE_PORT);
+        conf.setProperty("nameNode", "maprfs:///");
         //conf.setProperty(OozieClient.APP_PATH, "hdfs://"+ NAMENODE + ":" + NAMENODE_PORT + "/user/ubuntu/workflows/" + workflow +"_workflow.xml");
-        conf.setProperty(OozieClient.APP_PATH, "maprfs:///"+ NAMENODE + ":" + NAMENODE_PORT + "/user/ubuntu/workflows/" + workflow +"_workflow.xml");
+        conf.setProperty(OozieClient.APP_PATH, "maprfs:///user/ubuntu/workflows/" + workflow +"_workflow.xml");
         
         // setting workflow parameters
         workflowParameters.each{
@@ -113,5 +113,14 @@ class EaeService {
         result.put("KeggHTML", resp.text);
 
         return result;
+    }
+
+
+    def eaeInterfaceSparkSubmit(String interfaceURL, paramMap ){
+        def url = interfaceURL + "interfaceEAE/sparkSubmit/runSubmit" //"http://146.169.32.106:8081/interfaceEAE/sparkSubmit/runSubmit"
+        def rest = new RestBuilder();
+        def resp = rest.post(url, paramMap);
+        println(resp.text)
+        return resp.text
     }
 }
