@@ -117,7 +117,7 @@ class EaeService {
     }
 
 
-    def eaeInterfaceSparkSubmit(String interfaceURL, paramMap ){
+    def eaeInterfaceSparkSubmit(String interfaceURL, Map paramMap ){
         def url = interfaceURL + "interfaceEAE/sparkSubmit/runSubmit" //"http://146.169.32.106:8081/interfaceEAE/sparkSubmit/runSubmit"
         def rest = new RestBuilder();
         def resp = rest.post(url, paramMap);

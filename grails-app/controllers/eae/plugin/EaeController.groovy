@@ -54,7 +54,7 @@ class EaeController {
     def interfaceParams(){
         final String INTERFACE_URL = grailsApplication.config.com.eae.interfaceURL;
 
-        return [INTERFACE_URL]
+        return INTERFACE_URL
     }
 
     def runPEForSelectedGenes = {
