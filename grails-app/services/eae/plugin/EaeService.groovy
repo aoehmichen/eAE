@@ -70,20 +70,21 @@ class EaeService {
     }
 
     private def cvPreprocessing(params, MONGO_URL,MONGO_PORT,database,username){
-        def workflowParameters = [:]
-        String mongoDocumentIDPE = "abcd0000" // fake mongoId
-        String doEnrichement = "false"
+        def workflowParameters = [:];
+        String mongoDocumentIDPE = "abcd0000" ;// fake mongoId
+        String doEnrichement = "false";
+        String algorithmToUse = "SVM"
+        String kfold= "0.2";
+        String resampling = "1";
+        String numberOfFeaturesToRemove = "0.4"
+
         if( params.doEnrichment){
             mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, "pe", username, new BasicDBObject("ListOfGenes" , ""))
             doEnrichement = "true"
         }
-        workflowParameters['workflow'] = "cv.py";
-        workflowParameters['algorithmToUse'] = "SVM";
-        workflowParameters['kfold'] = "0.2";
-        workflowParameters['resampling'] = "1";
-        workflowParameters['numberOfFeaturesToRemove'] = "0.5";
-        workflowParameters['mongoDocIdPE'] = mongoDocumentIDPE.toString();
-        workflowParameters['doEnrichement'] = doEnrichement;
+
+        workflowParameters['workflow'] = params.workflow;
+        workflowParameters['workflowSpecificParameters'] = algorithmToUse + " " + kfold + " " + resampling + " " +  numberOfFeaturesToRemove + " " + doEnrichement + " " + mongoDocumentIDPE.toString();
 
         return workflowParameters;
     }

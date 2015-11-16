@@ -112,19 +112,19 @@ class EaeController {
         def parameterMap = eaeDataService.queryData(params);
         def query = mongoCacheService.buildMongoQuery(params);
 
+        def result
         // We check if this query has already been made before
         String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_URL, (String)MONGO_PORT, database, workflow, query)
-        def result
         if(cached == "NotCached") {
             def workflowParameters = eaeService.customPreProcessing(params, workflow, MONGO_URL, MONGO_PORT, database, username)
             String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, workflow, username, query)
             String dataFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "data")
             String additionalFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "additional")
             dataFileName = "GSE31773.txt" // this is a hack before i figure out the tm data shit.
-            workflowParameters['mongoDocId'] = mongoDocumentID;
-            workflowParameters['dataFile'] = dataFileName;
-            workflowParameters['featuresFile'] = additionalFileName;
-            eaeService.eaeInterfaceSparkSubmit( INTERFACE_URL,workflowParameters);
+            workflowParameters['mongoDocumentID'] = mongoDocumentID;
+            workflowParameters['dataFileName'] = dataFileName;
+            workflowParameters['additionalFileName'] = additionalFileName;
+            eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL, workflowParameters);
             //eaeService.scheduleOOzieJob(OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT, workflow, workflowParameters);
             //eaeService.sparkSubmit(scriptDir, SPARK_URL, workflow+".py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
