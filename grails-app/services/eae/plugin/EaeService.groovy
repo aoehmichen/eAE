@@ -5,6 +5,7 @@ import grails.plugins.rest.client.RestBuilder
 import grails.transaction.Transactional
 import groovyx.net.http.RESTClient
 import org.apache.oozie.client.OozieClient
+import org.json.JSONObject
 
 @Transactional
 class EaeService {
@@ -121,10 +122,10 @@ class EaeService {
     def eaeInterfaceSparkSubmit(String interfaceURL, Map paramMap ){
         //def url = interfaceURL + "interfaceEAE/sparkSubmit/runSubmit" //"http://146.169.32.106:8081/interfaceEAE/sparkSubmit/runSubmit"
         def rest = new RESTClient(interfaceURL+"interfaceEAE/");
-
+        def jsonBody = new JSONObject(paramMap)
         def resp = rest.post(
             path: "sparkSubmit/runSubmit",
-            body: paramMap,
+            body: jsonBody,
             contentType: groovyx.net.http.ContentType.JSON
         );
         println(resp.text)
