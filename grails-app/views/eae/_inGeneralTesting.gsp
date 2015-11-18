@@ -29,4 +29,10 @@
     function triggerGT() {
         jQuery("#outputs").html("AJAX CALL success!");
     }
+
+    function cacheDIVCustomName(name){
+        var holder =  $('<td/>');
+        holder.html(name);
+        return holder;
+    }
 </script>

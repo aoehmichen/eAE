@@ -41,11 +41,29 @@ class EaeController {
         return [SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username];
     }
 
+    def oozieParams(){
+        final String OOZIE_URL = grailsApplication.config.com.eae.OOzieURL; //"http://146.169.32.200:11000/oozie";
+        final String JOB_TRACKER = grailsApplication.config.com.eae.jobTracker; //"eti-spark-master.novalocal";
+        final String JOB_TRACKER_PORT = grailsApplication.config.com.eae.jobTrackerPort;// "8032";
+        final String NAMENODE = grailsApplication.config.com.eae.hdfsNamenode; //"eti-spark-master.novalocal";
+        final String NAMENODE_PORT =grailsApplication.config.com.eae.hdfsNamenodePort; //"8020"
+
+        return [OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT];
+    }
+
+    def interfaceParams(){
+        final String INTERFACE_URL = grailsApplication.config.com.eae.interfaceURL;
+
+        return INTERFACE_URL
+    }
+
     def runPEForSelectedGenes = {
         final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
         String database = "eae";
         String worflow = "pe";
-        String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join(' ').trim()
+        String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join(' ').trim();
+        final def INTERFACE_URL = interfaceParams();
+        def workflowParameters = [:]
 
         BasicDBObject query = new BasicDBObject("ListOfGenes", saneGenesList);
         query.append("DocumentType", "Original")
@@ -57,7 +75,12 @@ class EaeController {
             String dataFileName = worflow + "-" + username + "-" + mongoDocumentID + ".txt" //"listOfGenes.txt"
             eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, saneGenesList, scriptDir, SPARK_URL, "data")
             String workflowSpecificParameters = params.selectedCorrection
-            eaeService.sparkSubmit(scriptDir, SPARK_URL, "pe.py", dataFileName , workflowSpecificParameters, mongoDocumentID)
+            //eaeService.sparkSubmit(scriptDir, SPARK_URL, "pe.py",
+            // dataFileName , workflowSpecificParameters, mongoDocumentID)
+            workflowParameters['mongoDocId'] = mongoDocumentID;
+            workflowParameters['dataFile'] = dataFileName;
+            workflowParameters['featuresFile'] = additionalFileName;
+            eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL,workflowParameters);
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
             result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,database, worflow, query);
@@ -79,33 +102,34 @@ class EaeController {
     }
 
 
-    def runCV = {
+    def runWorkflow = {
         final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
-        String database = "eae"
-        String worflow = "cv";
+        //final def (OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT) = oozieParams();
+        final def INTERFACE_URL = interfaceParams();
+        String database = "eae";
+        String workflow = params.workflow;
 
-        def parameterMap = eaeDataService.queryData(params)
-        def query = mongoCacheService.buildMongoQuery(params)
+        def parameterMap = eaeDataService.queryData(params);
+        def query = mongoCacheService.buildMongoQuery(params);
 
-        // We check if this query has already been made before
-        String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_URL, (String)MONGO_PORT, database, worflow, query)
         def result
+        // We check if this query has already been made before
+        String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_URL, (String)MONGO_PORT, database, workflow, query)
         if(cached == "NotCached") {
-            String PEParameters = "false abcd0000" // fake mongoId
-            if(parameterMap['doEnrichment']){
-                String mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, "pe", username, new BasicDBObject("ListOfGenes" , ""))
-                PEParameters = "true " + mongoDocumentIDPE
-            }
-            String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, worflow, username, query)
-            //String dataFileName = worflow+ "-" + username + "-" + mongoDocumentID + ".txt"
-            String dataFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, parameterMap, scriptDir, SPARK_URL, "data")
-            String additionalFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, parameterMap, scriptDir, SPARK_URL, "additional")
-            String workflowSpecificParameters = "SVM featuresList.txt 0.2 1 0.5 " + PEParameters // "SVM" + additionalFileName + "0.2 1 0.5"
+            def workflowParameters = eaeService.customPreProcessing(params, workflow, MONGO_URL, MONGO_PORT, database, username)
+            String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, workflow, username, query)
+            String dataFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "data")
+            String additionalFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "additional")
             dataFileName = "GSE31773.txt" // this is a hack before i figure out the tm data shit.
-            eaeService.sparkSubmit(scriptDir, SPARK_URL, "cv.py", dataFileName , workflowSpecificParameters, mongoDocumentID)
+            workflowParameters['mongoDocumentID'] = mongoDocumentID;
+            workflowParameters['dataFileName'] = dataFileName;
+            workflowParameters['additionalFileName'] = additionalFileName;
+            eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL, workflowParameters);
+            //eaeService.scheduleOOzieJob(OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT, workflow, workflowParameters);
+            //eaeService.sparkSubmit(scriptDir, SPARK_URL, workflow+".py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
-            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, database, worflow, query);
+            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, database, workflow, query);
             //mongoCacheService.duplicateCVCacheForUser(MONGO_URL, MONGO_PORT,username, result)
         }else{
             result = "Your Job has been submitted. Please come back later for the result"

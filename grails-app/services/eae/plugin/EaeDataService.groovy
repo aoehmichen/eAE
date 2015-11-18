@@ -1,10 +1,12 @@
 package eae.plugin
 
+import grails.transaction.Transactional
 import grails.util.Environment
 import grails.util.Holders
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
+@Transactional
 class EaeDataService {
 
     def DEBUG =  Environment.current == Environment.DEVELOPMENT
@@ -83,7 +85,6 @@ class EaeDataService {
 
     def createParameterMap(params){
         def parameterMap = [:]
-        parameterMap['doEnrichment'] = params.doEnrichment
         parameterMap['result_instance_id1'] = params.result_instance_id1
         parameterMap['result_instance_id2'] = params.result_instance_id2
         parameterMap['conceptBoxes'] = new JsonSlurper().parseText(params.conceptBoxes)
@@ -214,7 +215,6 @@ class EaeDataService {
                 def data_size = data_value.size();
                 int chunkSize = data_size/size_cohort;
                 String[] subArray = data_value[0..chunkSize-1];
-                println(subArray.size());
                 String line = subArray.join(' ');
                 f.withWriterAppend('utf-8') { writer ->
                     writer.writeLine line

@@ -40,6 +40,9 @@
 </div>
 
 <script>
+    var currentWorkflow = "pe";
+    populateCacheDIV(currentWorkflow);
+
     function triggerPE() {
         var _s = document.getElementById('correctionSelect');
         var selectedCorrection = _s.options[_s.selectedIndex].value;
@@ -47,10 +50,43 @@
     }
 
     function refreshPECache(){
-        populateCacheDIV("pe")
+        populateCacheDIV(currentWorkflow)
     }
 
-    populateCacheDIV("pe")
+    function cacheDIVCustomName(name){
+        var holder =  $('<td/>');
+        $.each(name.split(' '), function (i, e) {
+            holder.append(
+                    $('<span />').addClass('eae_genetag').text(e)
+            )
+        });
+    return holder;
+    }
+
+    function buildOutput(jsonRecord){
+        var _o = $('#eaeoutputs');
+        _o.append($('<table/>').attr("id","TopPathways").attr("class", "cachetable")
+                .append($('<tr/>')
+                        .append($('<th/>').text("Pathways"))
+                        .append($('<th/>').text("Correction: " + jsonRecord.Correction))));
+        $.each(jsonRecord.TopPathways, function(i, e){
+            $('#TopPathways').append($('<tr/>')
+                    .append($('<td/>').text(e[0]))
+                    .append($('<td/>').text(e[1])))
+        });
+
+        var topPathway = jsonRecord.TopPathways[0][0].toString();
+        _o.append($('<br/>').html("&nbsp"));
+        _o.append($('<div/>').html(topPathway));
+        var html = $.parseHTML(jsonRecord.KeggHTML);
+        $.each( html, function( i, el ) {
+            if(el.nodeName == "IMG"){
+                _o.append($('<img/>').attr('src', "http://www.kegg.jp"+ el.getAttribute("src")));
+            }
+        });
+
+        _o.append($('<div/>').html(jsonRecord.KeggTopPathway.replace(/\n/g, '<br/>')));
+    }
 
 </script>
 
