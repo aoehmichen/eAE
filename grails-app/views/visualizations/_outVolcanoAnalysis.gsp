@@ -45,8 +45,13 @@
 
 .logFCLine {
     stroke: #0000FF;
-    stroke-width: 2px;
+    stroke-width: 3px;
     shape-rendering: crispEdges;
+}
+
+.logFCLine:hover {
+    opacity: 0.4;
+    cursor: ew-resize;
 }
 
 .axisText {
@@ -132,7 +137,7 @@
             .attr("height", height * 2);
 
     var x = d3.scale.linear()
-            .domain(d3.extent(logFCs))
+            .domain([-d3.max(logFCs), d3.max(logFCs)])
             .range([0, width]);
 
     var y = d3.scale.linear()
@@ -202,7 +207,7 @@
                 .attr("y2", yPos);
         d3.selectAll('.pText')
                 .attr('y', yPos)
-                .text((1 / Math.pow(10, y.invert(yPos))).toFixed(5));
+                .text("p = " + (1 / Math.pow(10, y.invert(yPos))).toFixed(5));
     }
 
     var pDrag = d3.behavior.drag()
@@ -225,19 +230,59 @@
             .text('p = 0.0500')
             .style('fill', 'red');
 
+    function lFCDragged() {
+        var xPos = d3.event.x;
+
+        if (xPos < 0) {
+            xPos = 0;
+        }
+        if (xPos > width) {
+            xPos = width;
+        }
+
+        var logFC = x.invert(xPos);
+
+        if (xPos < width / 2) {
+            d3.selectAll('.logFCLine.left')
+                    .attr("x1", x(logFC))
+                    .attr("x2", x(logFC));
+            d3.selectAll('.logFCLine.right')
+                    .attr("x1", x(-logFC))
+                    .attr("x2", x(-logFC));
+
+            d3.selectAll('.logFCText.left')
+                    .attr("x", x(logFC))
+                    .text("log2FC = " + (-Math.abs(logFC)).toFixed(2));
+            d3.selectAll('.logFCText.right')
+                    .attr("x", x(-logFC))
+                    .text("log2FC = " + Math.abs(logFC).toFixed(2));
+        } else {
+            d3.selectAll('.logFCLine.left')
+                    .attr("x1", x(-logFC))
+                    .attr("x2", x(-logFC));
+            d3.selectAll('.logFCLine.right')
+                    .attr("x1", x(logFC))
+                    .attr("x2", x(logFC));
+
+            d3.selectAll('.logFCText.left')
+                    .attr("x", x(-logFC))
+                    .text("log2FC = " + Math.abs(logFC).toFixed(2));
+            d3.selectAll('.logFCText.right')
+                    .attr("x", x(logFC))
+                    .text("log2FC = " + (-Math.abs(logFC)).toFixed(2));
+        }
+    }
+
+    var lFCDrag = d3.behavior.drag()
+            .on("drag", lFCDragged);
+
     volcanoplot.append('line')
             .attr('class', 'left logFCLine')
             .attr('x1', x(-0.5))
             .attr('y1', height)
             .attr('x2', x(-0.5))
-            .attr('y2', 0);
-
-    volcanoplot.append('line')
-            .attr('class', 'right logFCLine')
-            .attr('x1', x(0.5))
-            .attr('y1', height)
-            .attr('x2', x(0.5))
-            .attr('y2', 0);
+            .attr('y2', 0)
+            .call(lFCDrag);
 
     volcanoplot.append('text')
             .attr('class', 'text left logFCText')
@@ -247,6 +292,14 @@
             .attr("text-anchor", "middle")
             .text('log2FC = -0.5')
             .style('fill', '#0000FF');
+
+    volcanoplot.append('line')
+            .attr('class', 'right logFCLine')
+            .attr('x1', x(0.5))
+            .attr('y1', height)
+            .attr('x2', x(0.5))
+            .attr('y2', 0)
+            .call(lFCDrag);
 
     volcanoplot.append('text')
             .attr('class', 'text right logFCText')
