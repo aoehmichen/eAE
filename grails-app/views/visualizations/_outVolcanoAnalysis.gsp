@@ -39,7 +39,6 @@
 }
 
 .pLine:hover {
-    opacity: 0.4;
     cursor: ns-resize;
 }
 
@@ -50,18 +49,11 @@
 }
 
 .logFCLine:hover {
-    opacity: 0.4;
     cursor: ew-resize;
 }
 
 .axisText {
     font-size: 14px;
-}
-
-.brush .extent {
-    fill: blue;
-    opacity: .25;
-    shape-rendering: crispEdges;
 }
 
 .mytable, .myth, .mytd {
@@ -116,11 +108,12 @@
         };
     });
 
+    var currentLogFC = 0.5;
+    var currentNegLog10P = - Math.log10(0.05);
+
     var margin = {top: 100, right: 100, bottom: 100, left: 100};
     var width = 1200 - margin.left - margin.right;
     var height = 800 - margin.top - margin.bottom;
-
-    var oo5p = - Math.log10(0.05);
 
     var volcanotable = d3.select("#volcanotable").append("table")
             .attr("width", width)
@@ -178,22 +171,6 @@
             .attr("class", "tooltip text")
             .style("visibility", "hidden");
 
-    var brush = d3.svg.brush()
-            .x(d3.scale.identity().domain([-20, width + 20]))
-            .y(d3.scale.identity().domain([-20, height + 20]))
-            .on("brushend", function() {
-                updateSelection();
-            });
-
-    volcanoplot.append("g")
-            .attr("class", "brush")
-            .on("mousedown", function(){
-                if(d3.event.button === 2){
-                    d3.event.stopImmediatePropagation();
-                }
-            })
-            .call(brush);
-
     function pDragged() {
         var yPos = d3.event.y;
         if (yPos < 0 ) {
@@ -202,12 +179,20 @@
         if (yPos > height) {
             yPos = height;
         }
+
         d3.selectAll('.pLine')
                 .attr("y1", yPos)
                 .attr("y2", yPos);
         d3.selectAll('.pText')
                 .attr('y', yPos)
                 .text("p = " + (1 / Math.pow(10, y.invert(yPos))).toFixed(5));
+
+        currentNegLog10P = y.invert(yPos);
+
+        d3.selectAll('.point')
+                .style('fill', function(d) { return getColor(d); });
+
+        drawVolcanotable(getTopRankedPoints());
     }
 
     var pDrag = d3.behavior.drag()
@@ -216,15 +201,15 @@
     volcanoplot.append('line')
             .attr('class', 'pLine')
             .attr('x1', 0)
-            .attr('y1', y(oo5p))
+            .attr('y1', y(currentNegLog10P))
             .attr('x2', width)
-            .attr('y2', y(oo5p))
+            .attr('y2', y(currentNegLog10P))
             .call(pDrag);
 
     volcanoplot.append('text')
             .attr('class', 'text pText')
             .attr('x', width + 5)
-            .attr('y', y(oo5p))
+            .attr('y', y(currentNegLog10P))
             .attr('dy', '0.35em')
             .attr("text-anchor", "start")
             .text('p = 0.0500')
@@ -242,35 +227,30 @@
 
         var logFC = x.invert(xPos);
 
-        if (xPos < width / 2) {
-            d3.selectAll('.logFCLine.left')
-                    .attr("x1", x(logFC))
-                    .attr("x2", x(logFC));
-            d3.selectAll('.logFCLine.right')
-                    .attr("x1", x(-logFC))
-                    .attr("x2", x(-logFC));
-
-            d3.selectAll('.logFCText.left')
-                    .attr("x", x(logFC))
-                    .text("log2FC = " + (-Math.abs(logFC)).toFixed(2));
-            d3.selectAll('.logFCText.right')
-                    .attr("x", x(-logFC))
-                    .text("log2FC = " + Math.abs(logFC).toFixed(2));
-        } else {
-            d3.selectAll('.logFCLine.left')
-                    .attr("x1", x(-logFC))
-                    .attr("x2", x(-logFC));
-            d3.selectAll('.logFCLine.right')
-                    .attr("x1", x(logFC))
-                    .attr("x2", x(logFC));
-
-            d3.selectAll('.logFCText.left')
-                    .attr("x", x(-logFC))
-                    .text("log2FC = " + Math.abs(logFC).toFixed(2));
-            d3.selectAll('.logFCText.right')
-                    .attr("x", x(logFC))
-                    .text("log2FC = " + (-Math.abs(logFC)).toFixed(2));
+        if (Math.abs(logFC) <= 0.05) {
+            return;
         }
+
+        d3.selectAll('.logFCLine.left')
+                .attr("x1", x(Math.abs(logFC)))
+                .attr("x2", x(Math.abs(logFC)));
+        d3.selectAll('.logFCLine.right')
+                .attr("x1", x(-Math.abs(logFC)))
+                .attr("x2", x(-Math.abs(logFC)));
+
+        d3.selectAll('.logFCText.left')
+                .attr("x", x(-Math.abs(logFC)))
+                .text("log2FC = " + (-Math.abs(logFC)).toFixed(2));
+        d3.selectAll('.logFCText.right')
+                .attr("x", x(Math.abs(logFC)))
+                .text("log2FC = " + Math.abs(logFC).toFixed(2));
+
+        currentLogFC = Math.abs(logFC);
+
+        d3.selectAll('.point')
+                .style('fill', function(d) { return getColor(d); });
+
+        drawVolcanotable(getTopRankedPoints());
     }
 
     var lFCDrag = d3.behavior.drag()
@@ -278,58 +258,42 @@
 
     volcanoplot.append('line')
             .attr('class', 'left logFCLine')
-            .attr('x1', x(-0.5))
+            .attr('x1', x(-currentLogFC))
             .attr('y1', height)
-            .attr('x2', x(-0.5))
+            .attr('x2', x(-currentLogFC))
             .attr('y2', 0)
             .call(lFCDrag);
 
     volcanoplot.append('text')
             .attr('class', 'text left logFCText')
-            .attr('x', x(-0.5))
+            .attr('x', x(-currentLogFC))
             .attr('y', - 15)
             .attr('dy', '0.35em')
-            .attr("text-anchor", "middle")
-            .text('log2FC = -0.5')
+            .attr("text-anchor", "end")
+            .text('log2FC = ' + currentLogFC)
             .style('fill', '#0000FF');
 
     volcanoplot.append('line')
             .attr('class', 'right logFCLine')
-            .attr('x1', x(0.5))
+            .attr('x1', x(currentLogFC))
             .attr('y1', height)
-            .attr('x2', x(0.5))
+            .attr('x2', x(currentLogFC))
             .attr('y2', 0)
             .call(lFCDrag);
 
     volcanoplot.append('text')
             .attr('class', 'text right logFCText')
-            .attr('x', x(0.5))
+            .attr('x', x(currentLogFC))
             .attr('y', - 15)
             .attr('dy', '0.35em')
-            .attr("text-anchor", "middle")
-            .text('log2FC = 0.5')
+            .attr("text-anchor", "start")
+            .text('log2FC = ' + currentLogFC)
             .style('fill', '#0000FF');
 
-    function updateSelection() {
-        var selection = [];
-        d3.selectAll('.point')
-                .classed('brushed', false);
-
-        var extent = brush.extent();
-        var left = extent[0][0],
-                top = extent[0][1],
-                right = extent[1][0],
-                bottom = extent[1][1];
-
-        d3.selectAll('.point').each(function(d) {
-            var point = d3.select(this);
-            if (y(d.negativeLog10PValues) >= top && y(d.negativeLog10PValues) <= bottom && x(d.logFC) >= left && x(d.logFC) <= right) {
-                point
-                        .classed('brushed', true);
-                selection.push(d);
-            }
-        });
-        drawVolcanotable(selection);
+    function getTopRankedPoints() {
+        return d3.selectAll('.point').filter(function(d) {
+            return d.negativeLog10PValues > currentNegLog10P && Math.abs(d.logFC) > currentLogFC;
+        }).data();
     }
 
     var absLogFCs = jQuery.map(logFCs, function(d) { return Math.abs(d); });
@@ -355,13 +319,13 @@
             .range(redGreen());
 
     function getColor(point) {
-        if (point.negativeLog10PValues < oo5p && Math.abs(point.logFC) < 0.5) {
+        if (point.negativeLog10PValues < currentNegLog10P && Math.abs(point.logFC) < currentLogFC) {
             return '#000000';
         }
-        if (point.negativeLog10PValues >= oo5p && Math.abs(point.logFC) < 0.5) {
+        if (point.negativeLog10PValues >= currentNegLog10P && Math.abs(point.logFC) < currentLogFC) {
             return '#FF0000';
         }
-        if (point.negativeLog10PValues >= oo5p && Math.abs(point.logFC) >= 0.5) {
+        if (point.negativeLog10PValues >= currentNegLog10P && Math.abs(point.logFC) >= currentLogFC) {
             return '#00FF00';
         }
         return '#0000FF';
@@ -410,7 +374,8 @@
                 .text(function(d) { return d.value; });
     }
 
-    function launchKEGGPWEA(geneList) {
+    function launchKEGGPWEA() {
+        var geneList = [];
         jQuery.ajax({
             url: 'http://biocompendium.embl.de/cgi-bin/biocompendium.cgi',
             type: "POST",
