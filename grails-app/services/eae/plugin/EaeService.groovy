@@ -1,9 +1,9 @@
 package eae.plugin
-
 import com.mongodb.BasicDBObject
 import grails.plugins.rest.client.RestBuilder
 import grails.transaction.Transactional
 import org.apache.oozie.client.OozieClient
+import org.json.JSONObject
 
 @Transactional
 class EaeService {
@@ -24,11 +24,13 @@ class EaeService {
 
         // create a workflow job configuration and set the workflow application path
         Properties conf = wc.createConfiguration();
-        conf.setProperty(OozieClient.USER_NAME, "centos");
+        conf.setProperty(OozieClient.USER_NAME, "ubuntu");
         conf.setProperty("jobTracker", JOB_TRACKER + ":" + JOB_TRACKER_PORT); // the port must match yarn.resourcemanager.address's
-        conf.setProperty("nameNode", "hdfs://" + NAMENODE + ":" + NAMENODE_PORT)
-        conf.setProperty(OozieClient.APP_PATH, "hdfs://"+ NAMENODE + ":" + NAMENODE_PORT + "/user/centos/worflows/" + workflow +"_workflow.xml");
-
+        //conf.setProperty("nameNode", "hdfs://" + NAMENODE + ":" + NAMENODE_PORT); this is for the regular install but mapr needs maprfs ....
+        conf.setProperty("nameNode", "maprfs:///");
+        //conf.setProperty(OozieClient.APP_PATH, "hdfs://"+ NAMENODE + ":" + NAMENODE_PORT + "/user/ubuntu/workflows/" + workflow +"_workflow.xml");
+        conf.setProperty(OozieClient.APP_PATH, "maprfs:///user/ubuntu/workflows/" + workflow +"_workflow.xml");
+        
         // setting workflow parameters
         workflowParameters.each{
             k, v -> conf.setProperty(k,v) }
@@ -39,7 +41,7 @@ class EaeService {
         return jobId;
     }
 
-    def sparkSubmit(String scriptDir, String SparkURL, String worflowFileName, String dataFileName, String workflowSpecificParameters, String mongoDocumentID){
+    def sparkSubmit(String scriptDir, String SparkURL, String workflowFileName, String dataFileName, String workflowSpecificParameters, String mongoDocumentID){
         def script = scriptDir +'executeSparkJob.sh'
 
         def scriptFile = new File(script)
@@ -50,7 +52,7 @@ class EaeService {
         }else {
             log.error('The Script file spark submit wasn\'t found')
         }
-        def executeCommand = script + " " + SparkURL + " " + worflowFileName + " " + dataFileName + " " + workflowSpecificParameters + " " + mongoDocumentID
+        def executeCommand = script + " " + SparkURL + " " + workflowFileName + " " + dataFileName + " " + workflowSpecificParameters + " " + mongoDocumentID
         println(executeCommand)
         executeCommand.execute().waitFor()
         return 0
@@ -68,19 +70,21 @@ class EaeService {
     }
 
     private def cvPreprocessing(params, MONGO_URL,MONGO_PORT,database,username){
-        def workflowParameters = [:]
-        String mongoDocumentIDPE = "abcd0000" // fake mongoId
-        String doEnrichement = "false"
+        def workflowParameters = [:];
+        String mongoDocumentIDPE = "abcd0000" ;// fake mongoId
+        String doEnrichement = "false";
+        String algorithmToUse = "SVM"
+        String kfold= "0.2";
+        String resampling = "1";
+        String numberOfFeaturesToRemove = "0.4"
+
         if( params.doEnrichment){
             mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, "pe", username, new BasicDBObject("ListOfGenes" , ""))
             doEnrichement = "true"
         }
-        workflowParameters['algorithmToUse'] = "SVM";
-        workflowParameters['kfold'] = "0.2";
-        workflowParameters['resampling'] = "1";
-        workflowParameters['numberOfFeaturesToremove'] = "0.5";
-        workflowParameters['mongoDocIdPE'] = mongoDocumentIDPE.toString();
-        workflowParameters['doEnrichement'] = doEnrichement;
+
+        workflowParameters['workflow'] = params.workflow;
+        workflowParameters['workflowSpecificParameters'] = algorithmToUse + " " + kfold + " " + resampling + " " +  numberOfFeaturesToRemove + " " + doEnrichement + " " + mongoDocumentIDPE.toString();
 
         return workflowParameters;
     }
@@ -110,5 +114,21 @@ class EaeService {
         result.put("KeggHTML", resp.text);
 
         return result;
+    }
+
+
+    def eaeInterfaceSparkSubmit(String interfaceURL, Map paramMap ){
+        def url = interfaceURL + "interfaceEAE/sparkSubmit/runSubmit" //"http://146.169.32.106:8081/interfaceEAE/sparkSubmit/runSubmit"
+        def jsonBody = new JSONObject(paramMap).toString();
+        def rest = new RestBuilder();
+
+        def resp = rest.post(url){
+            accept("application/text")
+            contentType("application/json")
+            body(jsonBody)
+        }
+
+        return resp.text
+
     }
 }

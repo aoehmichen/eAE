@@ -88,7 +88,7 @@ function registerConceptBoxEAE(name, cohorts, type, min, max) {
 
 var workflowSelected = "";
 function registerWorkflowParams(workflow){
-    workflowSelected = workflow.toUpperCase();
+    workflowSelected = workflow.toLowerCase();
 }
 
 /**
@@ -276,7 +276,6 @@ function runPE(list, selectedCorrection){
 function runWorkflow(){
     conceptBoxes = [];
     sanityCheckErrors = [];
-    workflowSelected = "";
     register();
 
     if(!saneEAE()){
@@ -288,7 +287,7 @@ function runWorkflow(){
         runAllQueries(runWorkflow);
         return false;
     }
-    console.log(workflowSelected)
+
     jQuery.ajax({
         url: pageInfo.basePath + '/eae/runWorkflow', //runCV
         type: "POST",

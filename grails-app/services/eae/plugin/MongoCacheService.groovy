@@ -90,7 +90,7 @@ class MongoCacheService {
         }else{
             if (recordsCount == 0){
                 return "NotCached"
-            }else if(cacheItem.get("status") == "started" ){
+            }else if(cacheItem.get("Status") == "started" ){
                 return "started"
             }else{
                 return "Completed"
@@ -189,7 +189,7 @@ class MongoCacheService {
         Document doc = new Document();
         doc.append("TopPathways", arrayList)
         doc.append("KeggTopPathway",cacheRes.get("KeggTopPathway") )
-        doc.append("status", "Completed")
+        doc.append("Status", "Completed")
         doc.append("User", username)
         doc.append("ListOfGenes",cacheRes.get("ListOfGenes") )
         doc.append("Correction",cacheRes.get("Correction") )
