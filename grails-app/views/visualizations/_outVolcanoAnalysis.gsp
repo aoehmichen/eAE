@@ -78,22 +78,6 @@
 </div>
 
 <script>
-    d3.selection.prototype.moveToFront = function() {
-        return this.each(function(){
-            this.parentNode.appendChild(this);
-        });
-    };
-    var animationDuration = 500;
-    var tmpAnimationDuration = animationDuration;
-    function switchAnimation(checked) {
-        if (! checked) {
-            tmpAnimationDuration = animationDuration;
-            animationDuration = 0;
-        } else {
-            animationDuration = tmpAnimationDuration;
-        }
-    }
-
     var results = ${results};
     var uids = results.uids;
     var pValues = results.pValues;
@@ -320,7 +304,7 @@
     function getTopRankedPoints() {
         return d3.selectAll('.point').filter(function(d) {
             return d.negativeLog10PValues > currentNegLog10P && Math.abs(d.logFC) > currentLogFC;
-        }).data();
+        });
     }
 
     var absLogFCs = jQuery.map(logFCs, function(d) { return Math.abs(d); });
@@ -402,7 +386,7 @@
     }
 
     function launchKEGGPWEA() {
-        var genes = getTopRankedPoints().map(function(d) {
+        var genes = getTopRankedPoints().data().map(function(d) {
             var split = d.uid.split("--");
             return split[split.length - 1];
         });
@@ -443,7 +427,7 @@
                 .attr("height", 4)
                 .style("fill", function(d) { return getColor(d); })
                 .on("mouseover", function(d) {
-                    var html = "p-value:" + d.pValue + "<br/>" + "-log10 p: " + d.negativeLog10PValues + "<br/>" + "log2FC: " + d.logFC + "<br/>" + "ID: " + d.uid;
+                    var html = "ID: " + d.uid + "<br/>" + "p-value:" + d.pValue + "<br/>" + "-log10 p: " + d.negativeLog10PValues + "<br/>" + "log2FC: " + d.logFC;
                     tooltip.html(html)
                             .style("visibility", "visible")
                             .style("left", mouseX() + 10 + "px")
@@ -461,32 +445,25 @@
     }
 
     updateVolcano();
-    drawVolcanotable(getTopRankedPoints());
+    drawVolcanotable(getTopRankedPoints().data());
 
     var buttonWidth = 200;
     var buttonHeight = 40;
     var padding = 5;
 
-    createD3Switch({
-        location: controls,
-        onlabel: 'Animation ON',
-        offlabel: 'Animation OFF',
-        x: 2,
-        y: 2 + padding * 0 + buttonHeight * 0,
-        width: buttonWidth,
-        height: buttonHeight,
-        callback: switchAnimation,
-        checked: true
-    });
-
-
     var keggButton = createD3Button({
         location: controls,
         label: 'Find KEGG Pathway',
         x: 2,
-        y: 2 + padding * 1 + buttonHeight * 1,
+        y: 2 + padding * 0 + buttonHeight * 0,
         width: buttonWidth,
         height: buttonHeight,
         callback: launchKEGGPWEA
+    });
+
+    keggButton.on("mouseover" , function() {
+        getTopRankedPoints().style('stroke', '#FF0000');
+    }).on("mouseout", function() {
+        getTopRankedPoints().style('stroke', null);
     });
 </script>
