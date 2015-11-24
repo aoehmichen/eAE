@@ -19,6 +19,6 @@ grails.project.dependency.resolution = {
         compile 'org.apache.oozie:oozie-client:4.2.0'
     }
     plugins {
-
+        runtime ':resources:1.2.1'
     }
 }

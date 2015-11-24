@@ -1,10 +1,10 @@
-function builtVolcanoplot(results) {
-    let uids = results.uids
-    let pValues = results.pValues
-    let negativeLog10PValues = results.negativeLog10PValues
-    let logFCs = results.logFCs
-    let patientIDs = results.patientIDs
-    let zScoreMatrix = results.zScoreMatrix
+function buildVolcanoAnalysis(results) {
+    const uids = results.uids
+    const pValues = results.pValues
+    const negativeLog10PValues = results.negativeLog10PValues
+    const logFCs = results.logFCs
+    const patientIDs = results.patientIDs
+    const zScoreMatrix = results.zScoreMatrix
 
     let points = $.map(negativeLog10PValues, (d, i) => {
         return {
@@ -18,9 +18,9 @@ function builtVolcanoplot(results) {
     let currentLogFC = 0.5
     let currentNegLog10P = -Math.log10(0.05)
 
-    let margin = {top: 100, right: 100, bottom: 100, left: 100}
-    let width = 1200 - margin.left - margin.right
-    let height = 800 - margin.top - margin.bottom
+    const margin = {top: 100, right: 100, bottom: 100, left: 100}
+    const width = 1200 - margin.left - margin.right
+    const height = 800 - margin.top - margin.bottom
 
     let volcanotable = d3.select("#volcanotable").append("table")
         .attr("width", width)
@@ -166,9 +166,7 @@ function builtVolcanoplot(results) {
         currentLogFC = Math.abs(logFC)
 
         d3.selectAll('.point')
-            .style('fill', function (d) {
-                return getColor(d)
-            })
+            .style('fill', d => getColor(d))
 
         drawVolcanotable(getTopRankedPoints().data())
     }
@@ -305,7 +303,7 @@ function builtVolcanoplot(results) {
             }
         }).done(response => {
             let sessionID = response.match(/tmp_\d+/)[0]
-            let url = "http://biocompendium.embl.de/cgi-bin/biocompendium.cgi?section=pathway&pos=0&background=whole_genome&session=${sessionID}&list=gene_list_1__1&list_size=15&org=human"
+            let url = "http://biocompendium.embl.de/cgi-bin/biocompendium.cgi?section=pathway&pos=0&background=whole_genome&session=" + sessionID + "&list=gene_list_1__1&list_size=15&org=human"
             window.open(url)
         }).fail(() => alert('An error occured. Maybe the external resource is unavailable.'))
     }

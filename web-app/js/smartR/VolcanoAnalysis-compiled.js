@@ -1,6 +1,6 @@
 "use strict";
 
-function builtVolcanoplot(results) {
+function buildVolcanoAnalysis(results) {
     var uids = results.uids;
     var pValues = results.pValues;
     var negativeLog10PValues = results.negativeLog10PValues;
@@ -194,7 +194,7 @@ function builtVolcanoplot(results) {
             }
         }).done(function (response) {
             var sessionID = response.match(/tmp_\d+/)[0];
-            var url = "http://biocompendium.embl.de/cgi-bin/biocompendium.cgi?section=pathway&pos=0&background=whole_genome&session=${sessionID}&list=gene_list_1__1&list_size=15&org=human";
+            var url = "http://biocompendium.embl.de/cgi-bin/biocompendium.cgi?section=pathway&pos=0&background=whole_genome&session=" + sessionID + "&list=gene_list_1__1&list_size=15&org=human";
             window.open(url);
         }).fail(function () {
             return alert('An error occured. Maybe the external resource is unavailable.');
