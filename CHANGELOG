@@ -1,6 +1,8 @@
 CHANGELOG
 
 Current Version 0.5
+- Volcano Workflow: KEGG Pathway Enrichment Analysis
+- Volcano Workflow: Draggable limiters
 
 Version 0.4.1
 - Disabled static image feature because some users experienced heavy problems

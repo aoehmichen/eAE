@@ -105,7 +105,7 @@ class SmartRService {
             return grailsApplication
                 .mainContext
                 .servletContext
-                .getRealPath('/plugins/') + '/smart-r-0.4/'
+                .getRealPath('/plugins/') + '/smart-r-0.5/'
         }
     }
 
