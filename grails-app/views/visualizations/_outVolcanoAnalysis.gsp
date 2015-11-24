@@ -182,7 +182,7 @@
         d3.selectAll('.point')
                 .style('fill', function(d) { return getColor(d); });
 
-        drawVolcanotable(getTopRankedPoints());
+        drawVolcanotable(getTopRankedPoints().data());
     }
 
     var pDrag = d3.behavior.drag()
@@ -247,7 +247,7 @@
         d3.selectAll('.point')
                 .style('fill', function(d) { return getColor(d); });
 
-        drawVolcanotable(getTopRankedPoints());
+        drawVolcanotable(getTopRankedPoints().data());
     }
 
     var lFCDrag = d3.behavior.drag()
