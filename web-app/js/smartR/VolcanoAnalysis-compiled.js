@@ -8,7 +8,7 @@ function builtVolcanoplot(results) {
     var patientIDs = results.patientIDs;
     var zScoreMatrix = results.zScoreMatrix;
 
-    var points = jQuery.map(negativeLog10PValues, function (d, i) {
+    var points = $.map(negativeLog10PValues, function (d, i) {
         return {
             uid: uids[i],
             pValue: pValues[i],
@@ -178,7 +178,7 @@ function builtVolcanoplot(results) {
             return split[split.length - 1];
         });
 
-        jQuery.ajax({
+        $.ajax({
             url: 'http://biocompendium.embl.de/cgi-bin/biocompendium.cgi',
             type: "POST",
             timeout: '10000',
@@ -194,10 +194,10 @@ function builtVolcanoplot(results) {
             }
         }).done(function (response) {
             var sessionID = response.match(/tmp_\d+/)[0];
-            var url = "http://biocompendium.embl.de/cgi-bin/biocompendium.cgi?section=pathway&pos=0&background=whole_genome&session=" + sessionID + "&list=gene_list_1__1&list_size=15&org=human";
+            var url = "http://biocompendium.embl.de/cgi-bin/biocompendium.cgi?section=pathway&pos=0&background=whole_genome&session=${sessionID}&list=gene_list_1__1&list_size=15&org=human";
             window.open(url);
         }).fail(function () {
-            alert('An error occured. Maybe the external resource is unavailable.');
+            return alert('An error occured. Maybe the external resource is unavailable.');
         });
     }
 
@@ -207,7 +207,7 @@ function builtVolcanoplot(results) {
         });
 
         point.enter().append("rect").attr("class", function (d) {
-            return "point uid-" + d.uid;
+            return "point uid-${d.uid}";
         }).attr("x", function (d) {
             return x(d.logFC) - 2;
         }).attr("y", function (d) {
@@ -215,9 +215,9 @@ function builtVolcanoplot(results) {
         }).attr("width", 4).attr("height", 4).style("fill", function (d) {
             return getColor(d);
         }).on("mouseover", function (d) {
-            var html = "ID: " + d.uid + "<br/>" + "p-value:" + d.pValue + "<br/>" + "-log10 p: " + d.negativeLog10PValues + "<br/>" + "log2FC: " + d.logFC;
+            var html = 'ID: ${d.uid}<br/>p-value: ${d.pValue}<br/>-log10 p: ${d.negativeLog10PValues}<br/>log2FC:${d.logFC}';
             tooltip.html(html).style("visibility", "visible").style("left", mouseX() + 10 + "px").style("top", mouseY() + 10 + "px");
-        }).on("mouseout", function (d) {
+        }).on("mouseout", function () {
             tooltip.style("visibility", "hidden");
         });
 
@@ -229,22 +229,20 @@ function builtVolcanoplot(results) {
 
     var buttonWidth = 200;
     var buttonHeight = 40;
-    var padding = 5;
-
     var keggButton = createD3Button({
         location: controls,
         label: 'Find KEGG Pathway',
         x: 2,
-        y: 2 + padding * 0 + buttonHeight * 0,
+        y: 2,
         width: buttonWidth,
         height: buttonHeight,
         callback: launchKEGGPWEA
     });
 
     keggButton.on("mouseover", function () {
-        getTopRankedPoints().style('stroke', '#FF0000');
+        return getTopRankedPoints().style('stroke', '#FF0000');
     }).on("mouseout", function () {
-        getTopRankedPoints().style('stroke', null);
+        return getTopRankedPoints().style('stroke', null);
     });
 }
 
