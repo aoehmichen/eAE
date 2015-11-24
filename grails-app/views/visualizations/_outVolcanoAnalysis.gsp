@@ -34,22 +34,24 @@
 
 .pLine {
     stroke: red;
-    stroke-width: 3px;
+    stroke-width: 2px;
     shape-rendering: crispEdges;
 }
 
-.pLine:hover {
+.pHandle {
     cursor: ns-resize;
+    opacity: 0;
 }
 
 .logFCLine {
     stroke: #0000FF;
-    stroke-width: 3px;
+    stroke-width: 2px;
     shape-rendering: crispEdges;
 }
 
-.logFCLine:hover {
+.logFCHandle {
     cursor: ew-resize;
+    opacity: 0;
 }
 
 .axisText {
@@ -183,6 +185,10 @@
         d3.selectAll('.pLine')
                 .attr("y1", yPos)
                 .attr("y2", yPos);
+
+        d3.selectAll('.pHandle')
+                .attr('y', yPos - 6);
+
         d3.selectAll('.pText')
                 .attr('y', yPos)
                 .text("p = " + (1 / Math.pow(10, y.invert(yPos))).toFixed(5));
@@ -203,7 +209,14 @@
             .attr('x1', 0)
             .attr('y1', y(currentNegLog10P))
             .attr('x2', width)
-            .attr('y2', y(currentNegLog10P))
+            .attr('y2', y(currentNegLog10P));
+
+    volcanoplot.append('rect')
+            .attr('class', 'pHandle')
+            .attr('x', 0)
+            .attr('y', y(currentNegLog10P) - 6)
+            .attr('width', width)
+            .attr('height', 12)
             .call(pDrag);
 
     volcanoplot.append('text')
@@ -228,15 +241,19 @@
         var logFC = x.invert(xPos);
 
         d3.selectAll('.logFCLine.left')
-                .attr("x1", x(Math.abs(logFC)))
-                .attr("x2", x(Math.abs(logFC)));
-        d3.selectAll('.logFCLine.right')
                 .attr("x1", x(-Math.abs(logFC)))
                 .attr("x2", x(-Math.abs(logFC)));
-
+        d3.selectAll('.logFCHandle.left')
+                .attr("x", x(-Math.abs(logFC)) - 6);
         d3.selectAll('.logFCText.left')
                 .attr("x", x(-Math.abs(logFC)))
                 .text("log2FC = " + (-Math.abs(logFC)).toFixed(2));
+
+        d3.selectAll('.logFCLine.right')
+                .attr("x1", x(Math.abs(logFC)))
+                .attr("x2", x(Math.abs(logFC)));
+        d3.selectAll('.logFCHandle.right')
+                .attr("x", x(Math.abs(logFC)) - 6);
         d3.selectAll('.logFCText.right')
                 .attr("x", x(Math.abs(logFC)))
                 .text("log2FC = " + Math.abs(logFC).toFixed(2));
@@ -257,7 +274,14 @@
             .attr('x1', x(-currentLogFC))
             .attr('y1', height)
             .attr('x2', x(-currentLogFC))
-            .attr('y2', 0)
+            .attr('y2', 0);
+
+    volcanoplot.append('rect')
+            .attr('class', 'left logFCHandle')
+            .attr('x', x(-currentLogFC) - 6)
+            .attr('y', 0)
+            .attr('width', 12)
+            .attr('height', height)
             .call(lFCDrag);
 
     volcanoplot.append('text')
@@ -266,7 +290,7 @@
             .attr('y', - 15)
             .attr('dy', '0.35em')
             .attr("text-anchor", "end")
-            .text('log2FC = ' + currentLogFC)
+            .text('log2FC = ' + (-currentLogFC))
             .style('fill', '#0000FF');
 
     volcanoplot.append('line')
@@ -274,7 +298,14 @@
             .attr('x1', x(currentLogFC))
             .attr('y1', height)
             .attr('x2', x(currentLogFC))
-            .attr('y2', 0)
+            .attr('y2', 0);
+
+    volcanoplot.append('rect')
+            .attr('class', 'right logFCHandle')
+            .attr('x', x(currentLogFC) - 6)
+            .attr('y', 0)
+            .attr('width', 12)
+            .attr('height', height)
             .call(lFCDrag);
 
     volcanoplot.append('text')
