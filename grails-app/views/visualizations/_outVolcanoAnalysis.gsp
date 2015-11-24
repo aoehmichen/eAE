@@ -227,10 +227,6 @@
 
         var logFC = x.invert(xPos);
 
-        if (Math.abs(logFC) <= 0.05) {
-            return;
-        }
-
         d3.selectAll('.logFCLine.left')
                 .attr("x1", x(Math.abs(logFC)))
                 .attr("x2", x(Math.abs(logFC)));
@@ -375,7 +371,11 @@
     }
 
     function launchKEGGPWEA() {
-        var geneList = [];
+        var genes = getTopRankedPoints().map(function(d) {
+            var split = d.uid.split("--");
+            return split[split.length - 1];
+        });
+
         jQuery.ajax({
             url: 'http://biocompendium.embl.de/cgi-bin/biocompendium.cgi',
             type: "POST",
@@ -388,7 +388,7 @@
                 Category1: 'human',
                 gene_list_1: 'gene_list_1',
                 SubCat1: 'hgnc_symbol',
-                attachment1: geneList
+                attachment1: genes.join(" ")
             }
         }).done(function(response) {
             var sessionID = response.match(/tmp_\d+/)[0];
@@ -430,6 +430,7 @@
     }
 
     updateVolcano();
+    drawVolcanotable(getTopRankedPoints());
 
     var buttonWidth = 200;
     var buttonHeight = 40;
