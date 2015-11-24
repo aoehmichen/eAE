@@ -228,6 +228,7 @@ class EaeDataService {
         f.createNewFile()
         fp = f.getAbsolutePath()
         def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL;
+        println(executeCommand)
         executeCommand.execute().waitFor();
 
         // We cleanup

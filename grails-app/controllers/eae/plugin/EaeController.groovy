@@ -3,7 +3,7 @@ package eae.plugin
 import com.mongodb.BasicDBObject
 import grails.util.Environment
 import org.apache.commons.io.FilenameUtils
-import org.json.JSONObject
+import org.codehaus.groovy.grails.web.json.JSONObject
 
 class EaeController {
 
@@ -101,7 +101,6 @@ class EaeController {
         render answer
     }
 
-
     def runWorkflow = {
         final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
         //final def (OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT) = oozieParams();
@@ -109,7 +108,7 @@ class EaeController {
         String database = "eae";
         String workflow = params.workflow;
 
-        def parameterMap = eaeDataService.queryData(params);
+        //def parameterMap = eaeDataService.queryData(params);
         def query = mongoCacheService.buildMongoQuery(params);
 
         def result
@@ -149,6 +148,7 @@ class EaeController {
      *   @return {str}: path to the script folder
      */
     def getWebAppFolder() {
+        def smartRFileSystemName = applicationContext.getBean('pluginManager').allPlugins.sort({ it.name.toUpperCase() }).find { it.fileSystemName ==~ /smart-r-\w.\w/}
         if (Environment.current == Environment.DEVELOPMENT) {
             return org.codehaus.groovy.grails.plugins.GrailsPluginUtils
                     .getPluginDirForName('smart-r')
@@ -158,7 +158,7 @@ class EaeController {
             return grailsApplication
                     .mainContext
                     .servletContext
-                    .getRealPath('/plugins/') + '/smart-r-0.1/'
+                    .getRealPath('/plugins/') + '/'+ smartRFileSystemName.fileSystemName.toString() + '/'
         }
     }
 }
