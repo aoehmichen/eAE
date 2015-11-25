@@ -109,7 +109,7 @@ class EaeController {
         String database = "eae";
         String workflow = params.workflow;
 
-        //def parameterMap = eaeDataService.queryData(params);
+        def parameterMap = eaeDataService.queryData(params);
         def query = mongoCacheService.buildMongoQuery(params);
 
         def result
