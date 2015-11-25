@@ -1,5 +1,3 @@
-import 'babel/polyfill'
-
 function createD3Button(args) {
     let button = args.location.append('g')
 
@@ -444,7 +442,7 @@ function createQueryCriteriaDIV({conceptid, normalunits, setvaluemode, setvalueo
     }
 }
 
-function setCohorts({constrains, andConcat, negate, reCompute, subset=1}) {
+function setCohorts({constrains, andConcat, negate, reCompute, subset}) {
     if (typeof appendItemFromConceptInto !== "function") {
         alert('This functionality is not available in the tranSMART version you use.')
         return
@@ -550,8 +548,8 @@ function sane() { // FIXME: somehow check for subset2 to be non empty iff two co
 }
 
 function setSmartRCookie() {
-    let cookies = document.cookie.split('')
-    var cookie = cookies.find(cookie => cookie.split('=')[0] === 'SmartR')
+    let cookies = document.cookie.split(';')
+    let cookie = cookies.find(cookie => cookie.split('=')[0] === 'SmartR')
     if (cookie) return cookie.split('=')[1]
     let id = new Date().getTime() + Math.floor((Math.random() * 9999999999) + 1000000000)
     document.cookie = 'SmartR=' + id
@@ -639,7 +637,7 @@ function computeResults(callback=()=>{}, data=prepareFormData(), init=true, redr
 
     $('#submitButton').prop('disabled', true)
     $.ajax({
-        url: pageInfo.basePath + '/SmartR/' + (init ? 'computeResults' : 'reComputeResults'),
+        url: `${pageInfo.basePath}/SmartR/${init ? 'computeResults' : 'reComputeResults'}`,
         type: "POST",
         timeout: 1.8e+6,
         data: data

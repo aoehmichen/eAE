@@ -1,6 +1,4 @@
-'use strict';
-
-require('babel/polyfill');
+"use strict";
 
 function createD3Button(args) {
     var button = args.location.append('g');
@@ -280,8 +278,7 @@ function setCohorts(_ref2) {
     var andConcat = _ref2.andConcat;
     var negate = _ref2.negate;
     var reCompute = _ref2.reCompute;
-    var _ref2$subset = _ref2.subset;
-    var subset = _ref2$subset === undefined ? 1 : _ref2$subset;
+    var subset = _ref2.subset;
 
     if (typeof appendItemFromConceptInto !== "function") {
         alert('This functionality is not available in the tranSMART version you use.');
@@ -394,7 +391,7 @@ function registerConceptBox(name, cohorts) {
     var check1 = containsOnly(name, type);
     var check2 = concepts.length >= min;
     var check3 = concepts.length <= max;
-    sanityCheckErrors.push(!check1 ? 'Concept box (' + name + ') contains concepts with invalid type! Valid type: ' + type : !check2 ? 'Concept box (' + name + ') contains too few concepts! Valid range: ' + min + ' - ' + max : !check3 ? 'Concept box (' + name + ') contains too many concepts! Valid range: ' + min + ' - ' + max : '');
+    sanityCheckErrors.push(!check1 ? "Concept box (" + name + ") contains concepts with invalid type! Valid type: " + type : !check2 ? "Concept box (" + name + ") contains too few concepts! Valid range: " + min + " - " + max : !check3 ? "Concept box (" + name + ") contains too many concepts! Valid range: " + min + " - " + max : '');
     conceptBoxes.push({ name: name, cohorts: cohorts, type: type, concepts: concepts });
 }
 
@@ -460,7 +457,7 @@ function sane() {
 }
 
 function setSmartRCookie() {
-    var cookies = document.cookie.split('');
+    var cookies = document.cookie.split(';');
     var cookie = cookies.find(function (cookie) {
         return cookie.split('=')[0] === 'SmartR';
     });
@@ -578,7 +575,7 @@ function computeResults() {
 
     $('#submitButton').prop('disabled', true);
     $.ajax({
-        url: pageInfo.basePath + '/SmartR/' + (init ? 'computeResults' : 'reComputeResults'),
+        url: pageInfo.basePath + "/SmartR/" + (init ? 'computeResults' : 'reComputeResults'),
         type: "POST",
         timeout: 1.8e+6,
         data: data
@@ -649,7 +646,5 @@ function changeInputDIV() {
 
 function contact() {
     var version = 0.5;
-    alert('\nBefore reporting a bug...\n... 1. Make sure you use the lastet SmartR version (installed version: ' + version + ')\n... 2. Make sure that all requirements for using SmartR are met\n\nAll relevant information can be found on https://github.com/sherzinger/SmartR\n\nIf you still want to report a bug you MUST include these information:\n\n>>>' + navigator.userAgent + ' SmartR/' + version + '<<<\n\nBug reports -> http://usersupport.etriks.org/\nFeedback -> sascha.herzinger@uni.lu');
+    alert("\nBefore reporting a bug...\n... 1. Make sure you use the lastet SmartR version (installed version: " + version + ")\n... 2. Make sure that all requirements for using SmartR are met\n\nAll relevant information can be found on https://github.com/sherzinger/SmartR\n\nIf you still want to report a bug you MUST include these information:\n\n>>>" + navigator.userAgent + " SmartR/" + version + "<<<\n\nBug reports -> http://usersupport.etriks.org/\nFeedback -> sascha.herzinger@uni.lu");
 }
-
-//# sourceMappingURL=smartR-compiled.js.map
