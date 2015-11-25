@@ -75,11 +75,12 @@ class EaeController {
             String dataFileName = worflow + "-" + username + "-" + mongoDocumentID + ".txt" //"listOfGenes.txt"
             eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, saneGenesList, scriptDir, SPARK_URL, "data")
             String workflowSpecificParameters = params.selectedCorrection
-            //eaeService.sparkSubmit(scriptDir, SPARK_URL, "pe.py",
-            // dataFileName , workflowSpecificParameters, mongoDocumentID)
-            workflowParameters['mongoDocId'] = mongoDocumentID;
-            workflowParameters['dataFile'] = dataFileName;
-            workflowParameters['featuresFile'] = additionalFileName;
+            workflowParameters['workflow'] = worflow;
+            workflowParameters['workflowSpecificParameters'] = workflowSpecificParameters;
+            //eaeService.sparkSubmit(scriptDir, SPARK_URL, "pe.py",dataFileName , workflowSpecificParameters, mongoDocumentID)
+            workflowParameters['mongoDocumentID'] = mongoDocumentID;
+            workflowParameters['dataFileName'] = dataFileName;
+            workflowParameters['additionalFileName'] = "";
             eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL,workflowParameters);
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
