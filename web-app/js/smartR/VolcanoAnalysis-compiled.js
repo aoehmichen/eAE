@@ -8,7 +8,7 @@ function buildVolcanoAnalysis(results) {
     var patientIDs = results.patientIDs;
     var zScoreMatrix = results.zScoreMatrix;
 
-    var points = $.map(negativeLog10PValues, function (d, i) {
+    var points = negativeLog10PValues.map(function (d, i) {
         return {
             uid: uids[i],
             pValue: pValues[i],
@@ -207,7 +207,7 @@ function buildVolcanoAnalysis(results) {
         });
 
         point.enter().append("rect").attr("class", function (d) {
-            return "point uid-${d.uid}";
+            return "point uid-" + d.uid;
         }).attr("x", function (d) {
             return x(d.logFC) - 2;
         }).attr("y", function (d) {
@@ -215,7 +215,7 @@ function buildVolcanoAnalysis(results) {
         }).attr("width", 4).attr("height", 4).style("fill", function (d) {
             return getColor(d);
         }).on("mouseover", function (d) {
-            var html = 'ID: ${d.uid}<br/>p-value: ${d.pValue}<br/>-log10 p: ${d.negativeLog10PValues}<br/>log2FC:${d.logFC}';
+            var html = "ID: " + d.uid + "<br/>p-value: " + d.pValue + "<br/>-log10 p: " + d.negativeLog10PValues + "<br/>log2FC:" + d.logFC;
             tooltip.html(html).style("visibility", "visible").style("left", mouseX() + 10 + "px").style("top", mouseY() + 10 + "px");
         }).on("mouseout", function () {
             tooltip.style("visibility", "hidden");

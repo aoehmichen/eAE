@@ -168,7 +168,7 @@
 </div>
 
 <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-<g:javascript src="resource/d3.js"/>
+<g:javascript src="resource/d3.min.js"/>
 <g:javascript src="resource/2D.js"/>
 
 <script type="text/javascript">

@@ -9,9 +9,8 @@
 </style>
 
 <head>
-    <g:javascript library='jquery' />
-    <g:javascript src='smartR/smartR.js' />
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <r:require modules="index"/>
     <r:layoutResources/>
 </head>
 
@@ -43,4 +42,5 @@
     </div>
 
     <div id="outputDIV" class='txt'></div>
+    <r:layoutResources/>
 </body>

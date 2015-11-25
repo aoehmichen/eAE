@@ -26,7 +26,7 @@
 	}
 </style>
 
-<g:javascript src="resource/d3.js"/>
+<g:javascript src="resource/d3.min.js"/>
 
 <div id="visualization">
 	Loading Data ...

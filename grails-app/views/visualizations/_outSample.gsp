@@ -3,7 +3,7 @@
 <style>
 </style>
 
-<g:javascript src="resource/d3.js"/> <!-- Or any other js lib you want to use -->
+<g:javascript src="resource/d3.min.js"/> <!-- Or any other js lib you want to use -->
 
 <div id="visualization"> <!-- This div will contain your visualization -->
 </div>

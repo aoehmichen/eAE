@@ -121,7 +121,7 @@
 </style>
 
 <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-<g:javascript src="resource/d3.js"/>
+<g:javascript src="resource/d3.min.js"/>
 <div id='controls'></div>
 <div id="visualization">
     <div id="scatterplot"></div>

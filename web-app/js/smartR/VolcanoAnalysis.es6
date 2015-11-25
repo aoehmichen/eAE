@@ -6,7 +6,7 @@ function buildVolcanoAnalysis(results) {
     const patientIDs = results.patientIDs
     const zScoreMatrix = results.zScoreMatrix
 
-    let points = $.map(negativeLog10PValues, (d, i) => {
+    let points = negativeLog10PValues.map((d, i) => {
         return {
             uid: uids[i],
             pValue: pValues[i],
@@ -303,7 +303,7 @@ function buildVolcanoAnalysis(results) {
             }
         }).done(response => {
             let sessionID = response.match(/tmp_\d+/)[0]
-            let url = "http://biocompendium.embl.de/cgi-bin/biocompendium.cgi?section=pathway&pos=0&background=whole_genome&session=" + sessionID + "&list=gene_list_1__1&list_size=15&org=human"
+            let url = `http://biocompendium.embl.de/cgi-bin/biocompendium.cgi?section=pathway&pos=0&background=whole_genome&session=${sessionID}&list=gene_list_1__1&list_size=15&org=human`
             window.open(url)
         }).fail(() => alert('An error occured. Maybe the external resource is unavailable.'))
     }
@@ -314,14 +314,14 @@ function buildVolcanoAnalysis(results) {
 
         point.enter()
             .append("rect")
-            .attr("class", d => "point uid-${d.uid}")
+            .attr("class", d => `point uid-${d.uid}`)
             .attr("x", d => x(d.logFC) - 2)
             .attr("y", d => y(d.negativeLog10PValues) - 2)
             .attr("width", 4)
             .attr("height", 4)
             .style("fill", d => getColor(d))
             .on("mouseover", d => {
-                let html = 'ID: ${d.uid}<br/>p-value: ${d.pValue}<br/>-log10 p: ${d.negativeLog10PValues}<br/>log2FC:${d.logFC}'
+                let html = `ID: ${d.uid}<br/>p-value: ${d.pValue}<br/>-log10 p: ${d.negativeLog10PValues}<br/>log2FC:${d.logFC}`
                 tooltip.html(html)
                     .style("visibility", "visible")
                     .style("left", mouseX() + 10 + "px")
