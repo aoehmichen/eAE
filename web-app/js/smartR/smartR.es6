@@ -1,13 +1,13 @@
 function createD3Button(args) {
     let button = args.location.append('g')
 
-    let box = button.append("rect")
-        .attr("x", args.x)
-        .attr("y", args.y)
-        .attr("rx", 3)
-        .attr("ry", 3)
-        .attr("width", args.width)
-        .attr("height", args.height)
+    let box = button.append('rect')
+        .attr('x', args.x)
+        .attr('y', args.y)
+        .attr('rx', 3)
+        .attr('ry', 3)
+        .attr('width', args.width)
+        .attr('height', args.height)
         .style('stroke-width', '1px')
         .style('stroke', '#009ac9')
         .style('fill', '#009ac9')
@@ -41,7 +41,7 @@ function createD3Button(args) {
         .attr('y', args.y + args.height / 2)
         .attr('dy', '0.35em')
         .style('pointer-events', 'none')
-        .style("text-anchor", "middle")
+        .style('text-anchor', 'middle')
         .style('fill', '#ffffff')
         .style('font-size', '14px')
         .text(args.label)
@@ -55,13 +55,13 @@ function createD3Switch(args) {
     let checked = args.checked
     let color = checked ? 'green' : 'red'
 
-    let box = switcher.append("rect")
-        .attr("x", args.x)
-        .attr("y", args.y)
-        .attr("rx", 3)
-        .attr("ry", 3)
-        .attr("width", args.width)
-        .attr("height", args.height)
+    let box = switcher.append('rect')
+        .attr('x', args.x)
+        .attr('y', args.y)
+        .attr('rx', 3)
+        .attr('ry', 3)
+        .attr('width', args.width)
+        .attr('height', args.height)
         .style('stroke-width', '1px')
         .style('stroke', color)
         .style('fill', color)
@@ -93,7 +93,7 @@ function createD3Switch(args) {
         .attr('y', args.y + args.height / 2)
         .attr('dy', '0.35em')
         .style('pointer-events', 'none')
-        .style("text-anchor", "middle")
+        .style('text-anchor', 'middle')
         .style('fill', '#ffffff')
         .style('font-size', '14px')
         .text(checked ? args.onlabel : args.offlabel)
@@ -125,12 +125,12 @@ function createD3Dropdown(args) {
         .enter()
         .append('rect')
         .attr('class', 'itemBox')
-        .attr("x", args.x)
-        .attr("y", args.y + args.height)
-        .attr("rx", 0)
-        .attr("ry", 0)
-        .attr("width", args.width)
-        .attr("height", args.height)
+        .attr('x', args.x)
+        .attr('y', args.y + args.height)
+        .attr('rx', 0)
+        .attr('ry', 0)
+        .attr('width', args.width)
+        .attr('height', args.height)
         .style('cursor', 'pointer')
         .style('stroke-width', '2px')
         .style('stroke', '#ffffff')
@@ -164,19 +164,19 @@ function createD3Dropdown(args) {
         .attr('y', args.y + args.height + args.height / 2)
         .attr('dy', '0.35em')
         .style('pointer-events', 'none')
-        .style("text-anchor", "middle")
+        .style('text-anchor', 'middle')
         .style('fill', '#000000')
         .style('font-size', '14px')
         .style('visibility', 'hidden')
         .text(d => d.label)
 
-    let box = dropdown.append("rect")
-        .attr("x", args.x)
-        .attr("y", args.y)
-        .attr("rx", 3)
-        .attr("ry", 3)
-        .attr("width", args.width)
-        .attr("height", args.height)
+    let box = dropdown.append('rect')
+        .attr('x', args.x)
+        .attr('y', args.y)
+        .attr('rx', 3)
+        .attr('ry', 3)
+        .attr('width', args.width)
+        .attr('height', args.height)
         .style('stroke-width', '1px')
         .style('stroke', '#009ac9')
         .style('fill', '#009ac9')
@@ -224,7 +224,7 @@ function createD3Dropdown(args) {
         .attr('y', args.y + args.height / 2)
         .attr('dy', '0.35em')
         .style('pointer-events', 'none')
-        .style("text-anchor", "middle")
+        .style('text-anchor', 'middle')
         .style('fill', '#ffffff')
         .style('font-size', '14px')
         .text(args.label)
@@ -238,7 +238,7 @@ function createD3Slider(args) {
     let lineGen = d3.svg.line()
         .x(d => d.x)
         .y(d => d.y)
-        .interpolate("linear")
+        .interpolate('linear')
 
     let lineData = [
         {x: args.x, y: args.y + args.height},
@@ -264,7 +264,7 @@ function createD3Slider(args) {
         .attr('y', args.y + args.height + 10)
         .attr('dy', '0.35em')
         .style('pointer-events', 'none')
-        .style("text-anchor", "middle")
+        .style('text-anchor', 'middle')
         .style('fill', '#000000')
         .style('font-size', '9px')
         .text(args.min)
@@ -274,7 +274,7 @@ function createD3Slider(args) {
         .attr('y', args.y + args.height + 10)
         .attr('dy', '0.35em')
         .style('pointer-events', 'none')
-        .style("text-anchor", "middle")
+        .style('text-anchor', 'middle')
         .style('fill', '#000000')
         .style('font-size', '9px')
         .text(args.max)
@@ -284,7 +284,7 @@ function createD3Slider(args) {
         .attr('y', args.y + args.height)
         .attr('dy', '0.35em')
         .style('pointer-events', 'none')
-        .style("text-anchor", "middle")
+        .style('text-anchor', 'middle')
         .style('fill', '#000000')
         .style('font-size', '14px')
         .text(args.label)
@@ -314,7 +314,7 @@ function createD3Slider(args) {
     }
 
     let drag = d3.behavior.drag()
-        .on("drag", move)
+        .on('drag', move)
         .on(args.trigger, () => { args.callback(currentValue) })
 
     let dragger = slider.append('rect')
@@ -339,9 +339,9 @@ function createD3Slider(args) {
         .call(drag)
 
     let handle = slider.append('circle')
-        .attr("cx", sliderScale(args.init))
-        .attr("cy", args.y + 10)
-        .attr("r", 6)
+        .attr('cx', sliderScale(args.init))
+        .attr('cy', args.y + 10)
+        .attr('r', 6)
         .style('pointer-events', 'none')
         .style('fill', '#000000')
 
@@ -359,7 +359,7 @@ function createD3Slider(args) {
         .attr('y', args.y + 10)
         .attr('dy', '0.35em')
         .style('pointer-events', 'none')
-        .style("text-anchor", "start")
+        .style('text-anchor', 'start')
         .style('fill', '#000000')
         .style('font-size', '10px')
         .text(args.init)
@@ -374,21 +374,21 @@ function mouseX() {
 
 function mouseY() {
     let mouseYPos = typeof d3.event.sourceEvent !== 'undefined' ? d3.event.sourceEvent.pageY : d3.event.clientY
-    return mouseYPos + $("#index").parent().scrollTop() - $('#etrikspanel').offset().top
+    return mouseYPos + $('#index').parent().scrollTop() - $('#etrikspanel').offset().top
 }
 
-function showCohortInfo(){
+function showCohortInfo() {
     let cohortsSummary = ''
 
-    for(let i = 1; i <= GLOBAL.NumOfSubsets; i++) {
-        let currentQuery = getQuerySummary(i)
+    for(let i of Array(GLOBAL.NumOfSubsets).keys()) {
+        let currentQuery = getQuerySummary(i + 1)
         if(currentQuery !== '') {
-            cohortsSummary += "<br/>Subset " + i + ": <br/>"
+            cohortsSummary += '<br/>Subset ' + (i + 1) + ': <br/>'
             cohortsSummary += currentQuery
-            cohortsSummary += "<br/>"
+            cohortsSummary += '<br/>'
         }
     }
-    if (cohortsSummary === '') {
+    if (!cohortsSummary) {
         cohortsSummary = '<br/>WARNING: No subsets have been selected! Please go to the "Comparison" tab and select your subsets.'
     }
     $('#cohortInfo').html(cohortsSummary)
@@ -396,71 +396,17 @@ function showCohortInfo(){
 showCohortInfo()
 
 function updateInputView() {
-    if (typeof updateOnView === "function") {
+    if (typeof updateOnView === 'function') {
         updateOnView()
     }
 }
 
-$('#resultsTabPanel__etrikspanel').click(showCohortInfo)
-$('#resultsTabPanel__etrikspanel').click(updateInputView)
+let panelItem = $('#resultsTabPanel__etrikspanel')
+panelItem.click(showCohortInfo)
+panelItem.click(updateInputView)
 
-function getMaxWidth(elements) {
-    const MIN_SAFE_INTEGER = -(Math.pow(2, 53) - 1)
-    let currentMax = MIN_SAFE_INTEGER
-    elements.each(() => {
-        let len = this.getBBox().width
-        if (len > currentMax) {
-            currentMax = len
-        }
-    })
-    return currentMax
-}
-
-function createQueryCriteriaDIV({conceptid, normalunits, setvaluemode, setvalueoperator, setvaluelowvalue, setvaluehighvalue, setvalueunits, oktousevalues, setnodetype}) {
-    return {
-        conceptid : conceptid,
-        conceptname : shortenConcept(conceptid),
-        concepttooltip : conceptid.substr(1, conceptid.length),
-        conceptlevel : '',
-        concepttablename : "CONCEPT_DIMENSION",
-        conceptdimcode : conceptid,
-        conceptcomment : "",
-        normalunits : normalunits,
-        setvaluemode : setvaluemode,
-        setvalueoperator : setvalueoperator,
-        setvaluelowvalue : setvaluelowvalue,
-        setvaluehighvalue : setvaluehighvalue,
-        setvaluehighlowselect : "N",
-        setvalueunits : setvalueunits,
-        oktousevalues : oktousevalues,
-        setnodetype : setnodetype,
-        visualattributes : "LEAF,ACTIVE",
-        applied_path : "@",
-        modifiedNodePath : "undefined",
-        modifiedNodeId : "undefined",
-        modifiedNodeLevel : "undefined"
-    }
-}
-
-function setCohorts({constrains, andConcat, negate, reCompute, subset}) {
-    if (typeof appendItemFromConceptInto !== "function") {
-        alert('This functionality is not available in the tranSMART version you use.')
-        return
-    }
-    if (! confirm("Attention! This action will have the following impact:\n1. Your cohort selection in the 'Comparison' tab will be modified.\n2. Your current analysis will be recomputed based on this selection.\n")) {
-        return
-    }
-
-    let destination = $($("#queryTable tr:last-of-type td")[subset - 1]).find('div[id^=panelBoxList]').last()
-    for (let constrain of constrains) {
-        if (andConcat) {
-            destination = $($("#queryTable tr:last-of-type td")[subset - 1]).find('div[id^=panelBoxList]').last()
-        }
-        appendItemFromConceptInto(destination, constrain, negate)
-    }
-    if (reCompute) {
-        runAllQueries(runAnalysis)
-    }
+function getMaxWidth(arr) {
+    return Math.max.apply(null, arr.map(() => this.getBBox().width))
 }
 
 function shortenConcept(concept) {
@@ -475,10 +421,7 @@ function activateDragAndDrop(divName) {
 }
 
 function clearVarSelection(divName) {
-    let div = Ext.get(divName).dom
-    while (div.firstChild) {
-        div.removeChild(div.firstChild)
-    }
+    $('#' + divName).remove()
 }
 
 function getConcepts(divName) {
@@ -486,14 +429,10 @@ function getConcepts(divName) {
 }
 
 function addSettingsToData(data, settings) {
-    for (let element of data) {
-        if (element.name == "settings") {
-            let json = JSON.parse(element.value)
-            json = $.extend(json, settings)
-            element.value = JSON.stringify(json)
-            break
-        }
-    }
+    let element = data.find(d => d.name === 'settings')
+    let json = JSON.parse(element.value)
+    json = $.extend(json, settings)
+    element.value = JSON.stringify(json)
     return data
 }
 
@@ -533,13 +472,13 @@ function sane() { // FIXME: somehow check for subset2 to be non empty iff two co
         return false
     }
 
-    if ($("#scriptSelect").val() === '') {
+    if (!$('#scriptSelect').val()) {
         alert('Please select the algorithm you want to use!')
         return false
     }
 
     for (let sanityCheckError of sanityCheckErrors) {
-        if (sanityCheckError !== '') {
+        if (sanityCheckError) {
             alert(sanityCheckError)
             return false
         }
@@ -568,26 +507,26 @@ function setImage(divName, image) {
     }
 
     let img = document.createElement('img')
-    img.setAttribute('src', "data:image/pngbase64," + _arrayBufferToBase64(image))
+    img.setAttribute('src', 'data:image/pngbase64,' + _arrayBufferToBase64(image))
     document.getElementById(divName).appendChild(img)
 }
 
 function goToEAE() {
     $.ajax({
         url: pageInfo.basePath + '/SmartR/goToEAEngine' ,
-        type: "POST",
+        type: 'POST',
         timeout: '600000'
     }).done(response => {
-        $("#index").html(response)
+        $('#index').html(response)
     }).fail(() => {
-        $("#index").html("AJAX CALL FAILED!")
+        $('#index').html('AJAX CALL FAILED!')
     })
 }
 
 function renderResultsInTemplate(callback, data) {
     $.ajax({
         url: pageInfo.basePath + '/SmartR/renderResultsInTemplate',
-        type: "POST",
+        type: 'POST',
         timeout: 1.8e+6,
         data: data
     }).done(response => {
@@ -596,19 +535,19 @@ function renderResultsInTemplate(callback, data) {
         } else {
             $('#submitButton').prop('disabled', false)
             callback()
-            $("#outputDIV").html(response)
+            $('#outputDIV').html(response)
         }
     }).fail(() => {
         $('#submitButton').prop('disabled', false)
         callback()
-        $("#outputDIV").html("Could not render results. Please contact your administrator.")
+        $('#outputDIV').html('Could not render results. Please contact your administrator.')
     })
 }
 
 function renderResults(callback, data) {
     $.ajax({
         url: pageInfo.basePath + '/SmartR/renderResults',
-        type: "POST",
+        type: 'POST',
         timeout: 1.8e+6,
         data: data
     }).done(response => {
@@ -624,7 +563,7 @@ function renderResults(callback, data) {
         }
     }).fail(() => {
         $('#submitButton').prop('disabled', false)
-        alert("Server does not respond. Network connection lost?")
+        alert('Server does not respond. Network connection lost?')
     })
 }
 
@@ -638,7 +577,7 @@ function computeResults(callback=()=>{}, data=prepareFormData(), init=true, redr
     $('#submitButton').prop('disabled', true)
     $.ajax({
         url: `${pageInfo.basePath}/SmartR/${init ? 'computeResults' : 'reComputeResults'}`,
-        type: "POST",
+        type: 'POST',
         timeout: 1.8e+6,
         data: data
     }).done(response => {
@@ -650,7 +589,7 @@ function computeResults(callback=()=>{}, data=prepareFormData(), init=true, redr
             }
         } else {
             if (init) {
-                $("#outputDIV").html('')
+                $('#outputDIV').html('')
             }
             $('#submitButton').prop('disabled', false)
             alert(retCodes[response])
@@ -667,12 +606,12 @@ function computeResults(callback=()=>{}, data=prepareFormData(), init=true, redr
 function showLoadingScreen() {
     $.ajax({
         url: pageInfo.basePath + '/SmartR/renderLoadingScreen',
-        type: "POST",
+        type: 'POST',
         timeout: 1.8e+6
     }).done(response => {
-        $("#outputDIV").html(response)
+        $('#outputDIV').html(response)
     }).fail(() => {
-        $("#outputDIV").html("Loading screen could not be initialized. Probably you lost network connection.")
+        $('#outputDIV').html('Loading screen could not be initialized. Probably you lost network connection.')
     })
 }
 
@@ -680,7 +619,7 @@ function runAnalysis() {
     conceptBoxes = []
     sanityCheckErrors = []
     register() // method MUST be implemented by _inFoobarAnalysis.gsp
-    if (! sane()) return false
+    if (!sane()) return false
     // if no subset IDs exist compute them
     if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !( isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
         runAllQueries(runAnalysis)
@@ -691,17 +630,17 @@ function runAnalysis() {
 }
 
 function changeInputDIV() {
-    $("#outputDIV").html("")
+    $('#outputDIV').html('')
     $.ajax({
         url: pageInfo.basePath + '/SmartR/renderInputDIV',
-        type: "POST",
+        type: 'POST',
         timeout: 1.8e+6,
         data: {'script': $('#scriptSelect').val()}
     }).done(response => {
-        $("#inputDIV").html(response)
+        $('#inputDIV').html(response)
         updateInputView()
     }).fail(() => {
-        $("#inputDIV").html("Coult not render input form. Probably you lost network connection.")
+        $('#inputDIV').html('Coult not render input form. Probably you lost network connection.')
     })
 }
 

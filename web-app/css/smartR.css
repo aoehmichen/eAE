@@ -35,3 +35,15 @@
     color: white;
     background: #326FCB;
 }
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Roboto'), local('Roboto-Regular'), url(http://fonts.gstatic.com/s/roboto/v15/oMMgfZMQthOryQo9n22dcuvvDin1pK8aKteLpeZ5c0A.woff2) format('woff2');
+}
+
+#etrikspanel > * {
+    font-family: 'Roboto', sans-serif;
+}
+

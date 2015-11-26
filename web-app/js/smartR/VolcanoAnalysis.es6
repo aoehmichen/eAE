@@ -22,19 +22,19 @@ function buildVolcanoAnalysis(results) {
     const width = 1200 - margin.left - margin.right
     const height = 800 - margin.top - margin.bottom
 
-    let volcanotable = d3.select("#volcanotable").append("table")
-        .attr("width", width)
-        .attr("height", height)
+    let volcanotable = d3.select('#volcanotable').append('table')
+        .attr('width', width)
+        .attr('height', height)
 
-    let volcanoplot = d3.select("#volcanoplot").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    let volcanoplot = d3.select('#volcanoplot').append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
 
-    let controls = d3.select("#volcanocontrols").append("svg")
-        .attr("width", 220)
-        .attr("height", height * 2)
+    let controls = d3.select('#volcanocontrols').append('svg')
+        .attr('width', 220)
+        .attr('height', height * 2)
 
     let x = d3.scale.linear()
         .domain([-d3.max(logFCs), d3.max(logFCs)])
@@ -46,19 +46,19 @@ function buildVolcanoAnalysis(results) {
 
     let xAxis = d3.svg.axis()
         .scale(x)
-        .orient("bottom")
+        .orient('bottom')
 
     let yAxis = d3.svg.axis()
         .scale(y)
-        .orient("left")
+        .orient('left')
 
-    volcanoplot.append("g")
-        .attr("class", "axis")
-        .attr("transform", "translate(0," + height + ")")
+    volcanoplot.append('g')
+        .attr('class', 'axis')
+        .attr('transform', 'translate(0,' + height + ')')
         .call(xAxis)
 
-    volcanoplot.append("g")
-        .attr("class", "axis")
+    volcanoplot.append('g')
+        .attr('class', 'axis')
         .call(yAxis)
 
     volcanoplot.append('text')
@@ -71,12 +71,12 @@ function buildVolcanoAnalysis(results) {
     volcanoplot.append('text')
         .attr('class', 'text axisText')
         .attr('text-anchor', 'middle')
-        .attr("transform", "translate(" + (-40) + "," + (height / 2) + ")rotate(-90)")
+        .attr('transform', 'translate(' + (-40) + ',' + (height / 2) + ')rotate(-90)')
         .text('- log10 p')
 
-    let tooltip = d3.select('#volcanoplot').append("div")
-        .attr("class", "tooltip text")
-        .style("visibility", "hidden")
+    let tooltip = d3.select('#volcanoplot').append('div')
+        .attr('class', 'tooltip text')
+        .style('visibility', 'hidden')
 
     function pDragged() {
         let yPos = d3.event.y
@@ -88,15 +88,15 @@ function buildVolcanoAnalysis(results) {
         }
 
         d3.selectAll('.pLine')
-            .attr("y1", yPos)
-            .attr("y2", yPos)
+            .attr('y1', yPos)
+            .attr('y2', yPos)
 
         d3.selectAll('.pHandle')
             .attr('y', yPos - 6)
 
         d3.selectAll('.pText')
             .attr('y', yPos)
-            .text("p = " + (1 / Math.pow(10, y.invert(yPos))).toFixed(5))
+            .text('p = ' + (1 / Math.pow(10, y.invert(yPos))).toFixed(5))
 
         currentNegLog10P = y.invert(yPos)
 
@@ -107,7 +107,7 @@ function buildVolcanoAnalysis(results) {
     }
 
     let pDrag = d3.behavior.drag()
-        .on("drag", pDragged)
+        .on('drag', pDragged)
 
     volcanoplot.append('line')
         .attr('class', 'pLine')
@@ -129,7 +129,7 @@ function buildVolcanoAnalysis(results) {
         .attr('x', width + 5)
         .attr('y', y(currentNegLog10P))
         .attr('dy', '0.35em')
-        .attr("text-anchor", "start")
+        .attr('text-anchor', 'start')
         .text('p = 0.0500')
         .style('fill', 'red')
 
@@ -146,22 +146,22 @@ function buildVolcanoAnalysis(results) {
         let logFC = x.invert(xPos)
 
         d3.selectAll('.logFCLine.left')
-            .attr("x1", x(-Math.abs(logFC)))
-            .attr("x2", x(-Math.abs(logFC)))
+            .attr('x1', x(-Math.abs(logFC)))
+            .attr('x2', x(-Math.abs(logFC)))
         d3.selectAll('.logFCHandle.left')
-            .attr("x", x(-Math.abs(logFC)) - 6)
+            .attr('x', x(-Math.abs(logFC)) - 6)
         d3.selectAll('.logFCText.left')
-            .attr("x", x(-Math.abs(logFC)))
-            .text("log2FC = " + (-Math.abs(logFC)).toFixed(2))
+            .attr('x', x(-Math.abs(logFC)))
+            .text('log2FC = ' + (-Math.abs(logFC)).toFixed(2))
 
         d3.selectAll('.logFCLine.right')
-            .attr("x1", x(Math.abs(logFC)))
-            .attr("x2", x(Math.abs(logFC)))
+            .attr('x1', x(Math.abs(logFC)))
+            .attr('x2', x(Math.abs(logFC)))
         d3.selectAll('.logFCHandle.right')
-            .attr("x", x(Math.abs(logFC)) - 6)
+            .attr('x', x(Math.abs(logFC)) - 6)
         d3.selectAll('.logFCText.right')
-            .attr("x", x(Math.abs(logFC)))
-            .text("log2FC = " + Math.abs(logFC).toFixed(2))
+            .attr('x', x(Math.abs(logFC)))
+            .text('log2FC = ' + Math.abs(logFC).toFixed(2))
 
         currentLogFC = Math.abs(logFC)
 
@@ -172,7 +172,7 @@ function buildVolcanoAnalysis(results) {
     }
 
     let lFCDrag = d3.behavior.drag()
-        .on("drag", lFCDragged)
+        .on('drag', lFCDragged)
 
     volcanoplot.append('line')
         .attr('class', 'left logFCLine')
@@ -194,7 +194,7 @@ function buildVolcanoAnalysis(results) {
         .attr('x', x(-currentLogFC))
         .attr('y', -15)
         .attr('dy', '0.35em')
-        .attr("text-anchor", "end")
+        .attr('text-anchor', 'end')
         .text('log2FC = ' + (-currentLogFC))
         .style('fill', '#0000FF')
 
@@ -218,7 +218,7 @@ function buildVolcanoAnalysis(results) {
         .attr('x', x(currentLogFC))
         .attr('y', -15)
         .attr('dy', '0.35em')
-        .attr("text-anchor", "start")
+        .attr('text-anchor', 'start')
         .text('log2FC = ' + currentLogFC)
         .style('fill', '#0000FF')
 
@@ -248,48 +248,48 @@ function buildVolcanoAnalysis(results) {
         if (!points.length) {
             return
         }
-        let columns = ["uid", "logFC", "negativeLog10PValues", 'pValue']
-        let HEADER = ["ID", "log2 FC", "- log10 p", "p"]
-        let table = d3.select('#volcanotable').append("table")
+        let columns = ['uid', 'logFC', 'negativeLog10PValues', 'pValue']
+        let HEADER = ['ID', 'log2 FC', '- log10 p', 'p']
+        let table = d3.select('#volcanotable').append('table')
             .attr('class', 'mytable')
-        let thead = table.append("thead")
-        let tbody = table.append("tbody")
+        let thead = table.append('thead')
+        let tbody = table.append('tbody')
 
-        thead.append("tr")
+        thead.append('tr')
             .attr('class', 'mytr')
-            .selectAll("th")
+            .selectAll('th')
             .data(HEADER)
             .enter()
-            .append("th")
+            .append('th')
             .attr('class', 'myth')
             .text(d => d)
 
-        let rows = tbody.selectAll("tr")
+        let rows = tbody.selectAll('tr')
             .data(points)
             .enter()
-            .append("tr")
+            .append('tr')
             .attr('class', 'mytr')
 
-        let cells = rows.selectAll("td")
+        let cells = rows.selectAll('td')
             .data(row => columns.map(column => {
                     return {column, value: row[column]}
                 })
             )
             .enter()
-            .append("td")
+            .append('td')
             .attr('class', 'text mytd')
             .text(d => d.value)
     }
 
     function launchKEGGPWEA() {
         let genes = getTopRankedPoints().data().map(d => {
-            let split = d.uid.split("--")
+            let split = d.uid.split('--')
             return split[split.length - 1]
         })
 
         $.ajax({
             url: 'http://biocompendium.embl.de/cgi-bin/biocompendium.cgi',
-            type: "POST",
+            type: 'POST',
             timeout: '10000',
             async: false,
             data: {
@@ -299,7 +299,7 @@ function buildVolcanoAnalysis(results) {
                 Category1: 'human',
                 gene_list_1: 'gene_list_1',
                 SubCat1: 'hgnc_symbol',
-                attachment1: genes.join(" ")
+                attachment1: genes.join(' ')
             }
         }).done(response => {
             let sessionID = response.match(/tmp_\d+/)[0]
@@ -309,30 +309,30 @@ function buildVolcanoAnalysis(results) {
     }
 
     function updateVolcano() {
-        let point = volcanoplot.selectAll(".point")
+        let point = volcanoplot.selectAll('.point')
             .data(points, d => d.uid)
 
         point.enter()
-            .append("rect")
-            .attr("class", d => `point uid-${d.uid}`)
-            .attr("x", d => x(d.logFC) - 2)
-            .attr("y", d => y(d.negativeLog10PValues) - 2)
-            .attr("width", 4)
-            .attr("height", 4)
-            .style("fill", d => getColor(d))
-            .on("mouseover", d => {
+            .append('rect')
+            .attr('class', d => `point uid-${d.uid}`)
+            .attr('x', d => x(d.logFC) - 2)
+            .attr('y', d => y(d.negativeLog10PValues) - 2)
+            .attr('width', 4)
+            .attr('height', 4)
+            .style('fill', d => getColor(d))
+            .on('mouseover', d => {
                 let html = `ID: ${d.uid}<br/>p-value: ${d.pValue}<br/>-log10 p: ${d.negativeLog10PValues}<br/>log2FC:${d.logFC}`
                 tooltip.html(html)
-                    .style("visibility", "visible")
-                    .style("left", mouseX() + 10 + "px")
-                    .style("top", mouseY() + 10 + "px")
+                    .style('visibility', 'visible')
+                    .style('left', mouseX() + 10 + 'px')
+                    .style('top', mouseY() + 10 + 'px')
             })
-            .on("mouseout", () => {
-                tooltip.style("visibility", "hidden")
+            .on('mouseout', () => {
+                tooltip.style('visibility', 'hidden')
             })
 
         point.exit()
-            .attr("r", 0)
+            .attr('r', 0)
             .remove()
     }
 
@@ -352,6 +352,6 @@ function buildVolcanoAnalysis(results) {
     })
 
     keggButton
-        .on("mouseover", () => getTopRankedPoints().style('stroke', '#FF0000'))
-        .on("mouseout", () => getTopRankedPoints().style('stroke', null))
+        .on('mouseover', () => getTopRankedPoints().style('stroke', '#FF0000'))
+        .on('mouseout', () => getTopRankedPoints().style('stroke', null))
 }

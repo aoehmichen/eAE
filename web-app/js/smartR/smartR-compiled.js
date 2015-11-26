@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
 function createD3Button(args) {
     var button = args.location.append('g');
 
-    var box = button.append("rect").attr("x", args.x).attr("y", args.y).attr("rx", 3).attr("ry", 3).attr("width", args.width).attr("height", args.height).style('stroke-width', '1px').style('stroke', '#009ac9').style('fill', '#009ac9').style('cursor', 'pointer').on('mouseover', function () {
+    var box = button.append('rect').attr('x', args.x).attr('y', args.y).attr('rx', 3).attr('ry', 3).attr('width', args.width).attr('height', args.height).style('stroke-width', '1px').style('stroke', '#009ac9').style('fill', '#009ac9').style('cursor', 'pointer').on('mouseover', function () {
         box.transition().duration(300).style('fill', '#ffffff');
 
         text.transition().duration(300).style('fill', '#009ac9');
@@ -15,7 +15,7 @@ function createD3Button(args) {
         return args.callback();
     });
 
-    var text = button.append('text').attr('x', args.x + args.width / 2).attr('y', args.y + args.height / 2).attr('dy', '0.35em').style('pointer-events', 'none').style("text-anchor", "middle").style('fill', '#ffffff').style('font-size', '14px').text(args.label);
+    var text = button.append('text').attr('x', args.x + args.width / 2).attr('y', args.y + args.height / 2).attr('dy', '0.35em').style('pointer-events', 'none').style('text-anchor', 'middle').style('fill', '#ffffff').style('font-size', '14px').text(args.label);
 
     return button;
 }
@@ -26,7 +26,7 @@ function createD3Switch(args) {
     var checked = args.checked;
     var color = checked ? 'green' : 'red';
 
-    var box = switcher.append("rect").attr("x", args.x).attr("y", args.y).attr("rx", 3).attr("ry", 3).attr("width", args.width).attr("height", args.height).style('stroke-width', '1px').style('stroke', color).style('fill', color).style('cursor', 'pointer').on('click', function () {
+    var box = switcher.append('rect').attr('x', args.x).attr('y', args.y).attr('rx', 3).attr('ry', 3).attr('width', args.width).attr('height', args.height).style('stroke-width', '1px').style('stroke', color).style('fill', color).style('cursor', 'pointer').on('click', function () {
         if (color === 'green') {
             box.transition().duration(300).style('stroke', 'red').style('fill', 'red');
             color = 'red';
@@ -40,7 +40,7 @@ function createD3Switch(args) {
         args.callback(checked);
     });
 
-    var text = switcher.append('text').attr('x', args.x + args.width / 2).attr('y', args.y + args.height / 2).attr('dy', '0.35em').style('pointer-events', 'none').style("text-anchor", "middle").style('fill', '#ffffff').style('font-size', '14px').text(checked ? args.onlabel : args.offlabel);
+    var text = switcher.append('text').attr('x', args.x + args.width / 2).attr('y', args.y + args.height / 2).attr('dy', '0.35em').style('pointer-events', 'none').style('text-anchor', 'middle').style('fill', '#ffffff').style('font-size', '14px').text(checked ? args.onlabel : args.offlabel);
 
     return switcher;
 }
@@ -64,7 +64,7 @@ function createD3Dropdown(args) {
         return item.label;
     });
 
-    itemBox.enter().append('rect').attr('class', 'itemBox').attr("x", args.x).attr("y", args.y + args.height).attr("rx", 0).attr("ry", 0).attr("width", args.width).attr("height", args.height).style('cursor', 'pointer').style('stroke-width', '2px').style('stroke', '#ffffff').style('fill', '#E3E3E3').style('visibility', 'hidden').on('mouseover', function () {
+    itemBox.enter().append('rect').attr('class', 'itemBox').attr('x', args.x).attr('y', args.y + args.height).attr('rx', 0).attr('ry', 0).attr('width', args.width).attr('height', args.height).style('cursor', 'pointer').style('stroke-width', '2px').style('stroke', '#ffffff').style('fill', '#E3E3E3').style('visibility', 'hidden').on('mouseover', function () {
         itemHovered = true;
         d3.select(_this).style('fill', '#009ac9');
     }).on('mouseout', function () {
@@ -83,11 +83,11 @@ function createD3Dropdown(args) {
         return item.label;
     });
 
-    itemText.enter().append('text').attr('class', 'itemText').attr('x', args.x + args.width / 2).attr('y', args.y + args.height + args.height / 2).attr('dy', '0.35em').style('pointer-events', 'none').style("text-anchor", "middle").style('fill', '#000000').style('font-size', '14px').style('visibility', 'hidden').text(function (d) {
+    itemText.enter().append('text').attr('class', 'itemText').attr('x', args.x + args.width / 2).attr('y', args.y + args.height + args.height / 2).attr('dy', '0.35em').style('pointer-events', 'none').style('text-anchor', 'middle').style('fill', '#000000').style('font-size', '14px').style('visibility', 'hidden').text(function (d) {
         return d.label;
     });
 
-    var box = dropdown.append("rect").attr("x", args.x).attr("y", args.y).attr("rx", 3).attr("ry", 3).attr("width", args.width).attr("height", args.height).style('stroke-width', '1px').style('stroke', '#009ac9').style('fill', '#009ac9').on('mouseover', function () {
+    var box = dropdown.append('rect').attr('x', args.x).attr('y', args.y).attr('rx', 3).attr('ry', 3).attr('width', args.width).attr('height', args.height).style('stroke-width', '1px').style('stroke', '#009ac9').style('fill', '#009ac9').on('mouseover', function () {
         if (hovered) {
             return;
         }
@@ -121,7 +121,7 @@ function createD3Dropdown(args) {
         }, 350);
     });
 
-    var text = dropdown.append('text').attr('class', 'buttonText').attr('x', args.x + args.width / 2).attr('y', args.y + args.height / 2).attr('dy', '0.35em').style('pointer-events', 'none').style("text-anchor", "middle").style('fill', '#ffffff').style('font-size', '14px').text(args.label);
+    var text = dropdown.append('text').attr('class', 'buttonText').attr('x', args.x + args.width / 2).attr('y', args.y + args.height / 2).attr('dy', '0.35em').style('pointer-events', 'none').style('text-anchor', 'middle').style('fill', '#ffffff').style('font-size', '14px').text(args.label);
 
     return dropdown;
 }
@@ -133,7 +133,7 @@ function createD3Slider(args) {
         return d.x;
     }).y(function (d) {
         return d.y;
-    }).interpolate("linear");
+    }).interpolate('linear');
 
     var lineData = [{ x: args.x, y: args.y + args.height }, { x: args.x, y: args.y + 0.75 * args.height }, { x: args.x + args.width, y: args.y + 0.75 * args.height }, { x: args.x + args.width, y: args.y + args.height }];
 
@@ -141,11 +141,11 @@ function createD3Slider(args) {
 
     slider.append('path').attr('d', lineGen(lineData)).style('pointer-events', 'none').style('stroke', '#009ac9').style('stroke-width', '2px').style('shape-rendering', 'crispEdges').style('fill', 'none');
 
-    slider.append('text').attr('x', args.x).attr('y', args.y + args.height + 10).attr('dy', '0.35em').style('pointer-events', 'none').style("text-anchor", "middle").style('fill', '#000000').style('font-size', '9px').text(args.min);
+    slider.append('text').attr('x', args.x).attr('y', args.y + args.height + 10).attr('dy', '0.35em').style('pointer-events', 'none').style('text-anchor', 'middle').style('fill', '#000000').style('font-size', '9px').text(args.min);
 
-    slider.append('text').attr('x', args.x + args.width).attr('y', args.y + args.height + 10).attr('dy', '0.35em').style('pointer-events', 'none').style("text-anchor", "middle").style('fill', '#000000').style('font-size', '9px').text(args.max);
+    slider.append('text').attr('x', args.x + args.width).attr('y', args.y + args.height + 10).attr('dy', '0.35em').style('pointer-events', 'none').style('text-anchor', 'middle').style('fill', '#000000').style('font-size', '9px').text(args.max);
 
-    slider.append('text').attr('x', args.x + args.width / 2).attr('y', args.y + args.height).attr('dy', '0.35em').style('pointer-events', 'none').style("text-anchor", "middle").style('fill', '#000000').style('font-size', '14px').text(args.label);
+    slider.append('text').attr('x', args.x + args.width / 2).attr('y', args.y + args.height).attr('dy', '0.35em').style('pointer-events', 'none').style('text-anchor', 'middle').style('fill', '#000000').style('font-size', '14px').text(args.label);
 
     var currentValue = args.init;
 
@@ -165,7 +165,7 @@ function createD3Slider(args) {
         value.attr('x', xPos + 10).text(currentValue);
     }
 
-    var drag = d3.behavior.drag().on("drag", move).on(args.trigger, function () {
+    var drag = d3.behavior.drag().on('drag', move).on(args.trigger, function () {
         args.callback(currentValue);
     });
 
@@ -177,11 +177,11 @@ function createD3Slider(args) {
         pointer.style('stroke', '#000000');
     }).call(drag);
 
-    var handle = slider.append('circle').attr("cx", sliderScale(args.init)).attr("cy", args.y + 10).attr("r", 6).style('pointer-events', 'none').style('fill', '#000000');
+    var handle = slider.append('circle').attr('cx', sliderScale(args.init)).attr('cy', args.y + 10).attr('r', 6).style('pointer-events', 'none').style('fill', '#000000');
 
     var pointer = slider.append('line').attr('x1', sliderScale(args.init)).attr('y1', args.y + 10).attr('x2', sliderScale(args.init)).attr('y2', args.y + 0.75 * args.height).style('pointer-events', 'none').style('stroke', '#000000').style('stroke-width', '1px');
 
-    var value = slider.append('text').attr('x', sliderScale(args.init) + 10).attr('y', args.y + 10).attr('dy', '0.35em').style('pointer-events', 'none').style("text-anchor", "start").style('fill', '#000000').style('font-size', '10px').text(args.init);
+    var value = slider.append('text').attr('x', sliderScale(args.init) + 10).attr('y', args.y + 10).attr('dy', '0.35em').style('pointer-events', 'none').style('text-anchor', 'start').style('fill', '#000000').style('font-size', '10px').text(args.init);
 
     return slider;
 }
@@ -193,114 +193,26 @@ function mouseX() {
 
 function mouseY() {
     var mouseYPos = typeof d3.event.sourceEvent !== 'undefined' ? d3.event.sourceEvent.pageY : d3.event.clientY;
-    return mouseYPos + $("#index").parent().scrollTop() - $('#etrikspanel').offset().top;
+    return mouseYPos + $('#index').parent().scrollTop() - $('#etrikspanel').offset().top;
 }
 
 function showCohortInfo() {
     var cohortsSummary = '';
 
-    for (var i = 1; i <= GLOBAL.NumOfSubsets; i++) {
-        var currentQuery = getQuerySummary(i);
-        if (currentQuery !== '') {
-            cohortsSummary += "<br/>Subset " + i + ": <br/>";
-            cohortsSummary += currentQuery;
-            cohortsSummary += "<br/>";
-        }
-    }
-    if (cohortsSummary === '') {
-        cohortsSummary = '<br/>WARNING: No subsets have been selected! Please go to the "Comparison" tab and select your subsets.';
-    }
-    $('#cohortInfo').html(cohortsSummary);
-}
-showCohortInfo();
-
-function updateInputView() {
-    if (typeof updateOnView === "function") {
-        updateOnView();
-    }
-}
-
-$('#resultsTabPanel__etrikspanel').click(showCohortInfo);
-$('#resultsTabPanel__etrikspanel').click(updateInputView);
-
-function getMaxWidth(elements) {
-    var _this2 = this;
-
-    var MIN_SAFE_INTEGER = -(Math.pow(2, 53) - 1);
-    var currentMax = MIN_SAFE_INTEGER;
-    elements.each(function () {
-        var len = _this2.getBBox().width;
-        if (len > currentMax) {
-            currentMax = len;
-        }
-    });
-    return currentMax;
-}
-
-function createQueryCriteriaDIV(_ref) {
-    var conceptid = _ref.conceptid;
-    var normalunits = _ref.normalunits;
-    var setvaluemode = _ref.setvaluemode;
-    var setvalueoperator = _ref.setvalueoperator;
-    var setvaluelowvalue = _ref.setvaluelowvalue;
-    var setvaluehighvalue = _ref.setvaluehighvalue;
-    var setvalueunits = _ref.setvalueunits;
-    var oktousevalues = _ref.oktousevalues;
-    var setnodetype = _ref.setnodetype;
-
-    return {
-        conceptid: conceptid,
-        conceptname: shortenConcept(conceptid),
-        concepttooltip: conceptid.substr(1, conceptid.length),
-        conceptlevel: '',
-        concepttablename: "CONCEPT_DIMENSION",
-        conceptdimcode: conceptid,
-        conceptcomment: "",
-        normalunits: normalunits,
-        setvaluemode: setvaluemode,
-        setvalueoperator: setvalueoperator,
-        setvaluelowvalue: setvaluelowvalue,
-        setvaluehighvalue: setvaluehighvalue,
-        setvaluehighlowselect: "N",
-        setvalueunits: setvalueunits,
-        oktousevalues: oktousevalues,
-        setnodetype: setnodetype,
-        visualattributes: "LEAF,ACTIVE",
-        applied_path: "@",
-        modifiedNodePath: "undefined",
-        modifiedNodeId: "undefined",
-        modifiedNodeLevel: "undefined"
-    };
-}
-
-function setCohorts(_ref2) {
-    var constrains = _ref2.constrains;
-    var andConcat = _ref2.andConcat;
-    var negate = _ref2.negate;
-    var reCompute = _ref2.reCompute;
-    var subset = _ref2.subset;
-
-    if (typeof appendItemFromConceptInto !== "function") {
-        alert('This functionality is not available in the tranSMART version you use.');
-        return;
-    }
-    if (!confirm("Attention! This action will have the following impact:\n1. Your cohort selection in the 'Comparison' tab will be modified.\n2. Your current analysis will be recomputed based on this selection.\n")) {
-        return;
-    }
-
-    var destination = $($("#queryTable tr:last-of-type td")[subset - 1]).find('div[id^=panelBoxList]').last();
     var _iteratorNormalCompletion = true;
     var _didIteratorError = false;
     var _iteratorError = undefined;
 
     try {
-        for (var _iterator = constrains[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var constrain = _step.value;
+        for (var _iterator = Array(GLOBAL.NumOfSubsets).keys()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var i = _step.value;
 
-            if (andConcat) {
-                destination = $($("#queryTable tr:last-of-type td")[subset - 1]).find('div[id^=panelBoxList]').last();
+            var currentQuery = getQuerySummary(i + 1);
+            if (currentQuery !== '') {
+                cohortsSummary += '<br/>Subset ' + (i + 1) + ': <br/>';
+                cohortsSummary += currentQuery;
+                cohortsSummary += '<br/>';
             }
-            appendItemFromConceptInto(destination, constrain, negate);
         }
     } catch (err) {
         _didIteratorError = true;
@@ -317,9 +229,29 @@ function setCohorts(_ref2) {
         }
     }
 
-    if (reCompute) {
-        runAllQueries(runAnalysis);
+    if (!cohortsSummary) {
+        cohortsSummary = '<br/>WARNING: No subsets have been selected! Please go to the "Comparison" tab and select your subsets.';
     }
+    $('#cohortInfo').html(cohortsSummary);
+}
+showCohortInfo();
+
+function updateInputView() {
+    if (typeof updateOnView === 'function') {
+        updateOnView();
+    }
+}
+
+var panelItem = $('#resultsTabPanel__etrikspanel');
+panelItem.click(showCohortInfo);
+panelItem.click(updateInputView);
+
+function getMaxWidth(arr) {
+    var _this2 = this;
+
+    return Math.max.apply(null, arr.map(function () {
+        return _this2.getBBox().width;
+    }));
 }
 
 function shortenConcept(concept) {
@@ -334,10 +266,7 @@ function activateDragAndDrop(divName) {
 }
 
 function clearVarSelection(divName) {
-    var div = Ext.get(divName).dom;
-    while (div.firstChild) {
-        div.removeChild(div.firstChild);
-    }
+    $('#' + divName).remove();
 }
 
 function getConcepts(divName) {
@@ -347,36 +276,12 @@ function getConcepts(divName) {
 }
 
 function addSettingsToData(data, settings) {
-    var _iteratorNormalCompletion2 = true;
-    var _didIteratorError2 = false;
-    var _iteratorError2 = undefined;
-
-    try {
-        for (var _iterator2 = data[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-            var element = _step2.value;
-
-            if (element.name == "settings") {
-                var json = JSON.parse(element.value);
-                json = $.extend(json, settings);
-                element.value = JSON.stringify(json);
-                break;
-            }
-        }
-    } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
-    } finally {
-        try {
-            if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                _iterator2.return();
-            }
-        } finally {
-            if (_didIteratorError2) {
-                throw _iteratorError2;
-            }
-        }
-    }
-
+    var element = data.find(function (d) {
+        return d.name === 'settings';
+    });
+    var json = JSON.parse(element.value);
+    json = $.extend(json, settings);
+    element.value = JSON.stringify(json);
     return data;
 }
 
@@ -391,7 +296,7 @@ function registerConceptBox(name, cohorts) {
     var check1 = containsOnly(name, type);
     var check2 = concepts.length >= min;
     var check3 = concepts.length <= max;
-    sanityCheckErrors.push(!check1 ? "Concept box (" + name + ") contains concepts with invalid type! Valid type: " + type : !check2 ? "Concept box (" + name + ") contains too few concepts! Valid range: " + min + " - " + max : !check3 ? "Concept box (" + name + ") contains too many concepts! Valid range: " + min + " - " + max : '');
+    sanityCheckErrors.push(!check1 ? 'Concept box (' + name + ') contains concepts with invalid type! Valid type: ' + type : !check2 ? 'Concept box (' + name + ') contains too few concepts! Valid range: ' + min + ' - ' + max : !check3 ? 'Concept box (' + name + ') contains too many concepts! Valid range: ' + min + ' - ' + max : '');
     conceptBoxes.push({ name: name, cohorts: cohorts, type: type, concepts: concepts });
 }
 
@@ -420,35 +325,35 @@ function sane() {
         return false;
     }
 
-    if ($("#scriptSelect").val() === '') {
+    if (!$('#scriptSelect').val()) {
         alert('Please select the algorithm you want to use!');
         return false;
     }
 
-    var _iteratorNormalCompletion3 = true;
-    var _didIteratorError3 = false;
-    var _iteratorError3 = undefined;
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
 
     try {
-        for (var _iterator3 = sanityCheckErrors[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-            var sanityCheckError = _step3.value;
+        for (var _iterator2 = sanityCheckErrors[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var sanityCheckError = _step2.value;
 
-            if (sanityCheckError !== '') {
+            if (sanityCheckError) {
                 alert(sanityCheckError);
                 return false;
             }
         }
     } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
     } finally {
         try {
-            if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                _iterator3.return();
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                _iterator2.return();
             }
         } finally {
-            if (_didIteratorError3) {
-                throw _iteratorError3;
+            if (_didIteratorError2) {
+                throw _iteratorError2;
             }
         }
     }
@@ -472,27 +377,27 @@ function setImage(divName, image) {
         var binary = '';
         var bytes = new Uint8Array(buffer);
         var len = bytes.byteLength;
-        var _iteratorNormalCompletion4 = true;
-        var _didIteratorError4 = false;
-        var _iteratorError4 = undefined;
+        var _iteratorNormalCompletion3 = true;
+        var _didIteratorError3 = false;
+        var _iteratorError3 = undefined;
 
         try {
-            for (var _iterator4 = bytes[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                var byte = _step4.value;
+            for (var _iterator3 = bytes[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                var byte = _step3.value;
 
                 binary += String.fromCharCode(byte);
             }
         } catch (err) {
-            _didIteratorError4 = true;
-            _iteratorError4 = err;
+            _didIteratorError3 = true;
+            _iteratorError3 = err;
         } finally {
             try {
-                if (!_iteratorNormalCompletion4 && _iterator4.return) {
-                    _iterator4.return();
+                if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                    _iterator3.return();
                 }
             } finally {
-                if (_didIteratorError4) {
-                    throw _iteratorError4;
+                if (_didIteratorError3) {
+                    throw _iteratorError3;
                 }
             }
         }
@@ -501,26 +406,26 @@ function setImage(divName, image) {
     }
 
     var img = document.createElement('img');
-    img.setAttribute('src', "data:image/pngbase64," + _arrayBufferToBase64(image));
+    img.setAttribute('src', 'data:image/pngbase64,' + _arrayBufferToBase64(image));
     document.getElementById(divName).appendChild(img);
 }
 
 function goToEAE() {
     $.ajax({
         url: pageInfo.basePath + '/SmartR/goToEAEngine',
-        type: "POST",
+        type: 'POST',
         timeout: '600000'
     }).done(function (response) {
-        $("#index").html(response);
+        $('#index').html(response);
     }).fail(function () {
-        $("#index").html("AJAX CALL FAILED!");
+        $('#index').html('AJAX CALL FAILED!');
     });
 }
 
 function renderResultsInTemplate(callback, data) {
     $.ajax({
         url: pageInfo.basePath + '/SmartR/renderResultsInTemplate',
-        type: "POST",
+        type: 'POST',
         timeout: 1.8e+6,
         data: data
     }).done(function (response) {
@@ -529,19 +434,19 @@ function renderResultsInTemplate(callback, data) {
         } else {
             $('#submitButton').prop('disabled', false);
             callback();
-            $("#outputDIV").html(response);
+            $('#outputDIV').html(response);
         }
     }).fail(function () {
         $('#submitButton').prop('disabled', false);
         callback();
-        $("#outputDIV").html("Could not render results. Please contact your administrator.");
+        $('#outputDIV').html('Could not render results. Please contact your administrator.');
     });
 }
 
 function renderResults(callback, data) {
     $.ajax({
         url: pageInfo.basePath + '/SmartR/renderResults',
-        type: "POST",
+        type: 'POST',
         timeout: 1.8e+6,
         data: data
     }).done(function (response) {
@@ -557,7 +462,7 @@ function renderResults(callback, data) {
         }
     }).fail(function () {
         $('#submitButton').prop('disabled', false);
-        alert("Server does not respond. Network connection lost?");
+        alert('Server does not respond. Network connection lost?');
     });
 }
 
@@ -575,8 +480,8 @@ function computeResults() {
 
     $('#submitButton').prop('disabled', true);
     $.ajax({
-        url: pageInfo.basePath + "/SmartR/" + (init ? 'computeResults' : 'reComputeResults'),
-        type: "POST",
+        url: pageInfo.basePath + '/SmartR/' + (init ? 'computeResults' : 'reComputeResults'),
+        type: 'POST',
         timeout: 1.8e+6,
         data: data
     }).done(function (response) {
@@ -589,7 +494,7 @@ function computeResults() {
             }
         } else {
             if (init) {
-                $("#outputDIV").html('');
+                $('#outputDIV').html('');
             }
             $('#submitButton').prop('disabled', false);
             alert(retCodes[response]);
@@ -606,12 +511,12 @@ function computeResults() {
 function showLoadingScreen() {
     $.ajax({
         url: pageInfo.basePath + '/SmartR/renderLoadingScreen',
-        type: "POST",
+        type: 'POST',
         timeout: 1.8e+6
     }).done(function (response) {
-        $("#outputDIV").html(response);
+        $('#outputDIV').html(response);
     }).fail(function () {
-        $("#outputDIV").html("Loading screen could not be initialized. Probably you lost network connection.");
+        $('#outputDIV').html('Loading screen could not be initialized. Probably you lost network connection.');
     });
 }
 
@@ -630,21 +535,21 @@ function runAnalysis() {
 }
 
 function changeInputDIV() {
-    $("#outputDIV").html("");
+    $('#outputDIV').html('');
     $.ajax({
         url: pageInfo.basePath + '/SmartR/renderInputDIV',
-        type: "POST",
+        type: 'POST',
         timeout: 1.8e+6,
         data: { 'script': $('#scriptSelect').val() }
     }).done(function (response) {
-        $("#inputDIV").html(response);
+        $('#inputDIV').html(response);
         updateInputView();
     }).fail(function () {
-        $("#inputDIV").html("Coult not render input form. Probably you lost network connection.");
+        $('#inputDIV').html('Coult not render input form. Probably you lost network connection.');
     });
 }
 
 function contact() {
     var version = 0.5;
-    alert("\nBefore reporting a bug...\n... 1. Make sure you use the lastet SmartR version (installed version: " + version + ")\n... 2. Make sure that all requirements for using SmartR are met\n\nAll relevant information can be found on https://github.com/sherzinger/SmartR\n\nIf you still want to report a bug you MUST include these information:\n\n>>>" + navigator.userAgent + " SmartR/" + version + "<<<\n\nBug reports -> http://usersupport.etriks.org/\nFeedback -> sascha.herzinger@uni.lu");
+    alert('\nBefore reporting a bug...\n... 1. Make sure you use the lastet SmartR version (installed version: ' + version + ')\n... 2. Make sure that all requirements for using SmartR are met\n\nAll relevant information can be found on https://github.com/sherzinger/SmartR\n\nIf you still want to report a bug you MUST include these information:\n\n>>>' + navigator.userAgent + ' SmartR/' + version + '<<<\n\nBug reports -> http://usersupport.etriks.org/\nFeedback -> sascha.herzinger@uni.lu');
 }
