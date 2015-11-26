@@ -120,7 +120,6 @@ class EaeController {
             String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, workflow, username, query)
             String dataFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "data")
             String additionalFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "additional")
-            dataFileName = "GSE31773.txt" // this is a hack before i figure out the tm data shit.
             workflowParameters['mongoDocumentID'] = mongoDocumentID;
             workflowParameters['dataFileName'] = dataFileName;
             workflowParameters['additionalFileName'] = additionalFileName;
@@ -130,7 +129,7 @@ class EaeController {
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
             result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, database, workflow, query);
-            //mongoCacheService.duplicateCVCacheForUser(MONGO_URL, MONGO_PORT,username, result)
+           // mongoCacheService.duplicateCacheForUser(MONGO_URL, MONGO_PORT,username, result)
         }else{
             result = "Your Job has been submitted. Please come back later for the result"
         }
