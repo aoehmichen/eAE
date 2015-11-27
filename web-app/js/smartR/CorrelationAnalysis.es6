@@ -1,41 +1,17 @@
 function buildCorrelationAnalysis(results) {
-    let animationDuration = 500
-    let tmpAnimationDuration = animationDuration
-    function switchAnimation(checked) {
-        if (! checked) {
-            tmpAnimationDuration = animationDuration
-            animationDuration = 0
-        } else {
-            animationDuration = tmpAnimationDuration
-        }
-    }
-
-    let panel = $('#etrikspanel')
-
-    let controls = d3.select('#controls').append('svg')
-        .attr('width', panel.width())
-        .attr('height', 45)
-
-    let margin = {top: 20, right: 40, bottom: 40, left: 10}
-    let width = panel.width() * 2/3 - 10 - margin.left - margin.right
-    let height = panel.height() * 2/3 - 10 - margin.top - margin.bottom
-
-    let xLabel = results.xArrLabel
-    let yLabel = results.yArrLabel
-    let xArr = results.xArr
-    let yArr = results.yArr
-    let patientIDs = results.patientIDs
-    let tags = results.tags
-    let originalData = patientIDs.map((d, i) => {return {x:xArr[i], y:yArr[i], uid:patientIDs[i], tag:tags[i]}})
-
-    let firstRun = true
-
-    let legendPosX = 0
-    let legendPosY = 0
-
-    init(originalData)
-
-    function init(points) {
+    const animationDuration = 500
+    const colors = ['#33FF33', '#3399FF', '#CC9900', '#CC99FF', '#FFFF00', 'blue', 'black']
+    let correlation, pvalue, regLineSlope, regLineYIntercept, xArr, yArr, patientIDs, tags, points, x, y, detectedTags
+    function init(data) {
+        correlation = data.correlation
+        pvalue = data.pvalue
+        regLineSlope = data.regLineSlope
+        regLineYIntercept = data.regLineYIntercept
+        xArr = data.xArr
+        yArr = data.yArr
+        patientIDs = data.patientIDs
+        tags = data.tags
+        points = patientIDs.map((d, i) => {return {x:xArr[i], y:yArr[i], patientID:patientIDs[i], tag:tags[i]}})
         x = d3.scale.linear()
             .domain(d3.extent(points, d => d.x))
             .range([0, width])
@@ -44,436 +20,302 @@ function buildCorrelationAnalysis(results) {
             .domain(d3.extent(points, d => d.y))
             .range([height, 0])
 
-        let displayedData = points.map(d => { return {x:x(d.x), y:y(d.y), uid:d.uid, tag:d.tag} })
-
-        let selectedData = displayedData.slice()
-
-        let scatterplot = d3.select('#scatterplot').append('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom)
-            .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-
-        let tooltip = d3.select('#scatterplot').append('div')
-            .attr('class', 'tooltip text')
-            .style('visibility', 'hidden')
-
-        let contextMenu = d3.select('#scatterplot').append('div')
-            .attr('class', 'contextMenu text')
-            .style('visibility', 'hidden')
-            .html(`Number of bins<br/>
-<input id='binNumber' class='mybutton text' type='number' min='1' max='20' step='1' onchange='updateBinNumber()'/><br/>
-<input id='updateCohortsButton' class='mybutton text' type='button' value='Update Cohorts' onclick='updateCohorts()'/><br/>
-<input id='zoomButton' class='mybutton text' type='button' value='Zoom' onclick='zoomSelection()'/><br/>
-<input id='excludeButton' class='mybutton text' type='button' value='Exclude' onclick='excludeSelection()'/><br/>
-<input id='resetButton' class='mybutton text' type='button' value='Reset' onclick='reset()'/>`)
-
-        d3.select('#scatterplot')
-            .on('contextmenu', () => {
-                d3.event.preventDefault()
-                contextMenu
-                    .style('visibility', 'visible')
-                    .style('left', mouseX() + 'px')
-                    .style('top', mouseY() + 'px')
-            })
-
-        let drag = d3.behavior.drag()
-            .on('drag', dragmove)
-
-        let legend = d3.select('#scatterplot').append('div')
-            .attr('class', 'legend text')
-            .call(drag)
-
-        if (firstRun) {
-            var scatterPos = $('#scatterplot').position()
-            legend
-                .style('left', scatterPos.left + margin.left + 'px')
-                .style('top', scatterPos.top + margin.top + 'px')
-            legendPosX = scatterPos.left + margin.left + 'px'
-            legendPosY = scatterPos.top + margin.top + 'px'
-        } else {
-            legend
-                .style('left', legendPosX)
-                .style('top', legendPosY)
-        }
-
-        let scatterXAxis = d3.svg.axis()
-            .scale(x)
-            .ticks(10)
-            .tickFormat('')
-            .innerTickSize(height)
-            .orient('bottom')
-
-        scatterplot.append('g')
-            .attr('class', 'x axis text')
-            .attr('transform', 'translate(' + 0 + ',' + 0 + ')')
-            .call(scatterXAxis)
-
-        scatterplot.append('text')
-            .attr('class', 'axisLabels text')
-            .attr('x', width / 2)
-            .attr('y', 0 - margin.top + 15)
-            .text(shortenConcept(xLabel.toString()))
-
-        let scatterYAxis = d3.svg.axis()
-            .scale(y)
-            .ticks(10)
-            .tickFormat('')
-            .innerTickSize(width)
-            .orient('left')
-
-        scatterplot.append('g')
-            .attr('class', 'y axis text')
-            .attr('transform', `translate(${width}, ${0})`)
-            .call(scatterYAxis)
-
-        scatterplot.append('text')
-            .attr('class', 'axisLabels text')
-            .attr('x', height / 2)
-            .attr('y', - width - margin.right + 30)
-            .attr('transform', 'rotate(90)')
-            .text(shortenConcept(yLabel.toString()))
-
-        let brush = d3.svg.brush()
-            .x(d3.scale.identity().domain([-20, width + 20]))
-            .y(d3.scale.identity().domain([-20, height + 20]))
-            .on('brushend', () => {
-                contextMenu
-                    .style('visibility', 'hidden')
-                    .style('top', -100 + 'px')
-                updateSelection()
-            })
-
-        scatterplot.append('g')
-            .attr('class', 'brush')
-            .on('mousedown', () => d3.event.button === 2 ? d3.event.stopImmediatePropagation() : null)
-            .call(brush)
-
-        let detectedTags = []
-        detectTags()
-        colors = ['#33FF33', '#3399FF', '#CC9900', '#CC99FF', '#FFFF00', 'blue', 'black']
-
-        regressionLine = scatterplot.append('line')
-            .on('mouseover', function(d) {
-                d3.select(this).attr('stroke', 'red')
-                tooltip
-                    .style('visibility', 'visible')
-                    .html('slope: ' + results.regLineSlope + '<br/>' + 'intercept: ' + results.regLineYIntercept)
-                    .style('left', mouseX() + 'px')
-                    .style('top', mouseY() + 'px')
-            })
-            .on('mouseout', function(d) {
-                d3.select(this).attr('stroke', 'orange')
-                tooltip.style('visibility', 'hidden')
-            })
-
-        bins = 10
-        d3.select('#binNumber')
-            .attr('value', bins)
-            .on('change', updateHistogram)
-
-        hist1Width = width * 1 / 3
-
-        histogram1 = d3.select('#histogram1').append('svg')
-            .attr('width', hist1Width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom)
-            .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-
-        hist1xAxis = d3.svg.axis()
-            .scale(y)
-            .orient('right')
-
-        hist2Height = height * 1 / 3
-
-        histogram2 = d3.select('#histogram2').append('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', hist2Height + margin.top + margin.bottom)
-            .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-
-        hist2xAxis = d3.svg.axis()
-            .scale(x)
-            .ticks(10)
-            .orient('top')
+        detectedTags = points.filter(d => d.tag).map(d => d.tag).sort()
 
         updateScatterplot()
-        updateCorrelation()
-        updateHistogram()
+        updateRegressionLine()
+        updateLegend()
     }
 
-    function getOriginalPointWithUID(uid) {
-        let i = originalData.length
-        while(i--) {
-            if (originalData[i].uid === uid) {
-                return originalData[i]
-            }
-        }
-    }
+    init(results)
 
-    function detectTags() {
-        let i = originalData.length
-        while (i--) {
-            let index = detectedTags.indexOf(originalData[i].tag)
-            if (index === -1) {
-                detectedTags.push(originalData[i].tag)
-            }
-        }
-        detectedTags.sort()
-    }
-
-    function getColor(tag) {
-        if (! tag) {
-            return 'black'
-        }
-        let index = detectedTags.indexOf(tag)
-        if (index === -1) {
-            alert('An unexpected error occured while setting color tags!')
-        }
-        return colors[index]
-    }
-
-    function dragmove(d) {
-        d3.select(this)
-            .style('left', mouseX() + 'px')
-            .style('top', mouseY() + 'px')
-        legendPosX = mouseX() + 'px'
-        legendPosY = mouseY() + 'px'
-    }
-
-    function updateScatterplot() {
-        point = scatterplot.selectAll('.point')
-            .data(displayedData, function(d) { return d.uid })
-
-        point.enter()
-            .append('circle')
-            .attr('class', 'point')
-            .style('fill', function(d) { return getColor(d.tag) })
-            .on('mouseover', function(d) {
-                let originalPoint = getOriginalPointWithUID(d.uid)
-                d3.select(this).style('fill', 'red')
-                tooltip
-                    .style('visibility', 'visible')
-                    .html(shortenConcept(xLabel.toString()) + ': ' + originalPoint.x + '<br/>' +
-                        shortenConcept(yLabel.toString()) + ': ' + originalPoint.y + '<br/>' +
-                        'patientID: ' + originalPoint.uid + '<br/>' +
-                        (originalPoint.tag ? ('Tag: ' + originalPoint.tag) : ''))
-                    .style('left', mouseX() + 'px')
-                    .style('top', mouseY() + 'px')
-            })
-            .on('mouseout', function(d) {
-                let p = d3.select(this)
-                if (p.classed('selected')) {
-                    p.style('fill', 'white')
-                } else {
-                    p.style('fill', function(d) { return getColor(d.tag) })
-                }
-                tooltip.style('visibility', 'hidden')
-            })
-            .attr('cx', function(d) { return d.x })
-            .attr('cy', function(d) { return d.y })
-            .attr('r', 5)
-
-        point.exit()
-            .transition().duration(animationDuration)
-            .attr('r', 0)
-            .remove()
-    }
-
-    function updateRegressionLine() {
-        regressionLine.attr('stroke', 'orange')
-        regressionLine.attr('stroke-width', 3)
-        let minX, maxX
-        if (! selectedData && displayedData.length > 2) {
-            minX = d3.min(displayedData, function(d) { return d.x })
-            maxX = d3.max(displayedData, function(d) { return d.x })
-        } else if (selectedData.length >= 2 && results.regLineSlope[0] !== 'NA') {
-            minX = d3.min(selectedData, function(d) { return d.x })
-            maxX = d3.max(selectedData, function(d) { return d.x })
-        } else {
-            regressionLine
-                .transition()
-                .duration(animationDuration)
-                .attr('stroke-width', 10)
-                .transition()
-                .duration(animationDuration)
-                .attr('stroke-width', 0)
-            return
-        }
-
-        regressionLine
-            .transition()
-            .duration(animationDuration)
-            .attr('x1', minX)
-            .attr('y1', y(parseFloat(results.regLineYIntercept) + parseFloat(results.regLineSlope) * x.invert(minX)))
-            .attr('x2', maxX)
-            .attr('y2', y(parseFloat(results.regLineYIntercept) + parseFloat(results.regLineSlope) * x.invert(maxX)))
-    }
-
-    function updateSelection() {
-        point.each(function(d) {
-            d3.select(this)
-                .classed('selected', false)
-                .style('fill', getColor(d.tag))
-                .style('stroke', 'white')
-        })
-        let extent = brush.extent()
-        let x0 = extent[0][0],
-            y0 = extent[0][1],
-            x1 = extent[1][0],
-            y1 = extent[1][1]
-        let newSelectedData = []
-        point.each(function(d) {
-            if (x0 <= d.x && d.x <= x1 && y0 <= d.y && d.y <= y1) {
-                d3.select(this)
-                    .classed('selected', true)
-                    .style('fill', 'white')
-                    .style('stroke', getColor(d.tag))
-                newSelectedData.push({x:d.x, y:d.y, uid:d.uid, tag:d.tag})
-            }
-        })
-        if ((selectedData.length === displayedData.length && newSelectedData.length === 0) || equalUIDs(newSelectedData, selectedData)) {
-            return
-        }
-        selectedData = newSelectedData.length ? newSelectedData : displayedData.slice()
-        updateCorrelation()
-        updateHistogram()
-    }
-
-    function updateBinNumber() {
-        bins = parseInt($('#binNumber').val())
-    }
-
-    function equalUIDs(arr1, arr2) {
-        if (arr1.length !== arr2.length) {
-            return false
-        }
-        let i = arr2.length
-        while (i--) {
-            let index = indexOfObjWithUID(arr1, arr2[i])
-            if (index === -1) {
-                return false
-            }
-        }
-        return true
-    }
-
-    function indexOfObjWithUID(arr, obj) {
-        let i = arr.length
-        while (i--) {
-            if (arr[i].uid === obj.uid) {
-                return i
-            }
-        }
-        return -1
-    }
-
-    function zoomSelection() {
-        if (selectedData.length === displayedData.length || selectedData.length < 2) {
-            alert('Please select at least two elements before zooming!')
-            return
-        }
-        let newPoints = []
-        let i = selectedData.length
-        while(i--) {
-            let index = indexOfObjWithUID(originalData, selectedData[i])
-            if (~ index) {
-                newPoints.push(originalData[index])
-            }
-        }
-        cleanup()
-        init(newPoints)
-    }
-
-    function excludeSelection() {
-        if (selectedData.length === displayedData.length || selectedData.length === 0) {
-            return
-        }
-        let i = selectedData.length
-        while (i--) {
-            let index = indexOfObjWithUID(displayedData, selectedData[i])
-            if (~ index) {
-                displayedData.splice(index, 1)
-            }
-        }
-        selectedData = displayedData.slice()
-        updateScatterplot()
-        updateCorrelation()
-        updateHistogram()
-    }
-
-    function updateCorrelation() {
-        if (firstRun) {
-            firstRun = false
-            updateRegressionLine()
-            updateLegend()
-            return
-        }
-        let xLowHigh = d3.extent(selectedData, function(d) { return getOriginalPointWithUID(d.uid).x })
-        let yLowHigh = d3.extent(selectedData, function(d) { return getOriginalPointWithUID(d.uid).y })
-
+    function updateStatistics(patientIDs) {
         let data = prepareFormData()
-        data = addSettingsToData(data, { xLow: xLowHigh[0] })
-        data = addSettingsToData(data, { xHigh: xLowHigh[1] })
-        data = addSettingsToData(data, { yLow: yLowHigh[0] })
-        data = addSettingsToData(data, { yHigh: yLowHigh[1] })
+        data = addSettingsToData(data, { patientIDs })
 
-        let onResponse = function(response) {
-            results = response
-            updateRegressionLine()
-            updateLegend()
+        const onResponse = response => {
+            init(response)
         }
 
         computeResults(onResponse, data, false, false)
     }
 
+    const panel = $('#etrikspanel')
+    const margin = {top: 20, right: 40, bottom: 40, left: 10}
+    const width = panel.width() * 2/3 - 10 - margin.left - margin.right
+    const height = panel.height() * 2/3 - 10 - margin.top - margin.bottom
+
+    const scatterplot = d3.select('#scatterplot').append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin.left}, ${margin.top})`)
+        .on('contextmenu', () => {
+            d3.event.preventDefault()
+            contextMenu
+                .style('visibility', 'visible')
+                .style('left', mouseX() + 'px')
+                .style('top', mouseY() + 'px')
+        })
+
+    const tooltip = scatterplot.append('div')
+        .attr('class', 'tooltip')
+        .style('visibility', 'hidden')
+
+    function dragmove() {
+        legend
+            .style('left', mouseX() + 'px')
+            .style('top', mouseY() + 'px')
+    }
+
+    const drag = d3.behavior.drag()
+        .on('drag', dragmove)
+
+    const scatterPos = $('#scatterplot').position()
+    const legend = d3.select('#scatterplot').append('div')
+        .attr('class', 'legend')
+        .style('left', scatterPos.left + margin.left + 'px')
+        .style('top', scatterPos.top + margin.top + 'px')
+        .call(drag)
+
+    const scatterXAxis = d3.svg.axis()
+        .scale(x)
+        .ticks(10)
+        .tickFormat('')
+        .innerTickSize(height)
+        .orient('bottom')
+
+    scatterplot.append('g')
+        .attr('class', 'x axis')
+        .attr('transform', 'translate(0, 0)')
+        .call(scatterXAxis)
+
+    scatterplot.append('text')
+        .attr('class', 'axisLabels')
+        .attr('x', width / 2)
+        .attr('y', - margin.top + 15)
+        .text(shortenConcept(results.xArrLabel.toString()))
+
+    const scatterYAxis = d3.svg.axis()
+        .scale(y)
+        .ticks(10)
+        .tickFormat('')
+        .innerTickSize(width)
+        .orient('left')
+
+    scatterplot.append('g')
+        .attr('class', 'y axis')
+        .attr('transform', `translate(${width}, ${0})`)
+        .call(scatterYAxis)
+
+    scatterplot.append('text')
+        .attr('class', 'axisLabels')
+        .attr('x', height / 2)
+        .attr('y', - width - margin.right + 30)
+        .attr('transform', 'rotate(90)')
+        .text(shortenConcept(results.yArrLabel.toString()))
+
+    const hist1Width = width / 3
+    const histogram1 = d3.select('#histogram1').append('svg')
+        .attr('width', hist1Width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin.left}, ${margin.top})`)
+
+    const hist1xAxis = d3.svg.axis()
+        .scale(y)
+        .orient('right')
+
+    const hist2Height = height / 3
+    const histogram2 = d3.select('#histogram2').append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', hist2Height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin.left}, ${margin.top})`)
+
+    const hist2xAxis = d3.svg.axis()
+        .scale(x)
+        .ticks(10)
+        .orient('top')
+
+    const contextMenu = scatterplot.append('div')
+        .attr('class', 'contextMenu')
+        .style('visibility', 'hidden')
+        .html(`Number of bins<br/>
+<input id='binNumber' class='mybutton' type='number' min='1' max='20' step='1' onchange='updateBinNumber()'/><br/>
+<input id='updateCohortsButton' class='mybutton' type='button' value='Update Cohorts' onclick='updateCohorts()'/><br/>
+<input id='zoomButton' class='mybutton' type='button' value='Zoom' onclick='zoomSelection()'/><br/>
+<input id='excludeButton' class='mybutton' type='button' value='Exclude' onclick='excludeSelection()'/><br/>
+<input id='resetButton' class='mybutton' type='button' value='Reset' onclick='reset()'/>`)
+
+    let bins = 10
+    d3.select('#binNumber')
+        .attr('value', bins)
+        .on('change', updateHistogram)
+
+    function updateBinNumber() {
+        bins = parseInt($('#binNumber').val())
+    }
+
     function updateCohorts() {
-        let concept1LowHigh = d3.extent(selectedData, function(d) { return getOriginalPointWithUID(d.uid).x })
-        let concept2LowHigh = d3.extent(selectedData, function(d) { return getOriginalPointWithUID(d.uid).y })
-        let div1 = createQueryCriteriaDIV(xLabel.toString(), 'ratio', 'numeric', 'BETWEEN', concept1LowHigh[0], concept1LowHigh[1], 'ratio', 'Y', 'valueicon')
-        let div2 = createQueryCriteriaDIV(yLabel.toString(), 'ratio', 'numeric', 'BETWEEN', concept2LowHigh[0], concept2LowHigh[1], 'ratio', 'Y', 'valueicon')
-        setCohorts([div1, div2], true, false, true)
+        alert('This feature will be available in TranSMART 1.3')
+    }
+
+    function updateSelection() {
+        let extent = brush.extent()
+        let x0 = extent[0][0],
+            y0 = extent[0][1],
+            x1 = extent[1][0],
+            y1 = extent[1][1]
+        d3.selectAll('.point')
+            .classed('selected', false)
+            .style('fill', d => getColor(d))
+            .style('stroke', 'white')
+            .filter(d => x0 <= d.x && d.x <= x1 && y0 <= d.y && d.y <= y1)
+            .classed('selected', true)
+            .style('fill', 'white')
+            .style('stroke', d => getColor(d))
+            .data()
+    }
+
+    function excludeSelection() {
+        points = d3.selectAll('.point').filter(d => !d.classed('selected')).data()
+        updateScatterplot()
+        const remainingPatientIDs = points.map(d => d.patientID)
+        updateStatistics(remainingPatientIDs)
+        updateRegressionLine()
+        updateLegend()
+    }
+
+    function zoomSelection() {
+        if (d3.selectAll('.point.selected').length < 2) {
+            alert('Please select at least two elements before zooming!')
+            return
+        }
+        var selectedPatientIDs = d3.selectAll('.point.selected').data(d => d.patientID)
+        updateStatistics(selectedPatientIDs)
+    }
+
+    const brush = d3.svg.brush()
+        .x(d3.scale.identity().domain([-20, width + 20]))
+        .y(d3.scale.identity().domain([-20, height + 20]))
+        .on('brushend', () => {
+            contextMenu
+                .style('visibility', 'hidden')
+                .style('top', -100 + 'px')
+            updateSelection()
+            const selectedPatientIDs = d3.selectAll('.point.selected').data().map(d => d.patientID)
+            updateStatistics(selectedPatientIDs)
+            updateRegressionLine()
+            updateLegend()
+        })
+
+    scatterplot.append('g')
+        .attr('class', 'brush')
+        .on('mousedown', () => d3.event.button === 2 ? d3.event.stopImmediatePropagation() : null)
+        .call(brush)
+
+    function getColor(point) {
+        return point.tag ? colors[detectedTags.indexOf(tag)] : 'black'
+    }
+
+    function updateScatterplot() {
+        const point = d3.selectAll('.point')
+            .data(points, d => d.patientID)
+
+        point.enter()
+            .append('circle')
+            .attr('class', 'point')
+            .attr('cx', d => d.x)
+            .attr('cy', d => d.y)
+            .attr('r', 5)
+            .style('fill', d => getColor(d))
+            .on('mouseover', d => {
+                d3.select(this).style('fill', 'red')
+                tooltip
+                    .style('left', mouseX() + 'px')
+                    .style('top', mouseY() + 'px')
+                    .style('visibility', 'visible')
+                    .html(`${shortenConcept(xLabel.toString())}: ${d.x}<br/>
+${shortenConcept(yLabel.toString())}: ${d.y}<br/>
+patientID: ${d.patientID}<br/>
+${d.tag ? 'Tag: ' + d.tag : ''}`)})
+            .on('mouseout', () => {
+                d3.select(this)
+                style('fill', d => getColor(d))
+                tooltip.style('visibility', 'hidden')
+            })
+
+        point.exit()
+            .transition()
+            .duration(animationDuration)
+            .attr('r', 0)
+            .remove()
     }
 
     function updateLegend() {
-        let html = (
-            'Correlation Coefficient: ' + results.correlation[0]  + '<br/>' +
-            'p-value: ' + results.pvalue[0] + '<br/>' +
-            'Method: ' + results.method[0] + '<br/>' + '<br/>' +
-            'Selected: ' + selectedData.length + '<br/>' +
-            'Displayed: ' + displayedData.length + '<br/>' +
-            'Excluded: ' + (originalData.length - displayedData.length)) + '<br/>' + '<br/>'
-
-        for (let i = 0, len = detectedTags.length i < len i++) {
-            if (! detectedTags[i]) {
-                html = html + '<p style='background:' + getColor(detectedTags[i]) + ' color:white'>Default</p>'
-            } else {
-                html = html + '<p style='background:' + getColor(detectedTags[i]) + ''>' + detectedTags[i] + '</p>'
-            }
-        }
-
-        legend.html(html)
+//        let html = (`Correlation Coefficient: ${correlation[0]}<br/>
+//p-value: ${pvalue[0]}<br/>
+//Method: ${results.method[0]}<br/><br/>
+//Selected: ${d3.selectAll('.point.selected').length}<br/>
+//Displayed: ${d3.selectAll('.point').length}<br/><br/>`) // FIXME: add excluded to legend
+//
+//        for (let detectedTag of detectedTags) {
+//            if (!detectedTag) {
+//                html = html + `<p style='background:${getColor(detectedTag)} color:white'>Default</p>`
+//            } else {
+//                html = html + `<p style='background:${getColor(detectedTag)} color:black'>${detectedTag}</p>`
+//            }
+//        }
+//
+//        d3.select('.legend').html(html)
     }
 
-    function cleanup() {
-        d3.select('#scatterplot').selectAll('*').remove()
-        d3.select('#histogram1').selectAll('*').remove()
-        d3.select('#histogram2').selectAll('*').remove()
+    function updateRegressionLine() {
+
+        //const searchSpace = d3.selectAll('.point.selected') ? d3.selectAll('.point.selected') : d3.selectAll('.point')
+        //const [minX, maxX] = d3.extent(searchSpace.data().map(d => d.x))
+        //
+        //const regressionLine = d3.selectAll('.regressionLine')
+        //    .data({regLineSlope, regLineYIntercept}, d => `slope=${d.regLineSlope} icpt=${regLineYIntercept}`)
+        //
+        //regressionLine.enter()
+        //    .append('line')
+        //    .attr('class', 'regressionLine')
+        //    .transition()
+        //    .duration(animationDuration)
+        //    .attr('x1', minX)
+        //    .attr('y1', y(parseFloat(regLineYIntercept) + parseFloat(regLineSlope) * x.invert(minX)))
+        //    .attr('x2', maxX)
+        //    .attr('y2', y(parseFloat(regLineYIntercept) + parseFloat(regLineSlope) * x.invert(maxX)))
+        //    .on('mouseover', () => {
+        //        d3.select(this).attr('stroke', 'red')
+        //        tooltip
+        //            .style('visibility', 'visible')
+        //            .html(d => `slope: ${d.regLineSlope}<br/>intercept: ${d.regLineYIntercept}`)
+        //            .style('left', mouseX() + 'px')
+        //            .style('top', mouseY() + 'px')
+        //    })
+        //    .on('mouseout', () => {
+        //        d3.select(this).attr('stroke', 'orange')
+        //        tooltip.style('visibility', 'hidden')
+        //    })
+
     }
+
 
     function reset() {
-        cleanup()
-        init(originalData)
+
     }
 
     function updateHistogram() {
+/*
+
         let hist1Data = d3.layout.histogram()
-            .bins(bins)
-            (selectedData.map(function(d) { return d.y }))
+            .bins(bins)(d3.selectAll('point.selected').data().map(d => d.y))
 
         let hist2Data = d3.layout.histogram()
-            .bins(bins)
-            (selectedData.map(function(d) { return d.x }))
+            .bins(bins)(d3.selectAll('point.selected').data().map(d => d.x))
 
         histogram1.selectAll('*').remove()
         histogram2.selectAll('*').remove()
@@ -489,45 +331,44 @@ function buildCorrelationAnalysis(results) {
             .attr('class', 'bar')
 
         let hist1BarScale = d3.scale.linear()
-            .domain([0, d3.max(hist1Data, function(d) { return d.y })])
+            .domain([0, d3.max(hist1Data, d => d.y)])
             .range([0, hist1Width])
 
         let hist2BarScale = d3.scale.linear()
-            .domain([0, d3.max(hist2Data, function(d) { return d.y })])
+            .domain([0, d3.max(hist2Data, d => d.y)])
             .range([0, hist2Height])
 
         hist1Bar.append('rect')
             .attr('width', 0)
             .attr('height', hist1Data[0].dx)
             .attr('x', hist1Width)
-            .attr('y', function(d, i) { return hist1Data[i].x })
+            .attr('y', (d, i) => hist1Data[i].x)
             .transition()
-            .delay(function(d, i) { return i * 25 })
+            .delay((d, i) => i * 25)
             .duration(animationDuration)
-            .attr('x', function(d) { return hist1Width - hist1BarScale(d.y) })
-            .attr('width', function(d) { return hist1BarScale(d.y) })
+            .attr('x', d => hist1Width - hist1BarScale(d.y))
+            .attr('width', d => hist1BarScale(d.y))
 
         hist1Bar.append('text')
-            .attr('class', 'text')
             .attr('x', hist1Width)
-            .attr('y', function(d, i) { return hist1Data[i].x })
+            .attr('y', (d, i) => hist1Data[i].x)
             .transition()
-            .delay(function(d, i) { return i * 25 })
+            .delay((d, i) => i * 25)
             .duration(animationDuration)
             .attr('dy', '.35em')
-            .attr('x', function(d) { return hist1Width - hist1BarScale(d.y) + 10 })
-            .attr('y', function(d, i) { return hist1Data[i].x + hist1Data[i].dx / 2 })
-            .text(function(d) { return d.y ? d.y : '' })
+            .attr('x', d => hist1Width - hist1BarScale(d.y) + 10)
+            .attr('y', (d, i) => hist1Data[i].x + hist1Data[i].dx / 2)
+            .text(d => d.y ? d.y : '')
 
         histogram1.append('g')
-            .attr('class', 'x axis text')
+            .attr('class', 'x axis')
             .attr('transform', 'translate(' + hist1Width + ',' + 0 + ')')
             .call(hist1xAxis)
 
         hist2Bar.append('rect')
             .attr('width', hist2Data[0].dx)
             .attr('height', 0)
-            .attr('x', function(d, i) { return hist2Data[i].x })
+            .attr('x', (d, i) => hist2Data[i].x)
             .attr('y', 0)
             .transition()
             .delay((d, i) => i * 25)
@@ -535,7 +376,6 @@ function buildCorrelationAnalysis(results) {
             .attr('height', d => hist2BarScale(d.y))
 
         hist2Bar.append('text')
-            .attr('class', 'text')
             .attr('x', (d, i) => hist2Data[i].x)
             .attr('y', 0)
             .transition()
@@ -547,22 +387,10 @@ function buildCorrelationAnalysis(results) {
             .text(d => d.y ? d.y : '')
 
         histogram2.append('g')
-            .attr('class', 'x axis text')
+            .attr('class', 'x axis')
             .attr('transform', `translate(${0}, ${0})`)
             .call(hist2xAxis)
+            */
     }
 
-    let buttonWidth = 200
-    let buttonHeight = 40
-    createD3Switch({
-        location: controls,
-        onlabel: 'Animation ON',
-        offlabel: 'Animation OFF',
-        x: 2,
-        y: 2,
-        width: buttonWidth,
-        height: buttonHeight,
-        callback: switchAnimation,
-        checked: true
-    })
 }

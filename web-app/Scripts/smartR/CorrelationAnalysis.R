@@ -1,17 +1,6 @@
 ### PREPARE SETTINGS ###
 
 method <- SmartR.settings$method
-if (! is.null(SmartR.settings$xLow)) {
-	xLow <- as.integer(SmartR.settings$xLow)
-	xHigh <- as.integer(SmartR.settings$xHigh)
-	yLow <- as.integer(SmartR.settings$yLow)
-	yHigh <- as.integer(SmartR.settings$yHigh)
-} else {
-	xLow <- -Inf
-	xHigh <- Inf
-	yLow <- -Inf
-	yHigh <- Inf
-}
 
 ### COMPUTE RESULTS ###
 
@@ -32,21 +21,16 @@ yArr <- points[points$concept == concepts[2], ]
 xArr <- xArr[xArr$patientID %in% yArr$patientID, ]
 yArr <- yArr[yArr$patientID %in% xArr$patientID, ]
 
+patientIDs <- if(is.null(SmartR.settings$patientIDs)) xArr$patientID else SmartR.settings$patientIDs
+
+xArr <- xArr[xArr$patientID %in% patientIDs, ]
+yArr <- yArr[yArr$patientID %in% patientIDs, ]
+
 xArr <- xArr[order(xArr$patientID), ]
 yArr <- yArr[order(yArr$patientID), ]
 
-patientIDs <- xArr$patientID
-
 xArr <- xArr$value
 yArr <- yArr$value
-
-selection <- (xArr >= xLow
-			& xArr <= xHigh
-			& yArr >= yLow
-			& yArr <= yHigh)
-xArr <- xArr[selection]
-yArr <- yArr[selection]
-patientIDs <- patientIDs[selection]
 
 annotations <- SmartR.data.cohort1$annotations
 folders <- as.vector(sapply(annotations$concept, conceptStrToFolderStr))
