@@ -4,6 +4,8 @@ import grails.util.Holders
 import org.rosuda.REngine.Rserve.RConnection
 import groovy.time.*
 
+import java.rmi.NoSuchObjectException
+
 
 class ScriptExecutorService {
 
@@ -196,10 +198,21 @@ class ScriptExecutorService {
     }
 
     def getResults(id) {
-        if (sessions[id] && sessions[id].results) {
+        if (!sessions[id]) {
+            return [false, 'Could not find session. Make sure you permit the use of cookies for this website.']
+        }
+        if (sessions[id].results) {
             return [sessions[id].success, sessions[id].results]
         }
         return [false, 'RUNNING']   
+    }
+
+    def setResults(id, success, results) {
+        if (!sessions[id]) {
+            return [false, 'Could not find session. Make sure you permit the use of cookies for this website.']
+        }
+        sessions[id].success = success
+        sessions[id].results = results
     }
 
     def clearSession(id) {
