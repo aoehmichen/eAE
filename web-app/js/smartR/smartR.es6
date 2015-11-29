@@ -531,7 +531,7 @@ function renderResultsInTemplate(callback, data) {
         data: data
     }).done(response => {
         if (response === 'RUNNING') {
-            setTimeout(renderResultsInTemplate(callback, data), 5000)
+            setTimeout(() => renderResultsInTemplate(callback, data), 5000)
         } else {
             $('#submitButton').prop('disabled', false)
             callback()
@@ -553,7 +553,7 @@ function renderResults(callback, data) {
     }).done(response => {
         response = JSON.parse(response)
         if (response.error === 'RUNNING') {
-            setTimeout(renderResults(callback, data), 5000)
+            setTimeout(() => renderResults(callback, data), 5000)
         } else if (response.error) {
             $('#submitButton').prop('disabled', false)
             alert(response.error)

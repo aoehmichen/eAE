@@ -134,6 +134,7 @@ class SmartRService {
             }
         } catch (e) {
             print e
+            scriptExecutorService.setResults(parameterMap['cookieID'], false, e)
             return 1
         }
 
@@ -143,6 +144,7 @@ class SmartRService {
             }
         } catch (e) {
             print e
+            scriptExecutorService.setResults(parameterMap['cookieID'], false, e)
             return 2
         }
 
@@ -150,6 +152,7 @@ class SmartRService {
             scriptExecutorService.run(parameterMap)
         } catch(e) {
             print e
+            scriptExecutorService.setResults(parameterMap['cookieID'], false, e)
             return 3
         }
 
