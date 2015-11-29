@@ -725,7 +725,7 @@ function renderResultsInTemplate(callback, data) {
         data: data
     }).done(function(response) {
         if (response === 'RUNNING') {
-            setTimeout(renderResultsInTemplate(callback, data), 5000);
+            setTimeout(function() { renderResultsInTemplate(callback, data); }, 5000);
         } else {
             jQuery('#submitButton').prop('disabled', false);
             callback();
@@ -747,7 +747,7 @@ function renderResults(callback, data) {
     }).done(function(response) {
         response = JSON.parse(response);
         if (response.error === 'RUNNING') {
-            setTimeout(renderResults(callback, data), 5000);
+            setTimeout(function() { renderResultsInTemplate(callback, data); }, 5000);
         } else if (response.error) {
             jQuery('#submitButton').prop('disabled', false);
             alert(response.error);
