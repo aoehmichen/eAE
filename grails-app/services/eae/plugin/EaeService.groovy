@@ -62,6 +62,8 @@ class EaeService {
                 return cvPreprocessing(params, MONGO_URL,MONGO_PORT,database,username);
             case "gt":
                 return gtPreprocessing(params); //TODO
+            case "pe":
+                return pePreprocessing(params);
             default:
                 throw new Exception("The workflow in customPreProcessing doesn't exist.")
         }
@@ -87,9 +89,18 @@ class EaeService {
         return workflowParameters;
     }
 
+    private def pePreprocessing(params){
+        def workflowParameters = [:]
+        String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join(' ').trim();
+
+        workflowParameters['workflow'] = params.workflow;
+        workflowParameters['workflowSpecificParameters'] = params.selectedCorrection
+
+        BasicDBObject query = new BasicDBObject("ListOfGenes", saneGenesList);
+        query.append("DocumentType", "Original")
+    }
 
     def customPostProcessing(result, workflow) {
-
         switch (workflow){
             case "pe":
                 return pePostProcessing(result);
