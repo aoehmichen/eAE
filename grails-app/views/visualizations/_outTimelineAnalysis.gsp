@@ -879,10 +879,7 @@
             return;
         }
 
-        var data = prepareFormData();
-        data = addSettingsToData(data, { acfPatientID: patientID });
-        data = addSettingsToData(data, { xAxisSortOrder: x.domain() });
-        data = addSettingsToData(data, { interpolateNAs: interpolateNAs });
+        var settings = { acfPatientID: patientID, xAxisSortOrder: x.domain(), interpolateNAs: interpolateNAs };
 
         var onResponse = function(response) {
             var acfEstimates = response.acfEstimates;
@@ -902,7 +899,7 @@
 
         };
 
-        computeResults(onResponse, data, false, false);
+        startWorkflow(onResponse, settings, false, false);
     }
 
     function getEqualityCheck(concept, timepoint, patientID, value) {
@@ -1084,14 +1081,13 @@
         removeDendrograms();
         var similarityMeasure = dist;
         var linkageMeasure = link;
-        var data = prepareFormData();
-        data = addSettingsToData(data, { similarityMeasure: similarityMeasure });
-        data = addSettingsToData(data, { linkageMeasure: linkageMeasure });
-        data = addSettingsToData(data, { interpolateNAs: interpolateNAs });
-        data = addSettingsToData(data, { xAxisSortOrder: x.domain() });
+        var settings = { similarityMeasure: similarityMeasure,
+            linkageMeasure: linkageMeasure,
+            interpolateNAs: interpolateNAs,
+            xAxisSortOrder: x.domain() };
         clusteringDropdown.select('.buttonText').text('Loading...');
 
-        var onResponse = function(reponse) {
+        var onResponse = function(response) {
             clusteringDropdown.select('.buttonText').text('Timeline Clustering');
             for (var i = 0; i < concepts.length; i++) {
                 var concept = concepts[i];
@@ -1103,7 +1099,7 @@
             }
         };
 
-        computeResults(onResponse, data, false, false);
+        startWorkflow(onResponse, settings, false, false);
     }
 
     var buttonWidth = 200;

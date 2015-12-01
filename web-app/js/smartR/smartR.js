@@ -527,7 +527,7 @@ function setCohorts(constrains, andConcat, negate, reCompute, subset) {
         appendItemFromConceptInto(destination, constrains[i], negate);
     }
     if (reCompute) {
-        runAllQueries(runAnalysis);
+        runAllQueries(startWorkflow);
     }
 }
 
@@ -581,26 +581,6 @@ function getConcepts(divName) {
     return variables;
 }
 
-/**
-*   Expands the settings of the form data for a given setting
-*
-*   @param data: form data recieved by prepareFormData()
-*   @param settings: json like string representation of the settings we want to add
-*   @return: data with added settings
-*/
-function addSettingsToData(data, settings) {
-    for (var i = 0; i < data.length; i++) {
-        var element = data[i];
-        if (element.name == "settings") {
-            var json = JSON.parse(element.value);
-            json = jQuery.extend(json, settings);
-            element.value = JSON.stringify(json);
-            break;
-        }
-    }
-    return data;
-}
-
 var conceptBoxes = [];
 var sanityCheckErrors = [];
 function registerConceptBox(name, cohorts, type, min, max) {
@@ -613,22 +593,6 @@ function registerConceptBox(name, cohorts, type, min, max) {
         !check2 ? 'Concept box (' + name + ') contains too few concepts! Valid range: ' + min + ' - ' + max :
         !check3 ? 'Concept box (' + name + ') contains too many concepts! Valid range: ' + min + ' - ' + max : '');
     conceptBoxes.push({name: name, cohorts: cohorts, type: type, concepts: concepts});
-}
-
-/**
-*   Prepares data for the AJAX call containing all neccesary information for computation
-*
-*   @return {[]}: array of objects containing the information for server side computations
-*/
-function prepareFormData() {
-    var data = [];
-    data.push({name: 'conceptBoxes', value: JSON.stringify(conceptBoxes)});
-    data.push({name: 'result_instance_id1', value: GLOBAL.CurrentSubsetIDs[1]});
-    data.push({name: 'result_instance_id2', value: GLOBAL.CurrentSubsetIDs[2]});
-    data.push({name: 'script', value: jQuery('#scriptSelect').val()});
-    data.push({name: 'settings', value: JSON.stringify(getSettings())});
-    data.push({name: 'cookieID', value: setSmartRCookie()});
-    return data;
 }
 
 /**
@@ -689,27 +653,11 @@ function setSmartRCookie() {
     return id;
 }
 
-function setImage(divName, image) {
-    function _arrayBufferToBase64( buffer ) {
-        var binary = '';
-        var bytes = new Uint8Array( buffer );
-        var len = bytes.byteLength;
-        for (var i = 0; i < len; i++) {
-            binary += String.fromCharCode( bytes[ i ] );
-        }
-        return window.btoa( binary );
-    }
-
-    var img = document.createElement('img');
-    img.setAttribute('src', "data:image/png;base64," + _arrayBufferToBase64(image));
-    document.getElementById(divName).appendChild(img);
-}
-
 function goToEAE() {
     jQuery.ajax({
         url: pageInfo.basePath + '/SmartR/goToEAEngine' ,
         type: "POST",
-        timeout: '600000'
+        timeout: 600000
     }).done(function(response) {
         jQuery("#index").html(response);
     }).fail(function() {
@@ -717,88 +665,91 @@ function goToEAE() {
     });
 }
 
-function renderResultsInTemplate(callback, data) {
+function displayErrorMsg() {
     jQuery.ajax({
-        url: pageInfo.basePath + '/SmartR/renderResultsInTemplate',
+        url: pageInfo.basePath + '/SmartR/getMsg',
         type: "POST",
-        timeout: 1.8e+6,
-        data: data
+        timeout: 600000,
+        data: {id: setSmartRCookie()}
     }).done(function(response) {
-        if (response === 'RUNNING') {
-            setTimeout(function() { renderResultsInTemplate(callback, data); }, 5000);
-        } else {
-            jQuery('#submitButton').prop('disabled', false);
-            callback();
-            jQuery("#outputDIV").html(response);
-        }
-    }).fail(function() {
-        jQuery('#submitButton').prop('disabled', false);
-        callback();
-        jQuery("#outputDIV").html("Could not render results. Please contact your administrator.");
+        alert(response);
     });
 }
 
-function renderResults(callback, data) {
+function executeOnState(callback, status, checkFreq) {
+    jQuery.ajax({
+        url: pageInfo.basePath + '/SmartR/getState',
+        type: "POST",
+        timeout: 600000,
+        data: {id: setSmartRCookie()}
+    }).done(function(response) {
+        if (response === 'ERROR') {
+            jQuery('#submitButton').prop('disabled', false);
+            displayErrorMsg();
+        } else if (response === status) {
+            callback();
+        } else {
+            setTimeout(function() { executeOnState(callback, status, checkFreq); }, checkFreq);
+        }
+    });
+}
+
+function renderResults(callback, redraw) {
+    jQuery('#submitButton').prop('disabled', false);
     jQuery.ajax({
         url: pageInfo.basePath + '/SmartR/renderResults',
         type: "POST",
-        timeout: 1.8e+6,
-        data: data
+        timeout: 600000,
+        data: {id: setSmartRCookie(),
+            script: jQuery('#scriptSelect').val(),
+            redraw: redraw}
     }).done(function(response) {
-        response = JSON.parse(response);
-        if (response.error === 'RUNNING') {
-            setTimeout(function() { renderResultsInTemplate(callback, data); }, 5000);
-        } else if (response.error) {
-            jQuery('#submitButton').prop('disabled', false);
-            alert(response.error);
+        if (redraw) {
+            callback();
+            jQuery("#outputDIV").html(response);
         } else {
-            jQuery('#submitButton').prop('disabled', false);
-            callback(response);
+            callback(JSON.parse(response));
         }
-    }).fail(function() {
-        jQuery('#submitButton').prop('disabled', false);
-        alert("Server does not respond. Network connection lost?");
     });
 }
 
-function computeResults(callback, data, init, redraw) {
-    callback = callback === undefined ? function() {} : callback;
-    data = data === undefined ? prepareFormData() : data;
-    init = init === undefined ? true : init;
-    redraw = redraw === undefined ? true : redraw;
-
-    var retCodes = {
-        1: 'An unexpected error occured while initializing environment.',
-        2: 'An unexpected error occured while accessing the database.',
-        3: 'An unexpected error occured while processing the data.'
-    };
-
-    jQuery('#submitButton').prop('disabled', true);
+function runWorkflowScript(callback) {
     jQuery.ajax({
-        url: pageInfo.basePath + '/SmartR/' + (init ? 'computeResults' : 'reComputeResults'),
+        url: pageInfo.basePath + '/SmartR/runWorkflowScript' ,
         type: "POST",
-        timeout: 1.8e+6,
-        data: data
-    }).done(function(response) {
-        if (response === '0') { // successful
-            if (redraw) {
-                renderResultsInTemplate(callback, data);
-            } else {
-                renderResults(callback, data);
-            }
-        } else {
-            if (init) {
-                jQuery("#outputDIV").html('');
-            }
-            jQuery('#submitButton').prop('disabled', false);
-            alert(retCodes[response]);
-        }
-    }).fail(function(_, __, error){
-        if (redraw) {
-            renderResultsInTemplate(callback, data);
-        } else {
-            renderResults(callback, data);
-        }
+        timeout: 600000,
+        data: {id: setSmartRCookie(),
+            script: jQuery('#scriptSelect').val()}
+    });
+    callback();
+}
+
+function loadDataIntoSession(callback, init, settings) {
+    jQuery.ajax({
+        url: pageInfo.basePath + '/SmartR/loadDataIntoSession',
+        type: "POST",
+        timeout: 600000,
+        data: {id: setSmartRCookie(),
+            rIID1: GLOBAL.CurrentSubsetIDs[1],
+            rIID2: GLOBAL.CurrentSubsetIDs[2],
+            conceptBoxes: JSON.stringify(conceptBoxes),
+            settings: settings,
+            init: init}
+    });
+    callback();
+}
+
+function initSession(callback, init) {
+    jQuery.ajax({
+        url: pageInfo.basePath + '/SmartR/initSession',
+        type: "POST",
+        timeout: 600000,
+        data: {id: setSmartRCookie(),
+            init: init}
+    }).done(function() {
+        callback();
+    }).fail(function() {
+        alert('Server does not respond. Network connection lost?');
     });
 }
 
@@ -806,30 +757,47 @@ function showLoadingScreen() {
     jQuery.ajax({
         url: pageInfo.basePath + '/SmartR/renderLoadingScreen',
         type: "POST",
-        timeout: 1.8e+6
+        timeout: 600000
     }).done(function(response) {
         jQuery("#outputDIV").html(response);
     }).fail(function() {
-        jQuery("#outputDIV").html("Loading screen could not be initialized. Probably you lost network connection.");
+        jQuery("#outputDIV").html('Server does not respond. Network connection lost?');
     });
 }
 
-function runAnalysis() {
+function startWorkflow(visualizationCallback, settings, init, redraw) {
+    init = init === undefined ? true : init;
+    redraw = redraw === undefined ? true : redraw;
+    settings = JSON.stringify(settings === undefined ? getSettings() : jQuery.extend(getSettings(), settings));
+    visualizationCallback = visualizationCallback === undefined ? function() {} : visualizationCallback;
+
+    jQuery('#submitButton').prop('disabled', true);
     conceptBoxes = [];
     sanityCheckErrors = [];
-    register(); // method MUST be implemented by _inFoobarAnalysis.gsp
-
+    register();
     if (! sane()) {
-        return;
-    }
-
-    // if no subset IDs exist compute them
-    if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !( isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
-        runAllQueries(runAnalysis);
         return false;
     }
-    showLoadingScreen();
-    computeResults();
+    if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !( isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
+        runAllQueries(startWorkflow);
+        return false;
+    }
+    if (init) {
+        showLoadingScreen();
+    }
+    initSession(function() {
+        executeOnState(function() {
+            loadDataIntoSession(function() {
+                executeOnState(function() {
+                    runWorkflowScript(function() {
+                        executeOnState(function() {
+                            renderResults(visualizationCallback, redraw);
+                        }, 'COMPLETE', 100);
+                    });
+                }, 'LOADED', 500);
+            }, init, settings);
+        }, 'INIT', 100);
+    }, init);
 }
 
 /**
@@ -840,13 +808,13 @@ function changeInputDIV() {
     jQuery.ajax({
         url: pageInfo.basePath + '/SmartR/renderInputDIV',
         type: "POST",
-        timeout: 1.8e+6,
+        timeout: 600000,
         data: {'script': jQuery('#scriptSelect').val()}
     }).done(function(response) {
         jQuery("#inputDIV").html(response);
         updateInputView();
     }).fail(function() {
-        jQuery("#inputDIV").html("Coult not render input form. Probably you lost network connection.");
+        jQuery("#inputDIV").html('Server does not respond. Network connection lost?');
     });
 }
 

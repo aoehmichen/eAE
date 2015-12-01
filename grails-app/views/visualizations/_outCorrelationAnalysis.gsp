@@ -543,11 +543,7 @@
         var xLowHigh = d3.extent(selectedData, function(d) { return getOriginalPointWithUID(d.uid).x; });
         var yLowHigh = d3.extent(selectedData, function(d) { return getOriginalPointWithUID(d.uid).y; });
 
-        var data = prepareFormData();
-        data = addSettingsToData(data, { xLow: xLowHigh[0] });
-        data = addSettingsToData(data, { xHigh: xLowHigh[1] });
-        data = addSettingsToData(data, { yLow: yLowHigh[0] });
-        data = addSettingsToData(data, { yHigh: yLowHigh[1] });
+        var settings = {xLow: xLowHigh[0], xHigh: xLowHigh[1], yLow: yLowHigh[0] ,yHigh: yLowHigh[1]};
 
         var onResponse = function(response) {
             results = response;
@@ -555,7 +551,7 @@
             updateLegend();
         };
 
-        computeResults(onResponse, data, false, false);
+        startWorkflow(onResponse, settings, false, false);
     }
 
     function updateCohorts() {

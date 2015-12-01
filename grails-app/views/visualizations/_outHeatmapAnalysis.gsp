@@ -1141,15 +1141,14 @@
     function loadRows(nrows) {
         var maxRows = nrows === undefined ? uids.length + 100 : nrows;
         loadFeatureButton.select('text').text('Loading...');
-        var data = prepareFormData();
-        data = addSettingsToData(data, { maxRows: maxRows });
+        var settings = { maxRows: maxRows };
 
         var onResponse = function() {
             loadFeatureButton.select('text').text('Load 100 additional rows');
             cuttoffButton.select('text').text('Apply Cutoff');
         };
 
-        computeResults(onResponse, data, false, true);
+        startWorkflow(onResponse, settings, false, true);
     }
 
     function init() {

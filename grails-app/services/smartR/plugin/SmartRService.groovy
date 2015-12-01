@@ -1,10 +1,9 @@
 package smartR.plugin
 
 import groovy.json.JsonBuilder
-import groovy.json.JsonSlurper
 import grails.util.Holders
 import grails.util.Environment
-import groovy.io.FileType
+import org.codehaus.groovy.grails.plugins.GrailsPluginUtils
 
 
 class SmartRService {
@@ -17,7 +16,6 @@ class SmartRService {
     def springSecurityService
     def i2b2HelperService
     def dataQueryService
-    def scriptExecutorService
 
     def getScriptList() {
         def dir = getWebAppFolder() + 'Scripts/smartR/'
@@ -30,20 +28,31 @@ class SmartRService {
                 scriptList << name
             }
         }
-        return scriptList
+        scriptList
     }
 
-    def queryData(parameterMap) {
+    def getWebAppFolder() {
+        if (Environment.current == Environment.DEVELOPMENT) {
+            return GrailsPluginUtils
+                    .getPluginDirForName('smart-r')
+                    .getFile()
+                    .absolutePath + '/web-app/'
+        } else {
+            return grailsApplication
+                    .mainContext
+                    .servletContext
+                    .getRealPath('/plugins/') + '/smart-r-0.4/'
+        }
+    }
+
+    def queryData(rIID1, rIID2, conceptBoxes) {
         def data_cohort1 = [:]
         def data_cohort2 = [:]
-
-        def rIID1 = parameterMap['result_instance_id1'].toString()
-        def rIID2 = parameterMap['result_instance_id2'].toString()
 
         def patientIDs_cohort1 = rIID1 && rIID1 != 'null' ? i2b2HelperService.getSubjectsAsList(rIID1).collect { it.toLong() } : []
         def patientIDs_cohort2 = rIID2 && rIID2 != 'null' ? i2b2HelperService.getSubjectsAsList(rIID2).collect { it.toLong() } : []
 
-        parameterMap['conceptBoxes'].each { conceptBox ->
+        conceptBoxes.each { conceptBox ->
             conceptBox.cohorts.each { cohort ->
                 def rIID
                 def data
@@ -59,9 +68,7 @@ class SmartRService {
                     data = data_cohort2
                 }
 
-                if (! rIID || ! patientIDs) {
-                    return
-                }
+                if (! rIID || ! patientIDs) return
 
                 if (conceptBox.concepts.size() == 0) {
                     data[conceptBox.name] = [:]
@@ -72,90 +79,22 @@ class SmartRService {
                             conceptBox.concepts,
                             patientIDs,
                             rIID as Long)
-                     data[conceptBox.name] = rawData
+                    data[conceptBox.name] = rawData
                 } else {
                     throw new IllegalArgumentException()
                 }
             }
         }
 
-        parameterMap['data_cohort1'] = new JsonBuilder(data_cohort1).toString()
-        parameterMap['data_cohort2'] = new JsonBuilder(data_cohort2).toString()
+        def data = [:]
+        data.cohort1 = new JsonBuilder(data_cohort1).toString()
+        data.cohort2 = new JsonBuilder(data_cohort2).toString()
 
         if (DEBUG) {
-            new File(DEBUG_TMP_DIR + 'data1.json').write(parameterMap['data_cohort1'])
-            new File(DEBUG_TMP_DIR + 'data2.json').write(parameterMap['data_cohort2'])
+            new File(DEBUG_TMP_DIR + 'data1.json').write(data.cohort1)
+            new File(DEBUG_TMP_DIR + 'data2.json').write(data.cohort2)
         }
 
-        return parameterMap
-    }
-
-    /**
-    *   Gets the directory where all the R scripts are located
-    *
-    *   @return {str}: path to the script folder
-    */
-    def getWebAppFolder() {
-        if (Environment.current == Environment.DEVELOPMENT) {
-            return org.codehaus.groovy.grails.plugins.GrailsPluginUtils
-                .getPluginDirForName('smart-r')
-                .getFile()
-                .absolutePath + '/web-app/'
-        } else {
-            return grailsApplication
-                .mainContext
-                .servletContext
-                .getRealPath('/plugins/') + '/smart-r-0.4/'
-        }
-    }
-
-    def createParameterMap(params) {
-        def parameterMap = [:]
-        parameterMap['init'] = params.init.toBoolean()
-        parameterMap['script'] = params.script
-        parameterMap['scriptDir'] = getWebAppFolder() + '/Scripts/smartR/'
-        parameterMap['result_instance_id1'] = params.int('result_instance_id1')
-        parameterMap['result_instance_id2'] = params.int('result_instance_id2')
-        parameterMap['settings'] = params.settings
-        parameterMap['conceptBoxes'] = new JsonSlurper().parseText(params.conceptBoxes)
-        parameterMap['cookieID'] = params.cookieID
-        parameterMap['DEBUG'] = DEBUG
-        return parameterMap
-    }
-
-    def runScript(params) {
-        def parameterMap
-
-        try {
-            parameterMap = createParameterMap(params)
-            // we clear the session here already because a network timeout during the new DB query can cause the resycling of the previous workflow
-            if (parameterMap['init']) {
-                scriptExecutorService.clearSession(parameterMap['cookieID'])
-            }
-        } catch (e) {
-            print e
-            scriptExecutorService.setResults(parameterMap['cookieID'], false, e)
-            return 1
-        }
-
-        try {
-            if (parameterMap['init']) {
-                parameterMap = queryData(parameterMap)
-            }
-        } catch (e) {
-            print e
-            scriptExecutorService.setResults(parameterMap['cookieID'], false, e)
-            return 2
-        }
-
-        try {
-            scriptExecutorService.run(parameterMap)
-        } catch(e) {
-            print e
-            scriptExecutorService.setResults(parameterMap['cookieID'], false, e)
-            return 3
-        }
-
-        return 0
+        data
     }
 }
