@@ -510,7 +510,11 @@ function displayErrorMsg() {
         timeout: 600000,
         data: {id: setSmartRCookie()}
     })
-    request.done(response => alert(response))
+    request.done(response => {
+        alert(response)
+        $('#outputDIV').html(response)
+        $('#loadingScreen').html('')
+    })
 }
 
 function executeOnState(callback, status, checkFreq) {
@@ -616,7 +620,7 @@ function startWorkflow(visualizationCallback=()=>{}, settings=getSettings(), ini
         runAllQueries(startWorkflow)
         return false
     }
-    if (init) showLoadingScreen()
+    if (init && redraw) showLoadingScreen()
     initSession(() => {
         executeOnState(() => {
             loadDataIntoSession(() => {

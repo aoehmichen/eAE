@@ -411,7 +411,9 @@ function displayErrorMsg() {
         data: { id: setSmartRCookie() }
     });
     request.done(function (response) {
-        return alert(response);
+        alert(response);
+        $('#outputDIV').html(response);
+        $('#loadingScreen').html('');
     });
 }
 
@@ -533,7 +535,7 @@ function startWorkflow() {
         runAllQueries(startWorkflow);
         return false;
     }
-    if (init) showLoadingScreen();
+    if (init && redraw) showLoadingScreen();
     initSession(function () {
         executeOnState(function () {
             loadDataIntoSession(function () {
