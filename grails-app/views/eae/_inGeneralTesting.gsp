@@ -3,11 +3,11 @@
     This Workflow triggers a generic analysis of the clinical variables.
 </div>
 
-<div id='selectedCohort' class="txt">
+<div id='selectStudy' class="txt">
     %{--<script>--}%
         <td style='padding-right: 2em; padding-bottom: 1em'>
-                <div id='studyToAnalyse' class="queryGroupInclude"></div>
-                <input type="button" class='txt' onclick="clearVarSelection('studyToAnalyse')" value="Clear Window">
+            <select id="correctionSelect"/>
+            <input type="button" class='txt' onclick="clearVarSelection('studyToAnalyse')" value="Clear Window">
         </td>
         <input
             id="submitCV"
@@ -20,14 +20,31 @@
 </div>
 <br/>
 
+<hr class="myhr"/>
+<div id="cacheTableDiv">
+    <table id="mongocachetable" class ="cachetable"></table>
+    <div id="emptyCache">The Cache is Empty</div>
+    <button type="button"
+            value="refreshCacheDiv"
+            onclick="refreshCVCache()"
+            class="flatbutton">Refresh</button>
+</div>
+
 <script>
+    var currentWorkflow = "gt";
+    populateCacheDIV(currentWorkflow);
 
-    activateDragAndDropEAE('studyToAnalyse');
-
-    registerConceptBoxEAE('studyToAnalyse', 1, 'studyicon', 0, undefined);
+    function customSanityCheck() {
+        return true;
+    }
 
     function triggerGT() {
-        jQuery("#outputs").html("AJAX CALL success!");
+        registerWorkflowParams(currentWorkflow);
+        runWorkflow();
+    }
+
+    function refreshCVCache(){
+        populateCacheDIV(currentWorkflow)
     }
 
     function cacheDIVCustomName(name){
