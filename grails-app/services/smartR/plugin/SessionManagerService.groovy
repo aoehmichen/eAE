@@ -15,6 +15,7 @@ class SessionManagerService {
         LOADED,
         WORKING,
         COMPLETE,
+        EXIT,
         ERROR
     }
 

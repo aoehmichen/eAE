@@ -36,11 +36,13 @@ class SmartRController {
     }
 
     def runWorkflowScript = {
+        sessionManagerService.sessions[params.id].state = SessionManagerService.STATE.WORKING
         sessionManagerService.runWorkflowScript(params.id, smartRService.getWebAppFolder() + '/Scripts/smartR/' + params.script)
         render ''
     }
 
     def renderResults = {
+        sessionManagerService.sessions[params.id].state = SessionManagerService.STATE.EXIT
         def results = sessionManagerService.pullData(params.id)
         if (params.redraw.toBoolean()) {
             render template: "/visualizations/out${FilenameUtils.getBaseName(params.script)}",

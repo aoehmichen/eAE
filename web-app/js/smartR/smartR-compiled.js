@@ -431,6 +431,8 @@ function executeOnState(callback, status, checkFreq) {
             case status:
                 callback();
                 break;
+            case 'EXIT':
+                break;
             default:
                 setTimeout(function () {
                     return executeOnState(callback, status, checkFreq);

@@ -529,6 +529,8 @@ function executeOnState(callback, status, checkFreq) {
             case status:
                 callback()
                 break
+            case 'EXIT':
+                break
             default:
                 setTimeout(() => executeOnState(callback, status, checkFreq), checkFreq)
         }
