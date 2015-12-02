@@ -333,16 +333,12 @@
     var excludedPatientIDs = [];
     function excludeSelection() {
         excludedPatientIDs = excludedPatientIDs.concat(currentSelection);
-        var data = prepareFormData();
-        data = addSettingsToData(data, { excludedPatientIDs: excludedPatientIDs });
-
-
+        var settings = { excludedPatientIDs: excludedPatientIDs };
         var onResponse = function(response) {
             results = response;
             init();
         };
-
-        computeResults(onResponse, data, false, false);
+        startWorkflow(onResponse, settings, false, false);
     }
 
     function removeOutliers() {
