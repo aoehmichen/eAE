@@ -53,6 +53,8 @@ function buildCorrelationAnalysis(results) {
     }
 
     setData(results);
+    var X = x.copy();
+    var Y = y.copy();
 
     function updateStatistics(patientIDs) {
         var settings = { patientIDs: patientIDs };
@@ -130,21 +132,24 @@ function buildCorrelationAnalysis(results) {
 
     function updateSelection() {
         var extent = brush.extent();
-        var x0 = extent[0][0],
-            y0 = extent[0][1],
-            x1 = extent[1][0],
-            y1 = extent[1][1];
-        d3.selectAll('.point').classed('selected', false).style('fill', function (d) {
+        var x0 = X.invert(extent[0][0]),
+            y1 = Y.invert(extent[0][1]),
+            x1 = X.invert(extent[1][0]),
+            y0 = Y.invert(extent[1][1]);
+
+        console.log(x0);
+        console.log(y0);
+        svg.selectAll('.point').classed('selected', false).style('fill', function (d) {
             return getColor(d);
         }).style('stroke', 'white').filter(function (d) {
-            return x0 <= x(d.x) && x(d.x) <= x1 && y0 <= y(d.y) && y(d.y) <= y1;
+            return x0 <= d.x && d.x <= x1 && y0 <= d.y && d.y <= y1;
         }).classed('selected', true).style('fill', 'white').style('stroke', function (d) {
             return getColor(d);
         });
     }
 
     function excludeSelection() {
-        points = d3.selectAll('.point').filter(function (d) {
+        points = svg.selectAll('.point').filter(function (d) {
             return !d.classed('selected');
         }).data();
         updateScatterplot();
@@ -165,7 +170,7 @@ function buildCorrelationAnalysis(results) {
         updateStatistics(selectedPatientIDs);
     }
 
-    var brush = d3.svg.brush().x(d3.scale.identity().domain([-20, width + 20])).y(d3.scale.identity().domain([-20, height + 20])).on('brushend', function () {
+    var brush = d3.svg.brush().x(d3.scale.identity().domain([0, width])).y(d3.scale.identity().domain([0, height])).on('brushend', function () {
         contextMenu.style('visibility', 'hidden').style('top', -100 + 'px');
         updateSelection();
         var selectedPatientIDs = d3.selectAll('.point.selected').data().map(function (d) {
@@ -261,7 +266,7 @@ function buildCorrelationAnalysis(results) {
             tooltip.style('visibility', 'hidden');
         });
 
-        regressionLine.transition().duration(animationDuration).attr('x1', x(minX)).attr('y1', y(regLineYIntercept + parseFloat(regLineSlope) * minX)).attr('x2', x(maxX)).attr('y2', y(regLineYIntercept + parseFloat(regLineSlope) * maxX));
+        regressionLine.transition().duration(animationDuration).attr('x1', X(minX)).attr('y1', Y(regLineYIntercept + regLineSlope * minX)).attr('x2', X(maxX)).attr('y2', Y(regLineYIntercept + regLineSlope * maxX));
     }
 
     function reset() {}

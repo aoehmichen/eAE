@@ -27,6 +27,8 @@ function buildCorrelationAnalysis(results) {
     }
 
     setData(results)
+    const X = x.copy()
+    const Y = y.copy()
 
     function updateStatistics(patientIDs) {
         const settings = { patientIDs }
@@ -156,22 +158,25 @@ function buildCorrelationAnalysis(results) {
 
     function updateSelection() {
         let extent = brush.extent()
-        let x0 = extent[0][0],
-            y0 = extent[0][1],
-            x1 = extent[1][0],
-            y1 = extent[1][1]
-        d3.selectAll('.point')
+        let x0 = X.invert(extent[0][0]),
+            y1 = Y.invert(extent[0][1]),
+            x1 = X.invert(extent[1][0]),
+            y0 = Y.invert(extent[1][1])
+
+        console.log(x0)
+        console.log(y0)
+        svg.selectAll('.point')
             .classed('selected', false)
             .style('fill', d => getColor(d))
             .style('stroke', 'white')
-            .filter(d => { return x0 <= x(d.x) && x(d.x) <= x1 && y0 <= y(d.y) && y(d.y) <= y1 })
+            .filter(d => { return x0 <= d.x && d.x <= x1 && y0 <= d.y && d.y <= y1 })
             .classed('selected', true)
             .style('fill', 'white')
             .style('stroke', d => getColor(d))
     }
 
     function excludeSelection() {
-        points = d3.selectAll('.point').filter(d => !d.classed('selected')).data()
+        points = svg.selectAll('.point').filter(d => !d.classed('selected')).data()
         updateScatterplot()
         const remainingPatientIDs = points.map(d => d.patientID)
         updateStatistics(remainingPatientIDs)
@@ -187,8 +192,8 @@ function buildCorrelationAnalysis(results) {
     }
 
     const brush = d3.svg.brush()
-        .x(d3.scale.identity().domain([-20, width + 20]))
-        .y(d3.scale.identity().domain([-20, height + 20]))
+        .x(d3.scale.identity().domain([0, width]))
+        .y(d3.scale.identity().domain([0, height]))
         .on('brushend', () => {
             contextMenu
                 .style('visibility', 'hidden')
@@ -271,10 +276,10 @@ function buildCorrelationAnalysis(results) {
         regressionLine
             .transition()
             .duration(animationDuration)
-            .attr('x1', x(minX))
-            .attr('y1', y(regLineYIntercept + parseFloat(regLineSlope) * minX))
-            .attr('x2', x(maxX))
-            .attr('y2', y(regLineYIntercept + parseFloat(regLineSlope) * maxX))
+            .attr('x1', X(minX))
+            .attr('y1', Y(regLineYIntercept + regLineSlope * minX))
+            .attr('x2', X(maxX))
+            .attr('y2', Y(regLineYIntercept + regLineSlope * maxX))
     }
 
     function reset() {
