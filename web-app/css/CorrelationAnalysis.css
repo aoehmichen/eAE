@@ -1,10 +1,11 @@
-.text {
-    font-family: 'Roboto', sans-serif;
-}
-
 .point {
     opacity: 0.8;
-    stroke: white;
+    stroke: #FFFFFF;
+}
+
+.regressionLine {
+    stroke: #FFA500;
+    stroke-width: 3px;
 }
 
 .brush .extent {
@@ -19,7 +20,7 @@
 }
 
 .bar text {
-    fill: orange;
+    fill: #ffa500;
     font-weight: bold;
 }
 
@@ -51,22 +52,6 @@
 
 .legend:hover {
     cursor: move;
-}
-
-#svgs {
-    float: left;
-}
-
-#scatterplot {
-    float: right;
-}
-
-#histogram1 {
-    float: right;
-}
-
-#histogram2 {
-    float: right;
 }
 
 .tooltip {

@@ -4,8 +4,6 @@
 <div id='controls'></div>
 <div id="visualization">
     <div id="scatterplot"></div>
-    <div id="histogram1"></div>
-    <div id="histogram2"></div>
 </div>
 <r:layoutResources/>
 

@@ -351,44 +351,6 @@ function setSmartRCookie() {
     return id;
 }
 
-function setImage(divName, image) {
-    function _arrayBufferToBase64(buffer) {
-        var binary = '';
-        var bytes = new Uint8Array(buffer);
-        var len = bytes.byteLength;
-        var _iteratorNormalCompletion3 = true;
-        var _didIteratorError3 = false;
-        var _iteratorError3 = undefined;
-
-        try {
-            for (var _iterator3 = bytes[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                var byte = _step3.value;
-
-                binary += String.fromCharCode(byte);
-            }
-        } catch (err) {
-            _didIteratorError3 = true;
-            _iteratorError3 = err;
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                    _iterator3.return();
-                }
-            } finally {
-                if (_didIteratorError3) {
-                    throw _iteratorError3;
-                }
-            }
-        }
-
-        return window.btoa(binary);
-    }
-
-    var img = document.createElement('img');
-    img.setAttribute('src', 'data:image/pngbase64,' + _arrayBufferToBase64(image));
-    document.getElementById(divName).appendChild(img);
-}
-
 function goToEAE() {
     var request = $.ajax({
         url: pageInfo.basePath + '/SmartR/goToEAEngine',
@@ -403,102 +365,117 @@ function goToEAE() {
     });
 }
 
-function displayErrorMsg() {
+function displayErrorMsg(params) {
     var request = $.ajax({
         url: pageInfo.basePath + '/SmartR/getMsg',
         type: "POST",
         timeout: 600000,
-        data: { id: setSmartRCookie() }
+        data: { id: params.id }
     });
     request.done(function (response) {
         alert(response);
-        $('#outputDIV').html(response);
-        $('#loadingScreen').html('');
+    });
+    request.fail(function () {
+        return alert('Server does not respond. Network connection lost?');
     });
 }
 
-function executeOnState(callback, status, checkFreq) {
+function executeOnState(params, checkFreq) {
     var request = $.ajax({
         url: pageInfo.basePath + '/SmartR/getState',
         type: 'POST',
         timeout: 600000,
-        data: { id: setSmartRCookie() }
+        data: { id: params.id }
     });
     request.done(function (response) {
         switch (response) {
             case 'ERROR':
                 $('#submitButton').prop('disabled', false);
-                displayErrorMsg();
+                displayErrorMsg(params);
+                checkFreq = -1;
                 break;
-            case status:
-                callback();
+            case 'INIT':
+                loadDataIntoSession(params);
+                checkFreq = 500;
+                break;
+            case 'LOADED':
+                runWorkflowScript(params);
+                checkFreq = 100;
+                break;
+            case 'COMPLETE':
+                renderResults(params);
+                checkFreq = -1;
                 break;
             case 'EXIT':
+                checkFreq = -1;
                 break;
-            default:
-                setTimeout(function () {
-                    return executeOnState(callback, status, checkFreq);
-                }, checkFreq);
         }
+        if (~checkFreq) setTimeout(function () {
+            return executeOnState(params);
+        }, checkFreq);
+    });
+    request.fail(function () {
+        return alert('Server does not respond. Network connection lost?');
     });
 }
 
-function renderResults(callback, redraw) {
+function renderResults(params) {
     $('#submitButton').prop('disabled', false);
     var request = $.ajax({
         url: pageInfo.basePath + '/SmartR/renderResults',
         type: 'POST',
         timeout: 600000,
-        data: { id: setSmartRCookie(),
-            script: $('#scriptSelect').val(),
-            redraw: redraw }
+        data: { id: params.id,
+            script: params.script,
+            redraw: params.redraw }
     });
     request.done(function (response) {
-        if (redraw) {
-            callback();
+        if (params.redraw) {
+            params.callback();
             $('#outputDIV').html(response);
         } else {
-            callback(JSON.parse(response));
+            params.callback(JSON.parse(response));
         }
+    });
+    request.fail(function () {
+        return alert('Server does not respond. Network connection lost?');
     });
 }
 
-function runWorkflowScript(callback) {
+function runWorkflowScript(params) {
     $.ajax({
         url: pageInfo.basePath + '/SmartR/runWorkflowScript',
         type: 'POST',
         timeout: 600000,
-        data: { id: setSmartRCookie(),
-            script: $('#scriptSelect').val() }
+        data: { id: params.id,
+            script: params.script }
     });
-    callback();
 }
 
-function loadDataIntoSession(callback, init, settings) {
+function loadDataIntoSession(params) {
     $.ajax({
         url: pageInfo.basePath + '/SmartR/loadDataIntoSession',
         type: 'POST',
         timeout: 600000,
-        data: { id: setSmartRCookie(),
-            rIID1: GLOBAL.CurrentSubsetIDs[1],
-            rIID2: GLOBAL.CurrentSubsetIDs[2],
-            conceptBoxes: JSON.stringify(conceptBoxes),
-            settings: settings,
-            init: init }
+        data: { id: params.id,
+            rIID1: params.rIID1,
+            rIID2: params.rIID2,
+            conceptBoxes: params.conceptBoxes,
+            settings: params.settings,
+            init: params.init }
     });
-    callback();
 }
 
-function initSession(callback, init) {
+function initSession(params) {
     var request = $.ajax({
         url: pageInfo.basePath + '/SmartR/initSession',
         type: 'POST',
         timeout: 600000,
-        data: { id: setSmartRCookie(),
-            init: init }
+        data: { id: params.id,
+            init: params.init }
     });
     request.done(function () {
-        return callback();
+        return executeOnState(params, -1);
     });
     request.fail(function () {
         return alert('Server does not respond. Network connection lost?');
@@ -536,19 +513,20 @@ function startWorkflow() {
         return false;
     }
     if (init && redraw) showLoadingScreen();
-    initSession(function () {
-        executeOnState(function () {
-            loadDataIntoSession(function () {
-                executeOnState(function () {
-                    runWorkflowScript(function () {
-                        executeOnState(function () {
-                            renderResults(visualizationCallback, redraw);
-                        }, 'COMPLETE', 100);
-                    });
-                }, 'LOADED', 500);
-            }, init, settings);
-        }, 'INIT', 100);
-    }, init);
+
+    var parameters = {
+        id: setSmartRCookie(),
+        settings: settings,
+        init: init,
+        redraw: redraw,
+        callback: visualizationCallback,
+        rIID1: GLOBAL.CurrentSubsetIDs[1],
+        rIID2: GLOBAL.CurrentSubsetIDs[2],
+        conceptBoxes: JSON.stringify(conceptBoxes),
+        script: $('#scriptSelect').val()
+    };
+
+    initSession(parameters);
 }
 
 function changeInputDIV() {
@@ -570,5 +548,6 @@ function changeInputDIV() {
 
 function contact() {
     var version = 0.5;
+
     alert('\nBefore reporting a bug...\n... 1. Make sure you use the lastet SmartR version (installed version: ' + version + ')\n... 2. Make sure that all requirements for using SmartR are met\n\nAll relevant information can be found on https://github.com/sherzinger/SmartR\n\nIf you still want to report a bug you MUST include these information:\n\n>>>' + navigator.userAgent + ' SmartR/' + version + '<<<\n\nBug reports -> http://usersupport.etriks.org/\nFeedback -> sascha.herzinger@uni.lu');
 }

@@ -476,22 +476,6 @@ function setSmartRCookie() {
     return id
 }
 
-function setImage(divName, image) {
-    function _arrayBufferToBase64( buffer ) {
-        let binary = ''
-        let bytes = new Uint8Array( buffer )
-        let len = bytes.byteLength
-        for (let byte of bytes) {
-            binary += String.fromCharCode(byte)
-        }
-        return window.btoa( binary )
-    }
-
-    let img = document.createElement('img')
-    img.setAttribute('src', 'data:image/pngbase64,' + _arrayBufferToBase64(image))
-    document.getElementById(divName).appendChild(img)
-}
-
 function goToEAE() {
     const request = $.ajax({
         url: pageInfo.basePath + '/SmartR/goToEAEngine' ,
@@ -503,99 +487,108 @@ function goToEAE() {
 }
 
 
-function displayErrorMsg() {
+function displayErrorMsg(params) {
     const request = $.ajax({
         url: pageInfo.basePath + '/SmartR/getMsg',
         type: "POST",
         timeout: 600000,
-        data: {id: setSmartRCookie()}
+        data: {id: params.id}
     })
     request.done(response => {
         alert(response)
-        $('#outputDIV').html(response)
-        $('#loadingScreen').html('')
     })
+    request.fail(() => alert('Server does not respond. Network connection lost?'))
 }
 
-function executeOnState(callback, status, checkFreq) {
+function executeOnState(params, checkFreq) {
     const request = $.ajax({
         url: pageInfo.basePath + '/SmartR/getState',
         type: 'POST',
         timeout: 600000,
-        data: {id: setSmartRCookie()}
+        data: {id: params.id}
     })
     request.done(response => {
         switch(response) {
             case 'ERROR':
                 $('#submitButton').prop('disabled', false)
-                displayErrorMsg()
+                displayErrorMsg(params)
+                checkFreq = -1
                 break
-            case status:
-                callback()
+            case 'INIT':
+                loadDataIntoSession(params)
+                checkFreq = 500
+                break
+            case 'LOADED':
+                runWorkflowScript(params)
+                checkFreq = 100
+                break
+            case 'COMPLETE':
+                renderResults(params)
+                checkFreq = -1
                 break
             case 'EXIT':
+                checkFreq = -1
                 break
-            default:
-                setTimeout(() => executeOnState(callback, status, checkFreq), checkFreq)
         }
+        if (~checkFreq) setTimeout(() => executeOnState(params), checkFreq)
     })
+    request.fail(() => alert('Server does not respond. Network connection lost?'))
 }
 
-function renderResults(callback, redraw) {
+function renderResults(params) {
     $('#submitButton').prop('disabled', false);
     const request = $.ajax({
         url: pageInfo.basePath + '/SmartR/renderResults',
         type: 'POST',
         timeout: 600000,
-        data: {id: setSmartRCookie(),
-            script: $('#scriptSelect').val(),
-            redraw: redraw}
+        data: {id: params.id,
+            script: params.script,
+            redraw: params.redraw}
     })
     request.done(response => {
-        if (redraw) {
-            callback()
+        if (params.redraw) {
+            params.callback()
             $('#outputDIV').html(response)
         } else {
-            callback(JSON.parse(response))
+            params.callback(JSON.parse(response))
         }
     })
+    request.fail(() => alert('Server does not respond. Network connection lost?'))
 }
 
-function runWorkflowScript(callback) {
+function runWorkflowScript(params) {
     $.ajax({
         url: pageInfo.basePath + '/SmartR/runWorkflowScript' ,
         type: 'POST',
         timeout: 600000,
-        data: {id: setSmartRCookie(),
-            script: $('#scriptSelect').val()}
+        data: {id: params.id,
+            script: params.script}
     })
-    callback()
 }
 
-function loadDataIntoSession(callback, init, settings) {
+function loadDataIntoSession(params) {
     $.ajax({
         url: pageInfo.basePath + '/SmartR/loadDataIntoSession',
         type: 'POST',
         timeout: 600000,
-        data: {id: setSmartRCookie(),
-            rIID1: GLOBAL.CurrentSubsetIDs[1],
-            rIID2: GLOBAL.CurrentSubsetIDs[2],
-            conceptBoxes: JSON.stringify(conceptBoxes),
-            settings: settings,
-            init: init}
+        data: {id: params.id,
+            rIID1: params.rIID1,
+            rIID2: params.rIID2,
+            conceptBoxes: params.conceptBoxes,
+            settings: params.settings,
+            init: params.init}
     })
-    callback()
 }
 
-function initSession(callback, init) {
+function initSession(params) {
     const request = $.ajax({
         url: pageInfo.basePath + '/SmartR/initSession',
         type: 'POST',
         timeout: 600000,
-        data: {id: setSmartRCookie(),
-            init: init}
+        data: {id: params.id,
+            init: params.init}
     })
-    request.done(() => callback())
+    request.done(() => executeOnState(params, -1))
     request.fail(() => alert('Server does not respond. Network connection lost?'))
 }
 
@@ -621,19 +614,20 @@ function startWorkflow(visualizationCallback=()=>{}, settings=getSettings(), ini
         return false
     }
     if (init && redraw) showLoadingScreen()
-    initSession(() => {
-        executeOnState(() => {
-            loadDataIntoSession(() => {
-                executeOnState(() => {
-                    runWorkflowScript(() => {
-                        executeOnState(() => {
-                            renderResults(visualizationCallback, redraw)
-                        }, 'COMPLETE', 100)
-                    })
-                }, 'LOADED', 500)
-            }, init, settings)
-        }, 'INIT', 100)
-    }, init)
+
+    const parameters = {
+        id: setSmartRCookie(),
+        settings: settings,
+        init: init,
+        redraw: redraw,
+        callback: visualizationCallback,
+        rIID1: GLOBAL.CurrentSubsetIDs[1],
+        rIID2: GLOBAL.CurrentSubsetIDs[2],
+        conceptBoxes: JSON.stringify(conceptBoxes),
+        script: $('#scriptSelect').val()
+    }
+
+    initSession(parameters)
 }
 
 function changeInputDIV() {
@@ -653,6 +647,7 @@ function changeInputDIV() {
 
 function contact() {
     const version = 0.5
+
     alert(`
 Before reporting a bug...
 ... 1. Make sure you use the lastet SmartR version (installed version: ${version})

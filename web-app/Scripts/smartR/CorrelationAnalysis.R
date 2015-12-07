@@ -21,7 +21,7 @@ yArr <- points[points$concept == concepts[2], ]
 xArr <- xArr[xArr$patientID %in% yArr$patientID, ]
 yArr <- yArr[yArr$patientID %in% xArr$patientID, ]
 
-patientIDs <- if(is.null(SmartR.settings$patientIDs)) xArr$patientID else SmartR.settings$patientIDs
+patientIDs <- if(!length(SmartR.settings$patientIDs)) xArr$patientID else SmartR.settings$patientIDs
 
 xArr <- xArr[xArr$patientID %in% patientIDs, ]
 yArr <- yArr[yArr$patientID %in% patientIDs, ]
