@@ -2,12 +2,13 @@ function buildCorrelationAnalysis(results) {
     const animationDuration = 500
     const panel = $('#etrikspanel')
     const margin = {top: 20, right: 40, bottom: 40, left: 10}
-    const width = panel.width() * 2/3 - 10 - margin.left - margin.right
-    const height = panel.height() * 2/3 - 10 - margin.top - margin.bottom
+    const width = panel.width() * 2 / 3 - 10 - margin.left - margin.right
+    const height = panel.height() * 2 / 3 - 10 - margin.top - margin.bottom
     const colors = ['#33FF33', '#3399FF', '#CC9900', '#CC99FF', '#FFFF00', 'blue']
     const x = d3.scale.linear().range([0, width])
     const y = d3.scale.linear().range([height, 0])
-    let correlation, pvalue, regLineSlope, regLineYIntercept, xArr, yArr, patientIDs, tags, points, detectedTags, xArrLabel, yArrLabel, method
+    let correlation, pvalue, regLineSlope, regLineYIntercept, xArr, yArr, patientIDs, tags, points, xArrLabel, yArrLabel, method
+
     function setData(data) {
         correlation = data.correlation[0]
         pvalue = data.pvalue[0]
@@ -16,26 +17,24 @@ function buildCorrelationAnalysis(results) {
         xArrLabel = data.xArrLabel[0]
         yArrLabel = data.yArrLabel[0]
         method = data.method[0]
-        xArr = data.xArr
-        yArr = data.yArr
         patientIDs = data.patientIDs
         tags = data.tags
-        points = patientIDs.map((d, i) => {return {x:xArr[i], y:yArr[i], patientID:patientIDs[i], tag:tags[i]}})
+        points = data.points
         x.domain(d3.extent(points, d => d.x))
         y.domain(d3.extent(points, d => d.y))
-        detectedTags = points.filter(d => d.tag).map(d => d.tag).sort()
     }
 
     setData(results)
     const X = x.copy()
     const Y = y.copy()
 
-    function updateStatistics(patientIDs) {
-        const settings = { patientIDs }
+    function updateStatistics(patientIDs, scatterUpdate=false) {
+        const settings = {patientIDs}
         const onResponse = response => {
             setData(response)
             updateRegressionLine()
             updateLegend()
+            if (scatterUpdate) updateScatterplot()
         }
         startWorkflow(onResponse, settings, false, false)
     }
@@ -73,80 +72,57 @@ function buildCorrelationAnalysis(results) {
         .style('top', scatterPos.top + margin.top + 'px')
         .call(drag)
 
-    const scatterXAxis = d3.svg.axis()
-        .scale(x)
-        .ticks(10)
-        .tickFormat('')
-        .innerTickSize(height)
-        .orient('bottom')
-
     svg.append('g')
         .attr('class', 'x axis')
         .attr('transform', 'translate(0, 0)')
-        .call(scatterXAxis)
+        .call(d3.svg.axis()
+            .scale(x)
+            .ticks(10)
+            .tickFormat('')
+            .innerTickSize(height)
+            .orient('bottom'))
 
     svg.append('text')
         .attr('class', 'axisLabels')
         .attr('x', width / 2)
-        .attr('y', - margin.top + 15)
+        .attr('y', -margin.top + 15)
         .text(shortenConcept(xArrLabel))
-
-    const scatterYAxis = d3.svg.axis()
-        .scale(y)
-        .ticks(10)
-        .tickFormat('')
-        .innerTickSize(width)
-        .orient('left')
 
     svg.append('g')
         .attr('class', 'y axis')
         .attr('transform', `translate(${width}, ${0})`)
-        .call(scatterYAxis)
+        .call(d3.svg.axis()
+            .scale(y)
+            .ticks(10)
+            .tickFormat('')
+            .innerTickSize(width)
+            .orient('left'))
 
     svg.append('text')
         .attr('class', 'axisLabels')
         .attr('x', height / 2)
-        .attr('y', - width - margin.right + 30)
+        .attr('y', -width - margin.right + 30)
         .attr('transform', 'rotate(90)')
         .text(shortenConcept(yArrLabel))
-    //
-    //const hist1Width = width / 3
-    //const histogram1 = d3.select('#histogram1').append('svg')
-    //    .attr('width', hist1Width + margin.left + margin.right)
-    //    .attr('height', height + margin.top + margin.bottom)
-    //    .append('g')
-    //    .attr('transform', `translate(${margin.left}, ${margin.top})`)
-    //
-    //const hist1xAxis = d3.svg.axis()
-    //    .scale(y)
-    //    .orient('right')
-    //
-    //const hist2Height = height / 3
-    //const histogram2 = d3.select('#histogram2').append('svg')
-    //    .attr('width', width + margin.left + margin.right)
-    //    .attr('height', hist2Height + margin.top + margin.bottom)
-    //    .append('g')
-    //    .attr('transform', `translate(${margin.left}, ${margin.top})`)
-    //
-    //const hist2xAxis = d3.svg.axis()
-    //    .scale(x)
-    //    .ticks(10)
-    //    .orient('top')
 
-    const contextMenu = d3.select('#scatterplot').append('div')
-        .attr('class', 'contextMenu')
-        .style('visibility', 'hidden')
-        .html(`Number of bins<br/>
-<input id='binNumber' class='mybutton' type='number' min='1' max='20' step='1' onchange='updateBinNumber()'/><br/>
-<input id='updateCohortsButton' class='mybutton' type='button' value='Update Cohorts' onclick='updateCohorts()'/><br/>
-<input id='zoomButton' class='mybutton' type='button' value='Zoom' onclick='zoomSelection()'/><br/>
-<input id='excludeButton' class='mybutton' type='button' value='Exclude' onclick='excludeSelection()'/><br/>
-<input id='resetButton' class='mybutton' type='button' value='Reset' onclick='reset()'/>`)
+    svg.append('g')
+        .attr('class', 'x axis')
+        .attr('transform', `translate(${0}, ${height})`)
+        .call(d3.svg.axis()
+            .scale(x)
+            .orient('top'))
+
+    svg.append('g')
+        .attr('class', 'y axis')
+        .attr('transform', `translate(${0}, ${0})`)
+        .call(d3.svg.axis()
+            .scale(y)
+            .orient('right'))
 
     let bins = 10
     d3.select('#binNumber')
         .attr('value', bins)
-        .on('change', updateHistogram)
+        .on('change', () => {})
 
     function updateBinNumber() {
         bins = parseInt($('#binNumber').val())
@@ -156,30 +132,9 @@ function buildCorrelationAnalysis(results) {
         alert('This feature will be available in TranSMART 1.3')
     }
 
-    function updateSelection() {
-        let extent = brush.extent()
-        let x0 = X.invert(extent[0][0]),
-            y1 = Y.invert(extent[0][1]),
-            x1 = X.invert(extent[1][0]),
-            y0 = Y.invert(extent[1][1])
-
-        console.log(x0)
-        console.log(y0)
-        svg.selectAll('.point')
-            .classed('selected', false)
-            .style('fill', d => getColor(d))
-            .style('stroke', 'white')
-            .filter(d => { return x0 <= d.x && d.x <= x1 && y0 <= d.y && d.y <= y1 })
-            .classed('selected', true)
-            .style('fill', 'white')
-            .style('stroke', d => getColor(d))
-    }
-
     function excludeSelection() {
-        points = svg.selectAll('.point').filter(d => !d.classed('selected')).data()
-        updateScatterplot()
-        const remainingPatientIDs = points.map(d => d.patientID)
-        updateStatistics(remainingPatientIDs)
+        const remainingPatientIDs = d3.selectAll('.point:not(.selected)').map(d => d.patientID)
+        updateStatistics(remainingPatientIDs, true)
     }
 
     function zoomSelection() {
@@ -189,6 +144,40 @@ function buildCorrelationAnalysis(results) {
         }
         var selectedPatientIDs = d3.selectAll('.point.selected').data(d => d.patientID)
         updateStatistics(selectedPatientIDs)
+    }
+
+    const ctxHtml = 'Number of bins<br/> \
+            <input id="binNumber" class="mybutton" type="number" min="1" max="20" step="1"/><br/> \
+            <input id="updateCohortsButton" class="mybutton" type="button" value="Update Cohorts"/><br/> \
+            <input id="zoomButton" class="mybutton" type="button" value="Zoom"/><br/> \
+            <input id="excludeButton" class="mybutton" type="button" value="Exclude"/><br/> \
+            <input id="resetButton" class="mybutton" type="button" value="Reset"/>'
+    const contextMenu = d3.select('#scatterplot').append('div')
+        .attr('class', 'contextMenu')
+        .style('visibility', 'hidden')
+        .html(ctxHtml)
+    $('#binNumber').on('click', updateBinNumber)
+    $('#updateCohortsButton').on('click', updateCohorts)
+    $('#zoomButton').on('click', zoomSelection)
+    $('#excludeButton').on('click', excludeSelection)
+    $('#resetButton').on('click', reset)
+
+    function updateSelection() {
+        let extent = brush.extent()
+        let x0 = X.invert(extent[0][0]),
+            y1 = Y.invert(extent[0][1]),
+            x1 = X.invert(extent[1][0]),
+            y0 = Y.invert(extent[1][1])
+        svg.selectAll('.point')
+            .classed('selected', false)
+            .style('fill', d => getColor(d))
+            .style('stroke', 'white')
+            .filter(d => {
+                return x0 <= d.x && d.x <= x1 && y0 <= d.y && d.y <= y1
+            })
+            .classed('selected', true)
+            .style('fill', 'white')
+            .style('stroke', d => getColor(d))
     }
 
     const brush = d3.svg.brush()
@@ -209,7 +198,7 @@ function buildCorrelationAnalysis(results) {
         .call(brush)
 
     function getColor(point) {
-        return point.tag ? colors[detectedTags.indexOf(tag)] : 'black'
+        return point.tag ? colors[tags.indexOf(tag)] : 'black'
     }
 
     function updateScatterplot() {
@@ -223,15 +212,25 @@ function buildCorrelationAnalysis(results) {
             .attr('cy', d => y(d.y))
             .attr('r', 5)
             .style('fill', d => getColor(d))
-            .on('mouseover', function(d) {
+            .on('mouseover', function (d) {
                 d3.select(this).style('fill', '#FF0000')
                 tooltip
                     .style('left', 10 + mouseX() + 'px')
                     .style('top', 10 + mouseY() + 'px')
                     .style('visibility', 'visible')
-                    .html(`${shortenConcept(xArrLabel)}: ${d.x}<br/>${shortenConcept(yArrLabel)}: ${d.y}<br/>Patient ID: ${d.patientID}<br/>${d.tag ? 'Tag: ' + d.tag : ''}`)})
-            .on('mouseout', function() {
-                d3.select(this).style('fill', d => getColor(d))
+                    .html(`${shortenConcept(xArrLabel)}: ${d.x}<br/>
+                            ${shortenConcept(yArrLabel)}: ${d.y}<br/>
+                            Patient ID: ${d.patientID}<br/>
+                            ${d.tag ? 'Tag: ' + d.tag : ''}`)
+            })
+            .on('mouseout', function () {
+                const p = d3.select(this)
+                if (p.classed('selected')) {
+                    p.style('fill', '#FFFFFF')
+                }
+                else {
+                    p.style('fill', d => getColor(d))
+                }
                 tooltip.style('visibility', 'hidden')
             })
 
@@ -243,10 +242,14 @@ function buildCorrelationAnalysis(results) {
     }
 
     function updateLegend() {
-        let html = (`Correlation Coefficient: ${correlation}<br/>p-value: ${pvalue}<br/>Method: ${method}<br/><br/>Selected: ${d3.selectAll('.point.selected').size()}<br/>Displayed: ${d3.selectAll('.point').size()}<br/><br/>`)
+        let html = (`Correlation Coefficient: ${correlation}<br/>
+                    p-value: ${pvalue}<br/>
+                    Method: ${method}<br/><br/>
+                    Selected: ${d3.selectAll('.point.selected').size()}<br/>
+                    Displayed: ${d3.selectAll('.point').size()}<br/><br/>`)
         html = html + `<p style='background:#000000; color:#FFFFFF'>Default</p>`
-        for (let detectedTag of detectedTags) {
-            html = html + `<p style='background:${getColor(detectedTag)}; color:#000000'>${detectedTag}</p>`
+        for (let tag of tags) {
+            html = html + `<p style='background:${getColor(tag)}; color:#000000'>${tag}</p>`
         }
         legend.html(html)
     }
@@ -260,7 +263,7 @@ function buildCorrelationAnalysis(results) {
         regressionLine.enter()
             .append('line')
             .attr('class', 'regressionLine')
-            .on('mouseover', function() {
+            .on('mouseover', function () {
                 d3.select(this).attr('stroke', 'red')
                 tooltip
                     .style('visibility', 'visible')
@@ -268,7 +271,7 @@ function buildCorrelationAnalysis(results) {
                     .style('left', mouseX() + 'px')
                     .style('top', mouseY() + 'px')
             })
-            .on('mouseout', function() {
+            .on('mouseout', function () {
                 d3.select(this).attr('stroke', 'orange')
                 tooltip.style('visibility', 'hidden')
             })
@@ -283,10 +286,10 @@ function buildCorrelationAnalysis(results) {
     }
 
     function reset() {
-
+        updateStatistics([], true)
     }
 
-    function updateHistogram() {
+
 /*
 
         let hist1Data = d3.layout.histogram()
@@ -338,11 +341,6 @@ function buildCorrelationAnalysis(results) {
             .attr('y', (d, i) => hist1Data[i].x + hist1Data[i].dx / 2)
             .text(d => d.y ? d.y : '')
 
-        histogram1.append('g')
-            .attr('class', 'x axis')
-            .attr('transform', 'translate(' + hist1Width + ',' + 0 + ')')
-            .call(hist1xAxis)
-
         hist2Bar.append('rect')
             .attr('width', hist2Data[0].dx)
             .attr('height', 0)
@@ -363,13 +361,7 @@ function buildCorrelationAnalysis(results) {
             .attr('x', (d, i) => hist2Data[i].x + hist2Data[i].dx / 2)
             .attr('y', d => hist2BarScale(d.y) - 5)
             .text(d => d.y ? d.y : '')
-
-        histogram2.append('g')
-            .attr('class', 'x axis')
-            .attr('transform', `translate(${0}, ${0})`)
-            .call(hist2xAxis)
-            */
-    }
+    */
 
     updateScatterplot()
     updateRegressionLine()

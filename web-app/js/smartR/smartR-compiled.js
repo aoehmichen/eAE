@@ -266,7 +266,7 @@ function activateDragAndDrop(divName) {
 }
 
 function clearVarSelection(divName) {
-    $('#' + divName).remove();
+    $('#' + divName).children().remove();
 }
 
 function getConcepts(divName) {
@@ -413,6 +413,7 @@ function executeOnState(params, checkFreq) {
                 break;
         }
         if (~checkFreq) {
+            console.log(response + checkFreq);
             setTimeout(function () {
                 return executeOnState(params, checkFreq);
             }, checkFreq);
@@ -482,7 +483,7 @@ function initSession(params) {
         data: { id: params.id }
     });
     request1.done(function (response) {
-        if (response == 'NULL' || response == 'EXIT') {
+        if (params.init || params.redraw || response == 'NULL' || response == 'EXIT' || response == 'ERROR') {
             var request2 = $.ajax({
                 url: pageInfo.basePath + '/SmartR/initSession',
                 type: 'POST',
