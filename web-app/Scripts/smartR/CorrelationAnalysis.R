@@ -17,9 +17,10 @@ folders <- as.vector(sapply(annotations$concept, conceptStrToFolderStr))
 if (length(unique(folders)) > 1) {
     stop("Sorry, but at this moment only one folder at a time is supported for annotation.")
 } else if (length(unique(folders)) == 1) {
-    tags <- annotations[, c('patientID', 'value')]
-    df <- merge(df, tags, by='patientID', all=T)
-    colnames(df) <- c('patientID', 'x', 'y', 'tags')
+    annotations <- annotations[, c('patientID', 'value')]
+    df <- merge(df, annotations, by='patientID', all=T)
+    colnames(df) <- c('patientID', 'x', 'y', 'tag')
+    tags <- df$tag
 } else {
     tags <- list()
    colnames(df) <- c('patientID', 'x', 'y')
@@ -45,5 +46,5 @@ SmartR.output$method <- SmartR.settings$method
 SmartR.output$xArrLabel <- concepts[1]
 SmartR.output$yArrLabel <- concepts[2]
 SmartR.output$patientIDs <- df[,0]
-SmartR.output$tags <- tags
+SmartR.output$tags <- unique(tags)
 SmartR.output$points <- df

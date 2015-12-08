@@ -8,6 +8,10 @@
     stroke-width: 3px;
 }
 
+.regressionLine:hover {
+    stroke: #FF0000;
+}
+
 .brush .extent {
     fill: blue;
     opacity: .125;

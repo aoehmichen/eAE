@@ -15,8 +15,6 @@ function buildCorrelationAnalysis(results) {
         pvalue = undefined,
         regLineSlope = undefined,
         regLineYIntercept = undefined,
-        xArr = undefined,
-        yArr = undefined,
         patientIDs = undefined,
         tags = undefined,
         points = undefined,
@@ -53,9 +51,9 @@ function buildCorrelationAnalysis(results) {
         var settings = { patientIDs: patientIDs };
         var onResponse = function onResponse(response) {
             setData(response);
+            if (scatterUpdate) updateScatterplot();
             updateRegressionLine();
             updateLegend();
-            if (scatterUpdate) updateScatterplot();
         };
         startWorkflow(onResponse, settings, false, false);
     }
@@ -124,11 +122,21 @@ function buildCorrelationAnalysis(results) {
             <input id="excludeButton" class="mybutton" type="button" value="Exclude"/><br/> \
             <input id="resetButton" class="mybutton" type="button" value="Reset"/>';
     var contextMenu = d3.select('#scatterplot').append('div').attr('class', 'contextMenu').style('visibility', 'hidden').html(ctxHtml);
-    $('#binNumber').on('click', updateBinNumber);
-    $('#updateCohortsButton').on('click', updateCohorts);
-    $('#zoomButton').on('click', zoomSelection);
-    $('#excludeButton').on('click', excludeSelection);
-    $('#resetButton').on('click', reset);
+    $('#binNumber').on('click', function () {
+        contextMenu.style('visibility', 'hidden');updateBinNumber();
+    });
+    $('#updateCohortsButton').on('click', function () {
+        contextMenu.style('visibility', 'hidden');updateCohorts();
+    });
+    $('#zoomButton').on('click', function () {
+        contextMenu.style('visibility', 'hidden');zoomSelection();
+    });
+    $('#excludeButton').on('click', function () {
+        contextMenu.style('visibility', 'hidden');excludeSelection();
+    });
+    $('#resetButton').on('click', function () {
+        contextMenu.style('visibility', 'hidden');reset();
+    });
 
     function updateSelection() {
         var extent = brush.extent();
@@ -137,11 +145,11 @@ function buildCorrelationAnalysis(results) {
             x1 = X.invert(extent[1][0]),
             y0 = Y.invert(extent[1][1]);
         svg.selectAll('.point').classed('selected', false).style('fill', function (d) {
-            return getColor(d);
+            return getColor(d.tag);
         }).style('stroke', 'white').filter(function (d) {
             return x0 <= d.x && d.x <= x1 && y0 <= d.y && d.y <= y1;
         }).classed('selected', true).style('fill', 'white').style('stroke', function (d) {
-            return getColor(d);
+            return getColor(d.tag);
         });
     }
 
@@ -158,8 +166,8 @@ function buildCorrelationAnalysis(results) {
         return d3.event.button === 2 ? d3.event.stopImmediatePropagation() : null;
     }).call(brush);
 
-    function getColor(point) {
-        return point.tag ? colors[tags.indexOf(tag)] : 'black';
+    function getColor(tag) {
+        return tag ? colors[tags.indexOf(tag)] : '#000000';
     }
 
     function updateScatterplot() {
@@ -172,7 +180,7 @@ function buildCorrelationAnalysis(results) {
         }).attr('cy', function (d) {
             return y(d.y);
         }).attr('r', 5).style('fill', function (d) {
-            return getColor(d);
+            return getColor(d.tag);
         }).on('mouseover', function (d) {
             d3.select(this).style('fill', '#FF0000');
             tooltip.style('left', 10 + mouseX() + 'px').style('top', 10 + mouseY() + 'px').style('visibility', 'visible').html(shortenConcept(xArrLabel) + ': ' + d.x + '<br/>\n                            ' + shortenConcept(yArrLabel) + ': ' + d.y + '<br/>\n                            Patient ID: ' + d.patientID + '<br/>\n                            ' + (d.tag ? 'Tag: ' + d.tag : ''));
@@ -182,13 +190,13 @@ function buildCorrelationAnalysis(results) {
                 p.style('fill', '#FFFFFF');
             } else {
                 p.style('fill', function (d) {
-                    return getColor(d);
+                    return getColor(d.tag);
                 });
             }
             tooltip.style('visibility', 'hidden');
         });
 
-        point.exit().transition().duration(animationDuration).attr('r', 0).remove();
+        point.exit().classed('selected', false).transition().duration(animationDuration).attr('r', 0).remove();
     }
 
     function updateLegend() {
@@ -200,9 +208,11 @@ function buildCorrelationAnalysis(results) {
 
         try {
             for (var _iterator = tags[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                var _tag = _step.value;
+                var tag = _step.value;
 
-                html = html + ('<p style=\'background:' + getColor(_tag) + '; color:#000000\'>' + _tag + '</p>');
+                if (tag) {
+                    html = html + ('<p style=\'background:' + getColor(tag) + '; color:#FFFFFF\'>' + tag + '</p>');
+                }
             }
         } catch (err) {
             _didIteratorError = true;
@@ -237,7 +247,7 @@ function buildCorrelationAnalysis(results) {
         var regressionLine = svg.selectAll('.regressionLine').data([1], function (d) {
             return d;
         });
-
+        console.log(regLineYIntercept);
         regressionLine.enter().append('line').attr('class', 'regressionLine').on('mouseover', function () {
             d3.select(this).attr('stroke', 'red');
             tooltip.style('visibility', 'visible').html('slope: ' + regLineSlope + '<br/>intercept: ' + regLineYIntercept).style('left', mouseX() + 'px').style('top', mouseY() + 'px');
