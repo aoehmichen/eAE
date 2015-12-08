@@ -378,6 +378,9 @@ function displayErrorMsg(params) {
     request.fail(function () {
         return alert('Server does not respond. Network connection lost?');
     });
+    request.always(function () {
+        return $('#submitButton').prop('disabled', false);
+    });
 }
 
 function executeOnState(params, checkFreq) {
@@ -390,13 +393,12 @@ function executeOnState(params, checkFreq) {
     request.done(function (response) {
         switch (response) {
             case 'ERROR':
-                $('#submitButton').prop('disabled', false);
                 displayErrorMsg(params);
                 checkFreq = -1;
                 break;
             case 'INIT':
                 loadDataIntoSession(params);
-                checkFreq = 500;
+                checkFreq = params.init ? 500 : 100;
                 break;
             case 'LOADED':
                 runWorkflowScript(params);
@@ -410,9 +412,13 @@ function executeOnState(params, checkFreq) {
                 checkFreq = -1;
                 break;
         }
-        if (~checkFreq) setTimeout(function () {
-            return executeOnState(params);
-        }, checkFreq);
+        if (~checkFreq) {
+            setTimeout(function () {
+                return executeOnState(params, checkFreq);
+            }, checkFreq);
+        } else if (lastRequest) {
+            initSession(lastRequest);
+        }
     });
     request.fail(function () {
         return alert('Server does not respond. Network connection lost?');
@@ -466,18 +472,35 @@ function loadDataIntoSession(params) {
     });
 }
 
+var lastRequest = undefined;
 function initSession(params) {
-    var request = $.ajax({
-        url: pageInfo.basePath + '/SmartR/initSession',
+    lastRequest = null;
+    var request1 = $.ajax({
+        url: pageInfo.basePath + '/SmartR/getState',
         type: 'POST',
         timeout: 600000,
-        data: { id: params.id,
-            init: params.init }
+        data: { id: params.id }
     });
-    request.done(function () {
-        return executeOnState(params, -1);
+    request1.done(function (response) {
+        if (response == 'NULL' || response == 'EXIT') {
+            var request2 = $.ajax({
+                url: pageInfo.basePath + '/SmartR/initSession',
+                type: 'POST',
+                timeout: 600000,
+                data: { id: params.id,
+                    init: params.init }
+            });
+            request2.done(function () {
+                return executeOnState(params, -1);
+            });
+            request2.fail(function () {
+                return alert('Server does not respond. Network connection lost?');
+            });
+        } else {
+            lastRequest = $.extend(true, {}, params);
+        }
     });
-    request.fail(function () {
+    request1.fail(function () {
         return alert('Server does not respond. Network connection lost?');
     });
 }

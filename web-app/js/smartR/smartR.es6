@@ -498,6 +498,7 @@ function displayErrorMsg(params) {
         alert(response)
     })
     request.fail(() => alert('Server does not respond. Network connection lost?'))
+    request.always(() => $('#submitButton').prop('disabled', false))
 }
 
 function executeOnState(params, checkFreq) {
@@ -510,13 +511,12 @@ function executeOnState(params, checkFreq) {
     request.done(response => {
         switch(response) {
             case 'ERROR':
-                $('#submitButton').prop('disabled', false)
                 displayErrorMsg(params)
                 checkFreq = -1
                 break
             case 'INIT':
                 loadDataIntoSession(params)
-                checkFreq = 500
+                checkFreq = params.init ? 500 : 100
                 break
             case 'LOADED':
                 runWorkflowScript(params)
@@ -530,7 +530,11 @@ function executeOnState(params, checkFreq) {
                 checkFreq = -1
                 break
         }
-        if (~checkFreq) setTimeout(() => executeOnState(params), checkFreq)
+        if (~checkFreq) {
+            setTimeout(() => executeOnState(params, checkFreq), checkFreq)
+        } else if (lastRequest) {
+            initSession(lastRequest)
+        }
     })
     request.fail(() => alert('Server does not respond. Network connection lost?'))
 }
@@ -580,16 +584,31 @@ function loadDataIntoSession(params) {
     })
 }
 
+let lastRequest
 function initSession(params) {
-    const request = $.ajax({
-        url: pageInfo.basePath + '/SmartR/initSession',
+    lastRequest = null
+    const request1 = $.ajax({
+        url: pageInfo.basePath + '/SmartR/getState',
         type: 'POST',
         timeout: 600000,
-        data: {id: params.id,
-            init: params.init}
+        data: {id: params.id}
     })
-    request.done(() => executeOnState(params, -1))
-    request.fail(() => alert('Server does not respond. Network connection lost?'))
+    request1.done(response => {
+        if (response == 'NULL' || response == 'EXIT') {
+            const request2 = $.ajax({
+                url: pageInfo.basePath + '/SmartR/initSession',
+                type: 'POST',
+                timeout: 600000,
+                data: {id: params.id,
+                    init: params.init}
+            })
+            request2.done(() => executeOnState(params, -1))
+            request2.fail(() => alert('Server does not respond. Network connection lost?'))
+        } else {
+            lastRequest = $.extend(true, {}, params)
+        }
+    })
+    request1.fail(() => alert('Server does not respond. Network connection lost?'))
 }
 
 function showLoadingScreen() {

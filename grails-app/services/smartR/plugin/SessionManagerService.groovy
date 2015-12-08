@@ -10,6 +10,7 @@ class SessionManagerService {
     def GROOVY_CHUNK_SIZE = 10 * 1024 * 1024 / 2 // should be the size for a string of 10MB
     def R_CHUNK_SIZE = 10 * 1024 * 1024 // should be the size for a string of about 10MB
     enum STATE {
+        NULL,
         INIT,
         LOADING,
         LOADED,
@@ -27,7 +28,11 @@ class SessionManagerService {
     }
 
     def getState(id) {
-        sessions[id]?.state?.toString()
+        try {
+            return sessions[id].state.toString()
+        } catch (all) {
+            return STATE.NULL.toString()
+        }
     }
 
     def getMsg(id) {
@@ -35,14 +40,19 @@ class SessionManagerService {
     }
 
     def sessionValid(id) {
-        try {
-            def connection = sessions[id].connection
-            connection.assign("test1", "123")
-            connection.voidEval("test2 <- test1")
-            return connection.eval("test2").asString() == "123"
-        } catch (all) {
-            return false
+        def sane = false
+        def thread = Thread.start {
+            try {
+                def connection = sessions[id].connection
+                connection.assign("test1", "123")
+                connection.voidEval("test2 <- test1")
+                sane = connection.eval("test2").asString() == "123"
+            } catch (all) {
+                sane = false
+            }
         }
+        thread.join(2000)
+        return sane
     }
 
     def initSession(id, init) {
@@ -89,7 +99,6 @@ class SessionManagerService {
         }
 
         connection.voidEval("""
-            require(jsonlite)
             SmartR.data.cohort1 <- fromJSON(data_cohort1)
             SmartR.data.cohort2 <- fromJSON(data_cohort2)
         """)
@@ -99,7 +108,6 @@ class SessionManagerService {
         def connection = sessions[id].connection
         connection.assign("settings", settings)
         connection.voidEval("""
-            require(jsonlite)
             SmartR.settings <- fromJSON(settings)
             SmartR.output <- list()
         """)
@@ -107,7 +115,6 @@ class SessionManagerService {
     }
 
     def runWorkflowScript(id, script) {
-        sessions[id].state = STATE.WORKING
         def connection = sessions[id].connection
         def scriptCommand = "source('${script}')".replace("\\", "/")
         try {
