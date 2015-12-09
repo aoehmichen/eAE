@@ -28,9 +28,14 @@ function buildCorrelationAnalysis(results) {
     const X = x.copy()
     const Y = y.copy()
 
-    function updateStatistics(patientIDs, scatterUpdate=false) {
+    function updateStatistics(patientIDs, scatterUpdate=false, init=false) {
         const settings = {patientIDs}
         const onResponse = response => {
+            if (init) {
+                d3.selectAll('#scatterplot *').remove()
+                buildCorrelationAnalysis(response)
+                return
+            }
             setData(response)
             if (scatterUpdate) updateScatterplot()
             updateRegressionLine()
@@ -142,8 +147,8 @@ function buildCorrelationAnalysis(results) {
             alert('Please select at least two elements before zooming!')
             return
         }
-        var selectedPatientIDs = d3.selectAll('.point.selected').data(d => d.patientID)
-        updateStatistics(selectedPatientIDs)
+        var selectedPatientIDs = d3.selectAll('.point.selected').map(d => d.patientID)
+        updateStatistics(selectedPatientIDs, false, true)
     }
 
     const ctxHtml = 'Number of bins<br/> \
@@ -188,7 +193,7 @@ function buildCorrelationAnalysis(results) {
                 .style('visibility', 'hidden')
                 .style('top', -100 + 'px')
             updateSelection()
-            const selectedPatientIDs = d3.selectAll('.point.selected').data().map(d => d.patientID)
+            const selectedPatientIDs = d3.selectAll('.point.selected').map(d => d.patientID)
             updateStatistics(selectedPatientIDs)
         })
 
@@ -259,7 +264,7 @@ function buildCorrelationAnalysis(results) {
 
     function updateRegressionLine() {
         const searchSpace = d3.selectAll('.point.selected').empty() ? d3.selectAll('.point') : d3.selectAll('.point.selected')
-        const [minX, maxX] = d3.extent(searchSpace.data().map(d => d.x))
+        const [minX, maxX] = d3.extent(searchSpace.map(d => d.x))
         const regressionLine = svg.selectAll('.regressionLine')
             .data([1], d => d)
         console.log(regLineYIntercept)
@@ -289,7 +294,7 @@ function buildCorrelationAnalysis(results) {
     }
 
     function reset() {
-        updateStatistics([], true)
+        updateStatistics([], false, true)
     }
 
 

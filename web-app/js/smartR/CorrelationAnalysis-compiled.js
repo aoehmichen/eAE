@@ -47,9 +47,15 @@ function buildCorrelationAnalysis(results) {
 
     function updateStatistics(patientIDs) {
         var scatterUpdate = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+        var init = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
 
         var settings = { patientIDs: patientIDs };
         var onResponse = function onResponse(response) {
+            if (init) {
+                d3.selectAll('#scatterplot *').remove();
+                buildCorrelationAnalysis(response);
+                return;
+            }
             setData(response);
             if (scatterUpdate) updateScatterplot();
             updateRegressionLine();
@@ -109,10 +115,10 @@ function buildCorrelationAnalysis(results) {
             alert('Please select at least two elements before zooming!');
             return;
         }
-        var selectedPatientIDs = d3.selectAll('.point.selected').data(function (d) {
+        var selectedPatientIDs = d3.selectAll('.point.selected').map(function (d) {
             return d.patientID;
         });
-        updateStatistics(selectedPatientIDs);
+        updateStatistics(selectedPatientIDs, false, true);
     }
 
     var ctxHtml = 'Number of bins<br/> \
@@ -156,7 +162,7 @@ function buildCorrelationAnalysis(results) {
     var brush = d3.svg.brush().x(d3.scale.identity().domain([0, width])).y(d3.scale.identity().domain([0, height])).on('brushend', function () {
         contextMenu.style('visibility', 'hidden').style('top', -100 + 'px');
         updateSelection();
-        var selectedPatientIDs = d3.selectAll('.point.selected').data().map(function (d) {
+        var selectedPatientIDs = d3.selectAll('.point.selected').map(function (d) {
             return d.patientID;
         });
         updateStatistics(selectedPatientIDs);
@@ -235,7 +241,7 @@ function buildCorrelationAnalysis(results) {
     function updateRegressionLine() {
         var searchSpace = d3.selectAll('.point.selected').empty() ? d3.selectAll('.point') : d3.selectAll('.point.selected');
 
-        var _d3$extent = d3.extent(searchSpace.data().map(function (d) {
+        var _d3$extent = d3.extent(searchSpace.map(function (d) {
             return d.x;
         }));
 
@@ -260,7 +266,7 @@ function buildCorrelationAnalysis(results) {
     }
 
     function reset() {
-        updateStatistics([], true);
+        updateStatistics([], false, true);
     }
 
     /*
