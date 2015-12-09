@@ -31,7 +31,7 @@ function buildCorrelationAnalysis(results) {
         yArrLabel = data.yArrLabel[0];
         method = data.method[0];
         patientIDs = data.patientIDs;
-        tags = data.tags;
+        tags = data.tags.sort();
         points = data.points;
         x.domain(d3.extent(points, function (d) {
             return d.x;

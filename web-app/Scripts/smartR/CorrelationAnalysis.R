@@ -10,7 +10,6 @@ points <- SmartR.data.cohort1$datapoints
 concepts <- unique(points$concept)
 if (! length(points)) stop('Your selection does not match any patient in the defined cohort!')
 df <- data.frame(dcast(points, patientID ~ concept))
-df <- na.omit(df)
 if(length(SmartR.settings$patientIDs)) df <- df[df$patientID %in% SmartR.settings$patientIDs, ]
 annotations <- SmartR.data.cohort1$annotations
 folders <- as.vector(sapply(annotations$concept, conceptStrToFolderStr))
@@ -25,6 +24,8 @@ if (length(unique(folders)) > 1) {
     tags <- list()
    colnames(df) <- c('patientID', 'x', 'y')
 }
+
+df <- df[!is.na(df[,2]) & !is.na(df[,3]), ]
 
 corTest <- tryCatch({
 	cor.test(df[,2], df[,3], method=SmartR.settings$method)
