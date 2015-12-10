@@ -526,16 +526,18 @@ function startWorkflow() {
     var init = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
     var redraw = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
 
-    settings = JSON.stringify($.extend(getSettings(), settings));
-    $('#submitButton').prop('disabled', true);
-    conceptBoxes = [];
-    sanityCheckErrors = [];
-    register();
     if (!sane()) return false;
     if (!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !(isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
         runAllQueries(startWorkflow);
         return false;
     }
+
+    settings = JSON.stringify($.extend(getSettings(), settings));
+    $('#submitButton').prop('disabled', true);
+    conceptBoxes = [];
+    sanityCheckErrors = [];
+    register();
+
     if (init && redraw) showLoadingScreen();
 
     var parameters = {

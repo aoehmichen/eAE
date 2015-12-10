@@ -623,16 +623,18 @@ function showLoadingScreen() {
 }
 
 function startWorkflow(visualizationCallback=()=>{}, settings=getSettings(), init=true, redraw=true) {
+    if (!sane()) return false
+    if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !( isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
+        runAllQueries(startWorkflow)
+        return false
+    }
+
     settings = JSON.stringify($.extend(getSettings(), settings))
     $('#submitButton').prop('disabled', true)
     conceptBoxes = []
     sanityCheckErrors = []
     register()
-    if (! sane()) return false
-    if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !( isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
-        runAllQueries(startWorkflow)
-        return false
-    }
+
     if (init && redraw) showLoadingScreen()
 
     const parameters = {
