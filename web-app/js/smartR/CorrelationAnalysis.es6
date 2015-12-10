@@ -1,10 +1,11 @@
 function buildCorrelationAnalysis(results) {
     const animationDuration = 500
     const bins = 10
-    const panel = $('#etrikspanel')
-    const margin = {top: 20, right: 20, bottom: panel.height() / 3, left: panel.width() / 3}
-    const width = panel.width() * 2 / 3 - margin.left - margin.right
-    const height = panel.height() * 2 / 3 - margin.top - margin.bottom
+    const w = 1200
+    const h = 1200
+    const margin = {top: 20, right: 20, bottom: h / 4, left: w / 4}
+    const width = w * 3 / 4 - margin.left - margin.right
+    const height = h * 3 / 4 - margin.top - margin.bottom
     const bottomHistHeight = margin.bottom
     const leftHistHeight = margin.left
     const colors = ['#33FF33', '#3399FF', '#CC9900', '#CC99FF', '#FFFF00', 'blue']
@@ -166,10 +167,15 @@ function buildCorrelationAnalysis(results) {
             .classed('selected', false)
             .style('fill', d => getColor(d.tag))
             .style('stroke', 'white')
-            .filter(d => x0 <= d.x && d.x <= x1 && y1 <= d.y && d.y <= y0)
-            .classed('selected', true)
-            .style('fill', 'white')
-            .style('stroke', d => getColor(d.tag))
+        if (brush.empty()) {
+            d3.selectAll('.point').classed('selected', true)
+        } else {
+            svg.selectAll('.point')
+                .filter(d => x0 <= d.x && d.x <= x1 && y1 <= d.y && d.y <= y0)
+                .classed('selected', true)
+                .style('fill', 'white')
+                .style('stroke', d => getColor(d.tag))
+        }
     }
 
     const brush = d3.svg.brush()
@@ -235,23 +241,19 @@ ${d.tag ? 'Tag: ' + d.tag : ''}`)
     }
 
     function updateHistogram() {
-        const selX = d3.scale.linear()
-            .domain([minX, maxX])
-            .range([x(minX), x(maxX)])
-
-        const bottomHistYScale = d3.scale.linear()
-            .domain([0, points.size()])
-            .range([0, bottomHistHeight])
-        const leftHistYScale = d3.scale.linear()
-            .domain([0, points.size()])
-            .range([0, leftHistHeight])
-
         const bottomHistData = d3.layout.histogram()
             .bins(bins)(points.map(d => d.x))
             .map((d, i) => $.extend(d, {i}))
         const leftHistData = d3.layout.histogram()
             .bins(bins)(points.map(d => d.y))
             .map((d, i) => $.extend(d, {i}))
+
+        const bottomHistYScale = d3.scale.linear()
+            .domain([0, bottomHistData.max(d => d.y)])
+            .range([0, bottomHistHeight])
+        const leftHistYScale = d3.scale.linear()
+            .domain([0, leftHistData.max(d => d.y)])
+            .range([0, leftHistHeight])
 
         const bottomHistBar = svg.selectAll('.bar.bottom')
             .data(bottomHistData, d => d.i)
@@ -262,13 +264,23 @@ ${d.tag ? 'Tag: ' + d.tag : ''}`)
         bottomHistBar.transition()
             .delay((d, i) => i * 25)
             .duration(animationDuration)
-            .attr('x', d => selX(d.x))
-            .attr('width', selX(bottomHistData[0].dx))
-            .attr('height', d => bottomHistYScale(d.y))
+            .attr('x', (d, i) => x(minX) + i * (x(maxX) - x(minX)) / bins)
+            .attr('width', (x(maxX) - x(minX)) / bins)
+            .attr('height', d => bottomHistYScale(d.y) - 1)
         bottomHistBar.exit()
             .transition()
             .duration(animationDuration)
             .attr('height', 0)
+
+        bottomHistBar.enter()
+            .append('text')
+            .transition()
+            .delay((d, i) => i * 25)
+            .duration(animationDuration)
+            .attr('dy', '.35em')
+            .attr('x', (d, i) => x(minX) + i * (x(maxX) - x(minX)) / bins)
+            .attr('y', d => height + bottomHistYScale(d.y))
+            .text(d => d.y ? d.y : '')
 
         const leftHistBar = svg.selectAll('.bar.left')
             .data(leftHistData, d => d.i)
@@ -276,51 +288,26 @@ ${d.tag ? 'Tag: ' + d.tag : ''}`)
             .append('rect')
             .attr('class', 'bar left')
         leftHistBar.transition()
-            .delay((d, i) => i * 25) 
+            .delay((d, i) => i * 25)
             .duration(animationDuration)
-            .attr('x', d => - leftHistYScale(d.y))
+            .attr('x', d => - leftHistYScale(d.y) + 1)
             .attr('y', (d, i) => y(minY) - (i + 1) * (y(minY) - y(maxY)) / bins)
-            .attr('width', d => leftHistYScale(d.y) - 1)
-            .attr('height', () => (y(minY) - y(maxY)) / bins)
+            .attr('width', d => leftHistYScale(d.y) - 2)
+            .attr('height', (y(minY) - y(maxY)) / bins)
         leftHistBar.exit()
             .transition()
             .duration(animationDuration)
             .attr('width', 0)
 
-        //bottomHistBar.append('text')
-        //    .attr('x', bottomHistHeight)
-        //    .attr('y', (d, i) => bottomHistData[i].x)
-        //    .transition()
-        //    .delay((d, i) => i * 25)
-        //    .duration(animationDuration)
-        //    .attr('dy', '.35em')
-        //    .attr('x', d => bottomHistHeight - bottomHistYScale(d.y) + 10)
-        //    .attr('y', (d, i) => bottomHistData[i].x + bottomHistData[i].dx / 2)
-        //    .text(d => d.y ? d.y : '')
-        //
-        //const leftHistBar = svg.selectAll('.bar')
-        //    .data(leftHistData)
-        //    .enter().append('g')
-        //    .attr('class', 'bar')
-        //leftHistBar.append('rect')
-        //    .attr('width', leftHistData[0].dx)
-        //    .attr('height', 0)
-        //    .attr('x', (d, i) => leftHistData[i].x)
-        //    .attr('y', 0)
-        //    .transition()
-        //    .delay((d, i) => i * 25)
-        //    .duration(animationDuration)
-        //    .attr('height', d => leftHistYScale(d.y))
-        //leftHistBar.append('text')
-        //    .attr('x', (d, i) => leftHistData[i].x)
-        //    .attr('y', 0)
-        //    .transition()
-        //    .delay((d, i) => i * 25)
-        //    .duration(animationDuration)
-        //    .attr('dx', '-.5em')
-        //    .attr('x', (d, i) => leftHistData[i].x + leftHistData[i].dx / 2)
-        //    .attr('y', d => leftHistYScale(d.y) - 5)
-        //    .text(d => d.y ? d.y : '')
+        leftHistBar.enter()
+            .append('text')
+            .transition()
+            .delay((d, i) => i * 25)
+            .duration(animationDuration)
+            .attr('dx', '.35em')
+            .attr('x', d => - leftHistYScale(d.y))
+            .attr('y', (d, i) => y(minY) - (i + 1) * (y(minY) - y(maxY)) / bins)
+            .text(d => d.y ? d.y : '')
     }
 
     function updateLegend() {

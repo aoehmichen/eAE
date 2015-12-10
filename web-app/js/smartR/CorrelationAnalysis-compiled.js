@@ -5,10 +5,11 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
 function buildCorrelationAnalysis(results) {
     var animationDuration = 500;
     var bins = 10;
-    var panel = $('#etrikspanel');
-    var margin = { top: 20, right: 20, bottom: panel.height() / 3, left: panel.width() / 3 };
-    var width = panel.width() * 2 / 3 - margin.left - margin.right;
-    var height = panel.height() * 2 / 3 - margin.top - margin.bottom;
+    var w = 1200;
+    var h = 1200;
+    var margin = { top: 20, right: 20, bottom: h / 4, left: w / 4 };
+    var width = w * 3 / 4 - margin.left - margin.right;
+    var height = h * 3 / 4 - margin.top - margin.bottom;
     var bottomHistHeight = margin.bottom;
     var leftHistHeight = margin.left;
     var colors = ['#33FF33', '#3399FF', '#CC9900', '#CC99FF', '#FFFF00', 'blue'];
@@ -173,11 +174,16 @@ function buildCorrelationAnalysis(results) {
 
         svg.selectAll('.point').classed('selected', false).style('fill', function (d) {
             return getColor(d.tag);
-        }).style('stroke', 'white').filter(function (d) {
-            return x0 <= d.x && d.x <= x1 && y1 <= d.y && d.y <= y0;
-        }).classed('selected', true).style('fill', 'white').style('stroke', function (d) {
-            return getColor(d.tag);
-        });
+        }).style('stroke', 'white');
+        if (brush.empty()) {
+            d3.selectAll('.point').classed('selected', true);
+        } else {
+            svg.selectAll('.point').filter(function (d) {
+                return x0 <= d.x && d.x <= x1 && y1 <= d.y && d.y <= y0;
+            }).classed('selected', true).style('fill', 'white').style('stroke', function (d) {
+                return getColor(d.tag);
+            });
+        }
     }
 
     var brush = d3.svg.brush().x(d3.scale.identity().domain([0, width])).y(d3.scale.identity().domain([0, height])).on('brushend', function () {
@@ -227,11 +233,6 @@ function buildCorrelationAnalysis(results) {
     }
 
     function updateHistogram() {
-        var selX = d3.scale.linear().domain([minX, maxX]).range([x(minX), x(maxX)]);
-
-        var bottomHistYScale = d3.scale.linear().domain([0, points.size()]).range([0, bottomHistHeight]);
-        var leftHistYScale = d3.scale.linear().domain([0, points.size()]).range([0, leftHistHeight]);
-
         var bottomHistData = d3.layout.histogram().bins(bins)(points.map(function (d) {
             return d.x;
         })).map(function (d, i) {
@@ -243,18 +244,35 @@ function buildCorrelationAnalysis(results) {
             return $.extend(d, { i: i });
         });
 
+        var bottomHistYScale = d3.scale.linear().domain([0, bottomHistData.max(function (d) {
+            return d.y;
+        })]).range([0, bottomHistHeight]);
+        var leftHistYScale = d3.scale.linear().domain([0, leftHistData.max(function (d) {
+            return d.y;
+        })]).range([0, leftHistHeight]);
+
         var bottomHistBar = svg.selectAll('.bar.bottom').data(bottomHistData, function (d) {
             return d.i;
         });
         bottomHistBar.enter().append('rect').attr('class', 'bar bottom').attr('y', height + 1);
         bottomHistBar.transition().delay(function (d, i) {
             return i * 25;
-        }).duration(animationDuration).attr('x', function (d) {
-            return selX(d.x);
-        }).attr('width', selX(bottomHistData[0].dx)).attr('height', function (d) {
-            return bottomHistYScale(d.y);
+        }).duration(animationDuration).attr('x', function (d, i) {
+            return x(minX) + i * (x(maxX) - x(minX)) / bins;
+        }).attr('width', (x(maxX) - x(minX)) / bins).attr('height', function (d) {
+            return bottomHistYScale(d.y) - 1;
         });
         bottomHistBar.exit().transition().duration(animationDuration).attr('height', 0);
+
+        bottomHistBar.enter().append('text').transition().delay(function (d, i) {
+            return i * 25;
+        }).duration(animationDuration).attr('dy', '.35em').attr('x', function (d, i) {
+            return x(minX) + i * (x(maxX) - x(minX)) / bins;
+        }).attr('y', function (d) {
+            return height + bottomHistYScale(d.y);
+        }).text(function (d) {
+            return d.y ? d.y : '';
+        });
 
         var leftHistBar = svg.selectAll('.bar.left').data(leftHistData, function (d) {
             return d.i;
@@ -263,50 +281,23 @@ function buildCorrelationAnalysis(results) {
         leftHistBar.transition().delay(function (d, i) {
             return i * 25;
         }).duration(animationDuration).attr('x', function (d) {
-            return -leftHistYScale(d.y);
+            return -leftHistYScale(d.y) + 1;
         }).attr('y', function (d, i) {
             return y(minY) - (i + 1) * (y(minY) - y(maxY)) / bins;
         }).attr('width', function (d) {
-            return leftHistYScale(d.y) - 1;
-        }).attr('height', function () {
-            return (y(minY) - y(maxY)) / bins;
-        });
+            return leftHistYScale(d.y) - 2;
+        }).attr('height', (y(minY) - y(maxY)) / bins);
         leftHistBar.exit().transition().duration(animationDuration).attr('width', 0);
 
-        //bottomHistBar.append('text')
-        //    .attr('x', bottomHistHeight)
-        //    .attr('y', (d, i) => bottomHistData[i].x)
-        //    .transition()
-        //    .delay((d, i) => i * 25)
-        //    .duration(animationDuration)
-        //    .attr('dy', '.35em')
-        //    .attr('x', d => bottomHistHeight - bottomHistYScale(d.y) + 10)
-        //    .attr('y', (d, i) => bottomHistData[i].x + bottomHistData[i].dx / 2)
-        //    .text(d => d.y ? d.y : '')
-        //
-        //const leftHistBar = svg.selectAll('.bar')
-        //    .data(leftHistData)
-        //    .enter().append('g')
-        //    .attr('class', 'bar')
-        //leftHistBar.append('rect')
-        //    .attr('width', leftHistData[0].dx)
-        //    .attr('height', 0)
-        //    .attr('x', (d, i) => leftHistData[i].x)
-        //    .attr('y', 0)
-        //    .transition()
-        //    .delay((d, i) => i * 25)
-        //    .duration(animationDuration)
-        //    .attr('height', d => leftHistYScale(d.y))
-        //leftHistBar.append('text')
-        //    .attr('x', (d, i) => leftHistData[i].x)
-        //    .attr('y', 0)
-        //    .transition()
-        //    .delay((d, i) => i * 25)
-        //    .duration(animationDuration)
-        //    .attr('dx', '-.5em')
-        //    .attr('x', (d, i) => leftHistData[i].x + leftHistData[i].dx / 2)
-        //    .attr('y', d => leftHistYScale(d.y) - 5)
-        //    .text(d => d.y ? d.y : '')
+        leftHistBar.enter().append('text').transition().delay(function (d, i) {
+            return i * 25;
+        }).duration(animationDuration).attr('dx', '.35em').attr('x', function (d) {
+            return -leftHistYScale(d.y);
+        }).attr('y', function (d, i) {
+            return y(minY) - (i + 1) * (y(minY) - y(maxY)) / bins;
+        }).text(function (d) {
+            return d.y ? d.y : '';
+        });
     }
 
     function updateLegend() {
