@@ -99,7 +99,7 @@ function buildCorrelationAnalysis(results) {
 
     var drag = d3.behavior.drag().on('drag', dragmove);
 
-    var legend = d3.select('#scatterplot').append('div').attr('class', 'legend').style('left', $('#outputDIV').position().left + 'px').style('top', $('#outputDIV').position().top + 'px').call(drag);
+    var legend = d3.select('#scatterplot').append('div').attr('class', 'legend').style('left', 0).style('top', $('#scatterplot').offsetTop + 'px').call(drag);
 
     svg.append('g').attr('class', 'x axis').attr('transform', 'translate(0, 0)').call(d3.svg.axis().scale(x).ticks(10).tickFormat('').innerTickSize(height).orient('bottom'));
 
@@ -310,7 +310,7 @@ function buildCorrelationAnalysis(results) {
     }
 
     function updateLegend() {
-        var html = 'Correlation Coefficient: ' + correlation + '<br/>\np-value: ' + pvalue + '<br/>\nMethod: ' + method + '<br/><br/>\nSelected: ' + d3.selectAll('.point.selected').size() + '<br/>\nDisplayed: ' + d3.selectAll('.point').size() + '<br/><br/>';
+        var html = 'Correlation Coefficient: ' + correlation + '<br/>\np-value: ' + pvalue + '<br/>\nMethod: ' + method + '<br/><br/>\nSelected: ' + (d3.selectAll('.point.selected').size() || d3.selectAll('.point').size()) + '<br/>\nDisplayed: ' + d3.selectAll('.point').size() + '<br/><br/>';
         html = html + '<p style=\'background:#000000; color:#FFFFFF\'>Default</p>';
         var _iteratorNormalCompletion = true;
         var _didIteratorError = false;

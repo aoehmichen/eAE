@@ -508,6 +508,7 @@ function initSession(params) {
 }
 
 function showLoadingScreen() {
+    $('#outputDIV').empty();
     var request = $.ajax({
         url: pageInfo.basePath + '/SmartR/renderLoadingScreen',
         type: 'POST',

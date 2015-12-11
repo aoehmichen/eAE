@@ -79,8 +79,8 @@ function buildCorrelationAnalysis(results) {
 
     let legend = d3.select('#scatterplot').append('div')
         .attr('class', 'legend')
-        .style('left', $('#outputDIV').position().left + 'px')
-        .style('top', $('#outputDIV').position().top + 'px')
+        .style('left', 0)
+        .style('top', $('#scatterplot').offsetTop + 'px')
         .call(drag)
 
     svg.append('g')
@@ -325,7 +325,7 @@ ${d.tag ? 'Tag: ' + d.tag : ''}`)
         let html = (`Correlation Coefficient: ${correlation}<br/>
 p-value: ${pvalue}<br/>
 Method: ${method}<br/><br/>
-Selected: ${d3.selectAll('.point.selected').size()}<br/>
+Selected: ${d3.selectAll('.point.selected').size() || d3.selectAll('.point').size()}<br/>
 Displayed: ${d3.selectAll('.point').size()}<br/><br/>`)
         html = html + `<p style='background:#000000; color:#FFFFFF'>Default</p>`
         for (let tag of tags) {
@@ -364,7 +364,7 @@ Displayed: ${d3.selectAll('.point').size()}<br/><br/>`)
     function reset() {
         updateStatistics([], false, true)
     }
-
+ 
     updateScatterplot()
     updateHistogram()
     updateRegressionLine()
