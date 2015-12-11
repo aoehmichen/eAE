@@ -36,6 +36,7 @@
         <hr class="myhr"/>
     </div>
 
+    <div id="loadingDIV"></div>
     <div id="outputDIV"></div>
     <r:layoutResources/>
 </body>

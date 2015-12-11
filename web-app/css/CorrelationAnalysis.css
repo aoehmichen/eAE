@@ -18,16 +18,16 @@
     shape-rendering: crispEdges;
 }
 
-.bar {
+.bar rect {
     fill: #FEEAAF;
     stroke: #DEAC3A;
     shape-rendering: crispEdges;
 }
 
-/*.bar {*/
-    /*fill: #ffa500;*/
-    /*font-weight: bold;*/
-/*}*/
+.bar text {
+    fill: #ffa500;
+    font-weight: bold;
+}
 
 .axis path, .axis line {
     fill: none;

@@ -462,7 +462,7 @@ function sane() { // FIXME: somehow check for subset2 to be non empty iff two co
         if (sanityCheckError) {
             alert(sanityCheckError)
             return false
-        }
+        }$
     }
     return customSanityCheck() // method MUST be implemented by _inFoobarAnalysis.gsp
 }
@@ -553,6 +553,7 @@ function renderResults(params) {
     request.done(response => {
         if (params.redraw) {
             params.callback()
+            $('#loadingDIV').empty()
             $('#outputDIV').html(response)
         } else {
             params.callback(JSON.parse(response))
@@ -618,8 +619,8 @@ function showLoadingScreen() {
         type: 'POST',
         timeout: 600000
     })
-    request.done(response => $('#outputDIV').html(response))
-    request.fail(() => $('#outputDIV').html('Server does not respond. Network connection lost?'))
+    request.done(response => $('#loadingDIV').html(response))
+    request.fail(() => alert('Server does not respond. Network connection lost?'))
 }
 
 function startWorkflow(visualizationCallback=()=>{}, settings=getSettings(), init=true, redraw=true) {
@@ -664,7 +665,7 @@ function changeInputDIV() {
         $('#inputDIV').html(response)
         updateInputView()
     })
-    request.fail(() => $('#inputDIV').html('Server does not respond. Network connection lost?'))
+    request.fail(() => alert('Server does not respond. Network connection lost?'))
 }
 
 function contact() {

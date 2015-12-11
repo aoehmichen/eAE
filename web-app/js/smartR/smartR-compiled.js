@@ -320,7 +320,7 @@ function sane() {
             if (sanityCheckError) {
                 alert(sanityCheckError);
                 return false;
-            }
+            }$;
         }
     } catch (err) {
         _didIteratorError2 = true;
@@ -439,6 +439,7 @@ function renderResults(params) {
     request.done(function (response) {
         if (params.redraw) {
             params.callback();
+            $('#loadingDIV').empty();
             $('#outputDIV').html(response);
         } else {
             params.callback(JSON.parse(response));
@@ -513,10 +514,10 @@ function showLoadingScreen() {
         timeout: 600000
     });
     request.done(function (response) {
-        return $('#outputDIV').html(response);
+        return $('#loadingDIV').html(response);
     });
     request.fail(function () {
-        return $('#outputDIV').html('Server does not respond. Network connection lost?');
+        return alert('Server does not respond. Network connection lost?');
     });
 }
 
@@ -568,7 +569,7 @@ function changeInputDIV() {
         updateInputView();
     });
     request.fail(function () {
-        return $('#inputDIV').html('Server does not respond. Network connection lost?');
+        return alert('Server does not respond. Network connection lost?');
     });
 }
 

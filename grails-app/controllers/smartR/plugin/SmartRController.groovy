@@ -27,17 +27,25 @@ class SmartRController {
 
     def loadDataIntoSession = {
         sessionManagerService.sessions[params.id].state = SessionManagerService.STATE.LOADING
-        if (params.init.toBoolean()) {
-            def data = smartRService.queryData(params.rIID1, params.rIID2, new JsonSlurper().parseText(params.conceptBoxes))
-            sessionManagerService.pushData(params.id, data)
+        try {
+            if (params.init.toBoolean()) {
+                def data = smartRService.queryData(params.rIID1, params.rIID2, new JsonSlurper().parseText(params.conceptBoxes))
+                sessionManagerService.pushData(params.id, data)
+            }
+            sessionManagerService.pushSettings(params.id, params.settings)
+        } catch (Exception e) {
+            sessionManagerService.setError(params.id, e.getMessage())
         }
-        sessionManagerService.pushSettings(params.id, params.settings)
         render ''
     }
 
     def runWorkflowScript = {
         sessionManagerService.sessions[params.id].state = SessionManagerService.STATE.WORKING
-        sessionManagerService.runWorkflowScript(params.id, smartRService.getWebAppFolder() + '/Scripts/smartR/' + params.script)
+        try {
+            sessionManagerService.runWorkflowScript(params.id, smartRService.getWebAppFolder() + '/Scripts/smartR/' + params.script)
+        } catch (Exception e) {
+            sessionManagerService.setError(params.id, e.getMessage())
+        }
         render ''
     }
 
