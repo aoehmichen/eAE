@@ -364,7 +364,7 @@ Displayed: ${d3.selectAll('.point').size()}<br/><br/>`)
     function reset() {
         updateStatistics([], false, true)
     }
- 
+
     updateScatterplot()
     updateHistogram()
     updateRegressionLine()

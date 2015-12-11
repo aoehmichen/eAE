@@ -30,6 +30,11 @@
 
 }
 
+.tick line {
+    shape-rendering: crispEdges;
+    opacity: 0.2;
+}
+
 .pLine {
     stroke: red;
     stroke-width: 2px;

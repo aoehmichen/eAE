@@ -32,10 +32,6 @@ function buildVolcanoAnalysis(results) {
         .append('g')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
 
-    let controls = d3.select('#volcanocontrols').append('svg')
-        .attr('width', 220)
-        .attr('height', height * 2)
-
     let x = d3.scale.linear()
         .domain([-d3.max(logFCs), d3.max(logFCs)])
         .range([0, width])
@@ -60,6 +56,26 @@ function buildVolcanoAnalysis(results) {
     volcanoplot.append('g')
         .attr('class', 'axis')
         .call(yAxis)
+
+    volcanoplot.append('g')
+        .attr('class', 'x axis')
+        .attr('transform', 'translate(0, 0)')
+        .call(d3.svg.axis()
+            .scale(x)
+            .ticks(10)
+            .tickFormat('')
+            .innerTickSize(height)
+            .orient('bottom'))
+
+    volcanoplot.append('g')
+        .attr('class', 'y axis')
+        .attr('transform', `translate(${width}, ${0})`)
+        .call(d3.svg.axis()
+            .scale(y)
+            .ticks(10)
+            .tickFormat('')
+            .innerTickSize(width)
+            .orient('left'))
 
     volcanoplot.append('text')
         .attr('class', 'text axisText')
@@ -342,10 +358,10 @@ function buildVolcanoAnalysis(results) {
     let buttonWidth = 200
     let buttonHeight = 40
     let keggButton = createD3Button({
-        location: controls,
+        location: volcanoplot,
         label: 'Find KEGG Pathway',
-        x: 2,
-        y: 2,
+        x: 0,
+        y:  - buttonHeight - 5,
         width: buttonWidth,
         height: buttonHeight,
         callback: launchKEGGPWEA

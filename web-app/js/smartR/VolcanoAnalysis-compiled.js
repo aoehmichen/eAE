@@ -28,8 +28,6 @@ function buildVolcanoAnalysis(results) {
 
     var volcanoplot = d3.select('#volcanoplot').append('svg').attr('width', width + margin.left + margin.right).attr('height', height + margin.top + margin.bottom).append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-    var controls = d3.select('#volcanocontrols').append('svg').attr('width', 220).attr('height', height * 2);
-
     var x = d3.scale.linear().domain([-d3.max(logFCs), d3.max(logFCs)]).range([0, width]);
 
     var y = d3.scale.linear().domain(d3.extent(negativeLog10PValues)).range([height, 0]);
@@ -41,6 +39,10 @@ function buildVolcanoAnalysis(results) {
     volcanoplot.append('g').attr('class', 'axis').attr('transform', 'translate(0,' + height + ')').call(xAxis);
 
     volcanoplot.append('g').attr('class', 'axis').call(yAxis);
+
+    volcanoplot.append('g').attr('class', 'x axis').attr('transform', 'translate(0, 0)').call(d3.svg.axis().scale(x).ticks(10).tickFormat('').innerTickSize(height).orient('bottom'));
+
+    volcanoplot.append('g').attr('class', 'y axis').attr('transform', 'translate(' + width + ', ' + 0 + ')').call(d3.svg.axis().scale(y).ticks(10).tickFormat('').innerTickSize(width).orient('left'));
 
     volcanoplot.append('text').attr('class', 'text axisText').attr('x', width / 2).attr('y', height + 40).attr('text-anchor', 'middle').text('log2 FC');
 
@@ -230,10 +232,10 @@ function buildVolcanoAnalysis(results) {
     var buttonWidth = 200;
     var buttonHeight = 40;
     var keggButton = createD3Button({
-        location: controls,
+        location: volcanoplot,
         label: 'Find KEGG Pathway',
-        x: 2,
-        y: 2,
+        x: 0,
+        y: -buttonHeight - 5,
         width: buttonWidth,
         height: buttonHeight,
         callback: launchKEGGPWEA
