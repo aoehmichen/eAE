@@ -12,7 +12,7 @@ function createD3Button(args) {
         .style('stroke', '#009ac9')
         .style('fill', '#009ac9')
         .style('cursor', 'pointer')
-        .on('mouseover', () => {
+        .on('mouseover', function() {
             box
                 .transition()
                 .duration(300)
@@ -23,7 +23,7 @@ function createD3Button(args) {
                 .duration(300)
                 .style('fill', '#009ac9')
         })
-        .on('mouseout', () => {
+        .on('mouseout', function() {
             box
                 .transition()
                 .duration(300)
@@ -136,12 +136,12 @@ function createD3Dropdown(args) {
         .style('stroke', '#ffffff')
         .style('fill', '#E3E3E3')
         .style('visibility', 'hidden')
-        .on('mouseover', () => {
+        .on('mouseover', function() {
             itemHovered = true
             d3.select(this)
                 .style('fill', '#009ac9')
         })
-        .on('mouseout', () => {
+        .on('mouseout', function() {
             itemHovered = false
             d3.select(this)
                 .style('fill', '#E3E3E3')
@@ -180,7 +180,7 @@ function createD3Dropdown(args) {
         .style('stroke-width', '1px')
         .style('stroke', '#009ac9')
         .style('fill', '#009ac9')
-        .on('mouseover', () => {
+        .on('mouseover', function() {
             if (hovered) {
                 return
             }
@@ -204,7 +204,7 @@ function createD3Dropdown(args) {
 
             hovered = true
         })
-        .on('mouseout', () => {
+        .on('mouseout', function() {
             hovered = false
             setTimeout(() => {
                 if (! hovered && ! itemHovered) {
@@ -324,13 +324,13 @@ function createD3Slider(args) {
         .attr('height', args.height)
         .style('opacity', 0)
         .style('cursor', 'pointer')
-        .on('mouseover', () => {
+        .on('mouseover', function() {
             handle
                 .style('fill', '#009ac9')
             pointer
                 .style('stroke', '#009ac9')
         })
-        .on('mouseout', () => {
+        .on('mouseout', function() {
             handle
                 .style('fill', '#000000')
             pointer
@@ -377,6 +377,10 @@ function mouseY() {
     return mouseYPos + $('#index').parent().scrollTop() - $('#etrikspanel').offset().top
 }
 
+function getMaxWidth(selection) {
+    return selection[0].map(function(d) { return d.getBBox().width; }).max()
+}
+
 function showCohortInfo() {
     let cohortsSummary = ''
 
@@ -404,10 +408,6 @@ function updateInputView() {
 let panelItem = $('#resultsTabPanel__etrikspanel')
 panelItem.click(showCohortInfo)
 panelItem.click(updateInputView)
-
-function getMaxWidth(arr) {
-    return Math.max.apply(null, arr.map(() => this.getBBox().width))
-}
 
 function shortenConcept(concept) {
     let splits = concept.split('\\')

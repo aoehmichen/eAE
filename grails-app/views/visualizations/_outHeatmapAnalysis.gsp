@@ -960,7 +960,7 @@
                 var patientID = patientIDs[leafs[i]];
                 selectCol(patientID);
             }
-            if (arrEqual(previousSelection, selectedPatientIDs)) {
+            if (previousSelection.sort().toString() === selectedPatientIDs.sort().toString()) {
                 unselectAll();
             }
         })

@@ -209,7 +209,7 @@ function buildCorrelationAnalysis(results) {
             .attr('cy', d => y(d.y))
             .attr('r', 5)
             .style('fill', d => getColor(d.tag))
-            .on('mouseover', function (d) {
+            .on('mouseover', function(d) {
                 d3.select(this).style('fill', '#FF0000')
                 tooltip
                     .style('left', 10 + mouseX() + 'px')
@@ -220,7 +220,7 @@ ${shortenConcept(yArrLabel)}: ${d.y}<br/>
 Patient ID: ${d.patientID}<br/>
 ${d.tag ? 'Tag: ' + d.tag : ''}`)
             })
-            .on('mouseout', function () {
+            .on('mouseout', function() {
                 const p = d3.select(this)
                 if (p.classed('selected')) {
                     p.style('fill', '#FFFFFF')

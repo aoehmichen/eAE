@@ -46,8 +46,6 @@ function createD3Switch(args) {
 }
 
 function createD3Dropdown(args) {
-    var _this = this;
-
     function shrink() {
         dropdown.selectAll('.itemBox').attr('y', args.y + args.height).style('visibility', 'hidden');
         dropdown.selectAll('.itemText').attr('y', args.y + args.height + args.height / 2).style('visibility', 'hidden');
@@ -66,10 +64,10 @@ function createD3Dropdown(args) {
 
     itemBox.enter().append('rect').attr('class', 'itemBox').attr('x', args.x).attr('y', args.y + args.height).attr('rx', 0).attr('ry', 0).attr('width', args.width).attr('height', args.height).style('cursor', 'pointer').style('stroke-width', '2px').style('stroke', '#ffffff').style('fill', '#E3E3E3').style('visibility', 'hidden').on('mouseover', function () {
         itemHovered = true;
-        d3.select(_this).style('fill', '#009ac9');
+        d3.select(this).style('fill', '#009ac9');
     }).on('mouseout', function () {
         itemHovered = false;
-        d3.select(_this).style('fill', '#E3E3E3');
+        d3.select(this).style('fill', '#E3E3E3');
         setTimeout(function () {
             if (!hovered && !itemHovered) {
                 shrink();
@@ -196,6 +194,12 @@ function mouseY() {
     return mouseYPos + $('#index').parent().scrollTop() - $('#etrikspanel').offset().top;
 }
 
+function getMaxWidth(selection) {
+    return selection[0].map(function (d) {
+        return d.getBBox().width;
+    }).max();
+}
+
 function showCohortInfo() {
     var cohortsSummary = '';
 
@@ -245,14 +249,6 @@ function updateInputView() {
 var panelItem = $('#resultsTabPanel__etrikspanel');
 panelItem.click(showCohortInfo);
 panelItem.click(updateInputView);
-
-function getMaxWidth(arr) {
-    var _this2 = this;
-
-    return Math.max.apply(null, arr.map(function () {
-        return _this2.getBBox().width;
-    }));
-}
 
 function shortenConcept(concept) {
     var splits = concept.split('\\');
