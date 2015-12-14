@@ -29,7 +29,7 @@
         <div id="inputDIV" style="text-align: left">Please select a script to execute.</div>
 
         <hr class="myhr"/>
-        <g:select name="scriptSelect"from="${scriptList}" noSelection="['':'Choose an algorithm']" onchange="changeInputDIV()"/>
+        <g:select name="scriptSelect" from="${scriptList}" noSelection="['':'Choose an algorithm']" onchange="changeInputDIV()"/>
         &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
         <input id="submitButton" type="button" value="(Re-)Run Analysis" onclick="startWorkflow()"/><br/>
         <div id="cohortInfo"></div>

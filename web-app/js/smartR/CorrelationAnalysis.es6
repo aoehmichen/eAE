@@ -352,7 +352,7 @@ Displayed: ${d3.selectAll('.point').size()}<br/><br/>`)
                 d3.select(this).attr('stroke', 'orange')
                 tooltip.style('visibility', 'hidden')
             })
- 
+
         regressionLine.transition()
             .duration(animationDuration)
             .attr('x1', x(minX))

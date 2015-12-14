@@ -27,15 +27,15 @@ var smartRPanel = etriksPanel;
 /**
  *   Renders the input form for entering the parameters for a visualization/script
  */
-function gotToEngineDIV() {
+function goToEngineDIV(engine) {
     jQuery.ajax({
         url: pageInfo.basePath + '/EtriksEngines/renderEngine' ,
         type: "POST",
         timeout: '600000',
-        data: {'engine': jQuery('#engineSelect').val()}
-        }).done(function(serverAnswer) {
+        data: {engine: engine}
+    }).done(function(serverAnswer) {
         jQuery("#index").html(serverAnswer);
-        }).fail(function() {
+    }).fail(function() {
         jQuery("#index").html("AJAX CALL FAILED!");
     });
 }

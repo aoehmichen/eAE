@@ -1,59 +1,43 @@
 <style>
-    .txt {
-        font-family: 'Roboto', sans-serif;
+    #controls {
+        width: 100%;
+        height: 100%;
     }
 
-    #wrapper {
-        width: 0%;
-        margin: 0 auto;
-        overflow: hidden;
-    }
-
-    #smartRDIV {
-        float: left;
-        background-color: #123456;
-        color: #FFFFFF;
-        width: 100px;
+    .engineButton {
+        width: 200px;
         height: 50px;
-        text-align: center;
-        font-size: 20px;
-        vertical-align: middle;
+        background: rgb(65, 130, 195);
+        color: white;
+        font-size: 14px;
+        border: 0 none;
+        border-radius: 5px;
+        box-shadow: 10px 10px 20px grey;
     }
 
-    #eAEDIV {
-        float: left;
-        background-color: #654321;
-        color: #FFFFFF;
-        width: 100px;
-        height: 50px;
-        text-align: center;
-        vertical-align: middle;
+    .engineButton:hover {
+        background: rgb(65, 195, 76);
+        cursor: pointer;
     }
 </style>
 
 <head>
-    <g:javascript library='jquery' />
-    <g:javascript src='etriksEngines/engineSelection.js' />
-    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <r:layoutResources/>
 </head>
 
 <body>
     <div id="index" style="text-align: center">
-        <h1 class="txt"> Welcome to eTRIKS Analytics!</h1>
-        <span style='color:#0200ff' class='txt'>Please select which engine you want to use.</span><br/>
-        <hr class="myhr"/>
-        <g:select
-            name="engineSelect"
-            class='txt'
-            from="${engineList}"
-            noSelection="['':'Choose an engine']"
-            onchange="gotToEngineDIV()"/>
-        &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+        <br/>
+        <h1 style="font-size: 24px"> Welcome to eTRIKS Analytics!</h1>
+        <span style='color:#0200ff; font-size:16px;'>Please select which engine you want to use.</span><br/>
+        <br/>
+        <div id="controls">
+            <input class="engineButton" type="button" value="Initialize SmartR" onclick="goToEngineDIV('smartR')"/>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+            <input class="engineButton" type="button" value="Initialize eAE" onclick="goToEngineDIV('eae')"/>
+        </div>
     </div>
-    <!-- <div id="wrapper">
-        <div id="smartRDIV">SmartR</div> <div id="eAEDIV">eAE</div>
-    </div> -->
-
-    <div id="outputDIV" class='txt'></div>
+    <r:layoutResources/>
 </body>
+
+

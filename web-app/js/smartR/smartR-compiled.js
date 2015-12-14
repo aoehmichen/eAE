@@ -444,7 +444,7 @@ function renderResults(params) {
         timeout: 600000,
         data: { id: params.id,
             script: params.script,
-       w     redraw: params.redraw }
+            redraw: params.redraw }
     });
     request.done(function (response) {
         if (params.redraw) {
@@ -465,8 +465,7 @@ function runWorkflowScript(params) {
         url: pageInfo.basePath + '/SmartR/runWorkflowScript',
         type: 'POST',
         timeout: 600000,
-        data: { id: params.id,
-            script: params.script }
+        data: { id: params.id, script: params.script }
     });
 }
 
@@ -573,7 +572,7 @@ function changeInputDIV() {
         url: pageInfo.basePath + '/SmartR/inputDIV',
         type: 'POST',
         timeout: 600000,
-        data: { 'script': $('#scriptSelect').val() }
+        data: { script: $('#scriptSelect').val() }
     });
     request.done(function (response) {
         $('#inputDIV').html(response);
