@@ -241,10 +241,10 @@ function buildCorrelationAnalysis(results) {
 
         var bottomHistHeightScale = d3.scale.linear().domain([0, bottomHistData.max(function (d) {
             return d.y;
-        })]).range([0, bottomHistHeight]);
+        })]).range([1, bottomHistHeight]);
         var leftHistHeightScale = d3.scale.linear().domain([0, leftHistData.max(function (d) {
             return d.y;
-        })]).range([0, leftHistHeight]);
+        })]).range([2, leftHistHeight]);
 
         var bottomHistGroup = svg.selectAll('.bar.bottom').data(Array(bins).fill().map(function (_, i) {
             return i;
@@ -341,7 +341,7 @@ function buildCorrelationAnalysis(results) {
     }
 
     function updateRegressionLine() {
-        var regressionLine = svg.selectAll('.regressionLine').data([1], function (d) {
+        var regressionLine = svg.selectAll('.regressionLine').data(regLineSlope === 'NA' ? [] : [0], function (d) {
             return d;
         });
         regressionLine.enter().append('line').attr('class', 'regressionLine').on('mouseover', function () {
@@ -353,6 +353,8 @@ function buildCorrelationAnalysis(results) {
         });
 
         regressionLine.transition().duration(animationDuration).attr('x1', x(minX)).attr('y1', y(regLineYIntercept + regLineSlope * minX)).attr('x2', x(maxX)).attr('y2', y(regLineYIntercept + regLineSlope * maxX));
+
+        regressionLine.exit().remove();
     }
 
     function reset() {

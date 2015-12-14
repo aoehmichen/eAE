@@ -247,10 +247,10 @@ ${d.tag ? 'Tag: ' + d.tag : ''}`)
 
         const bottomHistHeightScale = d3.scale.linear()
             .domain([0, bottomHistData.max(d => d.y)])
-            .range([0, bottomHistHeight])
+            .range([1, bottomHistHeight])
         const leftHistHeightScale = d3.scale.linear()
             .domain([0, leftHistData.max(d => d.y)])
-            .range([0, leftHistHeight])
+            .range([2, leftHistHeight])
 
         const bottomHistGroup = svg.selectAll('.bar.bottom')
             .data(Array(bins).fill().map((_, i) => i))
@@ -336,7 +336,7 @@ Displayed: ${d3.selectAll('.point').size()}<br/><br/>`)
 
     function updateRegressionLine() {
         const regressionLine = svg.selectAll('.regressionLine')
-            .data([1], d => d)
+            .data(regLineSlope === 'NA' ? [] : [0], d => d)
         regressionLine.enter()
             .append('line')
             .attr('class', 'regressionLine')
@@ -352,13 +352,16 @@ Displayed: ${d3.selectAll('.point').size()}<br/><br/>`)
                 d3.select(this).attr('stroke', 'orange')
                 tooltip.style('visibility', 'hidden')
             })
-
+ 
         regressionLine.transition()
             .duration(animationDuration)
             .attr('x1', x(minX))
             .attr('y1', y(regLineYIntercept + regLineSlope * minX))
             .attr('x2', x(maxX))
             .attr('y2', y(regLineYIntercept + regLineSlope * maxX))
+
+        regressionLine.exit()
+            .remove()
     }
 
     function reset() {

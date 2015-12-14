@@ -208,7 +208,7 @@ function showCohortInfo() {
     var _iteratorError = undefined;
 
     try {
-        for (var _iterator = Array.from(GLOBAL.NumOfSubsets).keys()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        for (var _iterator = Array(GLOBAL.NumOfSubsets).keys()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
             var i = _step.value;
 
             var currentQuery = getQuerySummary(i + 1);
@@ -444,7 +444,7 @@ function renderResults(params) {
         timeout: 600000,
         data: { id: params.id,
             script: params.script,
-            redraw: params.redraw }
+       w     redraw: params.redraw }
     });
     request.done(function (response) {
         if (params.redraw) {

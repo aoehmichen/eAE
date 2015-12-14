@@ -384,7 +384,7 @@ function getMaxWidth(selection) {
 function showCohortInfo() {
     let cohortsSummary = ''
 
-    for(let i of Array.from(GLOBAL.NumOfSubsets).keys()) {
+    for(let i of Array(GLOBAL.NumOfSubsets).keys()) {
         let currentQuery = getQuerySummary(i + 1)
         if(currentQuery !== '') {
             cohortsSummary += '<br/>Subset ' + (i + 1) + ': <br/>'
