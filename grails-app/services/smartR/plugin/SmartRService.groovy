@@ -10,7 +10,6 @@ class SmartRService {
 
     def DEBUG = Environment.current == Environment.DEVELOPMENT
     def DEBUG_TMP_DIR = '/tmp/'
-    def ENABLE_STATIC_WORKFLOWS = false
 
     def grailsApplication = Holders.grailsApplication
     def springSecurityService
@@ -22,11 +21,7 @@ class SmartRService {
         def scriptList = []
         new File(dir).eachFile {
             def name = it.getName()
-            if (name != 'Sample.R'
-                    && name[0] != '.'
-                    && (DEBUG || ENABLE_STATIC_WORKFLOWS || ! name.contains('STATIC'))) {
-                scriptList << name
-            }
+            if (name[0] != '.') scriptList << name
         }
         scriptList
     }

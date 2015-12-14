@@ -384,7 +384,7 @@ function getMaxWidth(selection) {
 function showCohortInfo() {
     let cohortsSummary = ''
 
-    for(let i of Array(GLOBAL.NumOfSubsets).keys()) {
+    for(let i of Array.from(GLOBAL.NumOfSubsets).keys()) {
         let currentQuery = getQuerySummary(i + 1)
         if(currentQuery !== '') {
             cohortsSummary += '<br/>Subset ' + (i + 1) + ': <br/>'
@@ -489,7 +489,7 @@ function goToEAE() {
 
 function displayErrorMsg(params) {
     const request = $.ajax({
-        url: pageInfo.basePath + '/SmartR/getMsg',
+        url: pageInfo.basePath + '/SmartR/msg',
         type: "POST",
         timeout: 600000,
         data: {id: params.id}
@@ -501,32 +501,44 @@ function displayErrorMsg(params) {
     request.always(() => $('#submitButton').prop('disabled', false))
 }
 
-function executeOnState(params, checkFreq) {
+function executeOnState(params, checkFreq=-1) {
     const request = $.ajax({
-        url: pageInfo.basePath + '/SmartR/getState',
+        url: pageInfo.basePath + '/SmartR/state',
         type: 'POST',
         timeout: 600000,
         data: {id: params.id}
     })
     request.done(response => {
         switch(response) {
-            case 'ERROR':
-                displayErrorMsg(params)
-                checkFreq = -1
-                break
             case 'INIT':
                 loadDataIntoSession(params)
                 checkFreq = params.init ? 500 : 100
                 break
+            case 'LOADING':
+                break
             case 'LOADED':
                 runWorkflowScript(params)
                 checkFreq = 100
+                break
+            case 'WORKING':
                 break
             case 'COMPLETE':
                 renderResults(params)
                 checkFreq = -1
                 break
             case 'EXIT':
+                checkFreq = -1
+                break
+            case 'ERROR':
+                displayErrorMsg(params)
+                checkFreq = -1
+                break
+            case 'NULL':
+                alert('Session has state "NULL". This is a bug and should be reported.')
+                checkFreq = -1
+                break
+            default:
+                alert('Your session has an unknown state. This a is a bug and should be reported. State: ' + response)
                 checkFreq = -1
                 break
         }
@@ -543,7 +555,7 @@ function executeOnState(params, checkFreq) {
 function renderResults(params) {
     $('#submitButton').prop('disabled', false);
     const request = $.ajax({
-        url: pageInfo.basePath + '/SmartR/renderResults',
+        url: pageInfo.basePath + '/SmartR/results',
         type: 'POST',
         timeout: 600000,
         data: {id: params.id,
@@ -586,37 +598,21 @@ function loadDataIntoSession(params) {
     })
 }
 
-let lastRequest
 function initSession(params) {
-    lastRequest = null
-    const request1 = $.ajax({
-        url: pageInfo.basePath + '/SmartR/getState',
+    const request = $.ajax({
+        url: pageInfo.basePath + '/SmartR/initSession',
         type: 'POST',
         timeout: 600000,
-        data: {id: params.id}
+        data: {id: params.id, init: params.init}
     })
-    request1.done(response => {
-        if (params.init || params.redraw || response == 'NULL' || response == 'EXIT' || response == 'ERROR') {
-            const request2 = $.ajax({
-                url: pageInfo.basePath + '/SmartR/initSession',
-                type: 'POST',
-                timeout: 600000,
-                data: {id: params.id,
-                    init: params.init}
-            })
-            request2.done(() => executeOnState(params, -1))
-            request2.fail(() => alert('Server does not respond. Network connection lost?'))
-        } else {
-            lastRequest = $.extend(true, {}, params)
-        }
-    })
-    request1.fail(() => alert('Server does not respond. Network connection lost?'))
+    request.done(() => executeOnState(params))
+    request.fail(() => alert('Server does not respond. Network connection lost?'))
 }
 
 function showLoadingScreen() {
     $('#outputDIV').empty()
     const request = $.ajax({
-        url: pageInfo.basePath + '/SmartR/renderLoadingScreen',
+        url: pageInfo.basePath + '/SmartR/loadingScreen',
         type: 'POST',
         timeout: 600000
     })
@@ -624,7 +620,9 @@ function showLoadingScreen() {
     request.fail(() => alert('Server does not respond. Network connection lost?'))
 }
 
+let lastRequest
 function startWorkflow(visualizationCallback=()=>{}, settings=getSettings(), init=true, redraw=true) {
+    lastRequest = null
     if (!sane()) return false
     if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !( isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
         runAllQueries(startWorkflow)
@@ -639,7 +637,7 @@ function startWorkflow(visualizationCallback=()=>{}, settings=getSettings(), ini
 
     if (init && redraw) showLoadingScreen()
 
-    const parameters = {
+    const params = {
         id: setSmartRCookie(),
         settings: settings,
         init: init,
@@ -651,13 +649,29 @@ function startWorkflow(visualizationCallback=()=>{}, settings=getSettings(), ini
         script: $('#scriptSelect').val()
     }
 
-    initSession(parameters)
+    const request = $.ajax({
+        url: pageInfo.basePath + '/SmartR/state',
+        type: 'POST',
+        timeout: 600000,
+        data: {id: params.id}
+    })
+    request.done(response => {
+        if (params.init || params.redraw || response == 'NULL' || response == 'EXIT' || response == 'ERROR') {
+            initSession(params)
+        } else {
+            lastRequest = $.extend(true, {}, params)
+        }
+    })
+    request.fail(() => {
+        $('#loadingDIV').empty()
+        alert('Server does not respond. Network connection lost?')
+    })
 }
 
 function changeInputDIV() {
-    $('#outputDIV').html('')
+    $('#outputDIV').empty()
     const request = $.ajax({
-        url: pageInfo.basePath + '/SmartR/renderInputDIV',
+        url: pageInfo.basePath + '/SmartR/inputDIV',
         type: 'POST',
         timeout: 600000,
         data: {'script': $('#scriptSelect').val()}

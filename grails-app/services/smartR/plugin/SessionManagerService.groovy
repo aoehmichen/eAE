@@ -55,6 +55,12 @@ class SessionManagerService {
         return sane
     }
 
+    def createFallbackErrorSession(id, error) {
+        sessions[id] = [:]
+        sessions[id].lifetime = Integer.MIN_VALUE
+        setError(id, error)
+    }
+
     def initSession(id, init) {
         if (init && sessions[id]) closeSession(id)
         if (!sessions[id]) sessions[id] = [:]

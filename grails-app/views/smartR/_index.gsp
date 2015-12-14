@@ -5,7 +5,7 @@
 </style>
 
 <head>
-    <r:require modules="index"/>
+    <r:require modules="global"/>
     <r:layoutResources/>
 </head>
 

@@ -12,16 +12,20 @@ class SmartRController {
     def sessionManagerService
     def eaeService
 
-    def getState = {
+    def state = {
         render sessionManagerService.getState(params.id)
     }
 
-    def getMsg = {
+    def msg = {
         render sessionManagerService.getMsg(params.id)
     }
 
     def initSession = {
-        sessionManagerService.initSession(params.id, params.init.toBoolean())
+        try {
+            sessionManagerService.initSession(params.id, params.init.toBoolean())
+        } catch (Exception e) {
+            sessionManagerService.createFallbackErrorSession(params.id, e.getMessage())
+        }
         render ''
     }
 
@@ -49,7 +53,7 @@ class SmartRController {
         render ''
     }
 
-    def renderResults = {
+    def results = {
         sessionManagerService.sessions[params.id].state = SessionManagerService.STATE.EXIT
         def results = sessionManagerService.pullData(params.id)
         if (params.redraw.toBoolean()) {
@@ -60,7 +64,7 @@ class SmartRController {
         }
     }
 
-    def renderInputDIV = {
+    def inputDIV = {
         if (! params.script) {
             render 'Please select a script to execute.'
         } else {
@@ -68,7 +72,7 @@ class SmartRController {
         }
     }
 
-    def renderLoadingScreen = {
+    def loadingScreen = {
         render template: "/visualizations/outLoading"
     }
 

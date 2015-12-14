@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<style>	
-	
+<style>
 	path {
 	  fill-rule: evenodd;
 	  stroke: steelblue;
@@ -25,8 +24,6 @@
 		font-size: 30px
 	}
 </style>
-
-<g:javascript src="resource/d3.min.js"/>
 
 <div id="visualization">
 	Loading Data ...
