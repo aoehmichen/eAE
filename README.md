@@ -82,9 +82,3 @@ You could for example search for DALLIANCE and add it somewhere close.
   - [limma](http://bioconductor.org/packages/release/bioc/html/limma.html)
   - [zoo](https://cran.r-project.org/web/packages/zoo/index.html) (only for Timeline Analysis)
   - [TSclust](https://cran.r-project.org/web/packages/TSclust/index.html) (only for Timeline Analysis)
-
-####How to deploy your own visualization:
-1. [Add an input view to specify the input data](https://github.com/sherzinger/SmartR/blob/master/grails-app/views/smartR/_inSample.gsp)
-2. [Add an analysis script to prepare/order/filter the data and to compute statistical information](https://github.com/sherzinger/SmartR/blob/master/web-app/Scripts/Sample.R)
-3. [Add an output view to visualize the processed data](https://github.com/sherzinger/SmartR/blob/master/grails-app/views/visualizations/_outSample.gsp)
-

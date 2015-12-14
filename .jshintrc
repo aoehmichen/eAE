@@ -1,7 +1,0 @@
-{
-  "globals": {
-    "d3": false
-  },
-  "esnext": true,
-  "asi": true
-}
