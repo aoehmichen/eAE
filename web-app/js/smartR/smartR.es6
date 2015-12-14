@@ -495,6 +495,7 @@ function displayErrorMsg(params) {
         data: {id: params.id}
     })
     request.done(response => {
+        $('#loadingDIV').empty()
         alert(response)
     })
     request.fail(() => alert('Server does not respond. Network connection lost?'))

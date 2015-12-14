@@ -369,6 +369,7 @@ function displayErrorMsg(params) {
         data: { id: params.id }
     });
     request.done(function (response) {
+        $('#loadingDIV').empty();
         alert(response);
     });
     request.fail(function () {
