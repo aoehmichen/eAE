@@ -512,22 +512,39 @@ function executeOnState(params, checkFreq=-1) {
     request.done(response => {
         switch(response) {
             case 'INIT':
-                loadDataIntoSession(params)
-                checkFreq = params.init ? 500 : 100
+                if (lastRequest) {
+                    initSession(lastRequest)
+                    checkFreq = -1
+                } else {
+                    loadDataIntoSession(params)
+                    checkFreq = params.init ? 500 : 100
+                }
                 break
             case 'LOADING':
                 break
             case 'LOADED':
-                runWorkflowScript(params)
-                checkFreq = 100
+                if (lastRequest) {
+                    initSession(lastRequest)
+                    checkFreq = -1
+                } else {
+                    runWorkflowScript(params)
+                    checkFreq = 100
+                }
                 break
             case 'WORKING':
                 break
             case 'COMPLETE':
-                renderResults(params)
+                if (lastRequest) {
+                    initSession(lastRequest)
+                } else {
+                    renderResults(params)
+                }
                 checkFreq = -1
                 break
             case 'EXIT':
+                if (lastRequest) {
+                    initSession(lastRequest)
+                }
                 checkFreq = -1
                 break
             case 'ERROR':
@@ -543,12 +560,7 @@ function executeOnState(params, checkFreq=-1) {
                 checkFreq = -1
                 break
         }
-        if (~checkFreq) {
-            console.log(response + checkFreq)
-            setTimeout(() => executeOnState(params, checkFreq), checkFreq)
-        } else if (lastRequest) {
-            initSession(lastRequest)
-        }
+        if (~checkFreq) setTimeout(() => executeOnState(params, checkFreq), checkFreq)
     })
     request.fail(() => alert('Server does not respond. Network connection lost?'))
 }
@@ -599,6 +611,7 @@ function loadDataIntoSession(params) {
 }
 
 function initSession(params) {
+    lastRequest = null
     const request = $.ajax({
         url: pageInfo.basePath + '/SmartR/initSession',
         type: 'POST',
@@ -621,8 +634,8 @@ function showLoadingScreen() {
 }
 
 let lastRequest
+let initializingWorkflow = false
 function startWorkflow(visualizationCallback=()=>{}, settings=getSettings(), init=true, redraw=true) {
-    lastRequest = null
     if (!sane()) return false
     if(!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !( isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
         runAllQueries(startWorkflow)
@@ -649,6 +662,13 @@ function startWorkflow(visualizationCallback=()=>{}, settings=getSettings(), ini
         script: $('#scriptSelect').val()
     }
 
+    if (initializingWorkflow) {
+        lastRequest = $.extend(true, {}, params)
+        return
+    } else {
+        initializingWorkflow = true
+    }
+
     const request = $.ajax({
         url: pageInfo.basePath + '/SmartR/state',
         type: 'POST',
@@ -656,8 +676,8 @@ function startWorkflow(visualizationCallback=()=>{}, settings=getSettings(), ini
         data: {id: params.id}
     })
     request.done(response => {
-        if (params.init || params.redraw || response == 'NULL' || response == 'EXIT' || response == 'ERROR') {
-            initSession(params)
+        if (params.init || response == 'NULL' || response == 'EXIT' || response == 'ERROR') {
+            initSession(lastRequest || params)
         } else {
             lastRequest = $.extend(true, {}, params)
         }
@@ -666,6 +686,7 @@ function startWorkflow(visualizationCallback=()=>{}, settings=getSettings(), ini
         $('#loadingDIV').empty()
         alert('Server does not respond. Network connection lost?')
     })
+    request.always(() => initializingWorkflow = false)
 }
 
 function changeInputDIV() {

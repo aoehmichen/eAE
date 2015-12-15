@@ -392,22 +392,39 @@ function executeOnState(params) {
     request.done(function (response) {
         switch (response) {
             case 'INIT':
-                loadDataIntoSession(params);
-                checkFreq = params.init ? 500 : 100;
+                if (lastRequest) {
+                    initSession(lastRequest);
+                    checkFreq = -1;
+                } else {
+                    loadDataIntoSession(params);
+                    checkFreq = params.init ? 500 : 100;
+                }
                 break;
             case 'LOADING':
                 break;
             case 'LOADED':
-                runWorkflowScript(params);
-                checkFreq = 100;
+                if (lastRequest) {
+                    initSession(lastRequest);
+                    checkFreq = -1;
+                } else {
+                    runWorkflowScript(params);
+                    checkFreq = 100;
+                }
                 break;
             case 'WORKING':
                 break;
             case 'COMPLETE':
-                renderResults(params);
+                if (lastRequest) {
+                    initSession(lastRequest);
+                } else {
+                    renderResults(params);
+                }
                 checkFreq = -1;
                 break;
             case 'EXIT':
+                if (lastRequest) {
+                    initSession(lastRequest);
+                }
                 checkFreq = -1;
                 break;
             case 'ERROR':
@@ -423,14 +440,9 @@ function executeOnState(params) {
                 checkFreq = -1;
                 break;
         }
-        if (~checkFreq) {
-            console.log(response + checkFreq);
-            setTimeout(function () {
-                return executeOnState(params, checkFreq);
-            }, checkFreq);
-        } else if (lastRequest) {
-            initSession(lastRequest);
-        }
+        if (~checkFreq) setTimeout(function () {
+            return executeOnState(params, checkFreq);
+        }, checkFreq);
     });
     request.fail(function () {
         return alert('Server does not respond. Network connection lost?');
@@ -485,6 +497,7 @@ function loadDataIntoSession(params) {
 }
 
 function initSession(params) {
+    lastRequest = null;
     var request = $.ajax({
         url: pageInfo.basePath + '/SmartR/initSession',
         type: 'POST',
@@ -515,13 +528,13 @@ function showLoadingScreen() {
 }
 
 var lastRequest = undefined;
+var initializingWorkflow = false;
 function startWorkflow() {
     var visualizationCallback = arguments.length <= 0 || arguments[0] === undefined ? function () {} : arguments[0];
     var settings = arguments.length <= 1 || arguments[1] === undefined ? getSettings() : arguments[1];
     var init = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
     var redraw = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
 
-    lastRequest = null;
     if (!sane()) return false;
     if (!(isSubsetEmpty(1) || GLOBAL.CurrentSubsetIDs[1]) || !(isSubsetEmpty(2) || GLOBAL.CurrentSubsetIDs[2])) {
         runAllQueries(startWorkflow);
@@ -548,6 +561,13 @@ function startWorkflow() {
         script: $('#scriptSelect').val()
     };
 
+    if (initializingWorkflow) {
+        lastRequest = $.extend(true, {}, params);
+        return;
+    } else {
+        initializingWorkflow = true;
+    }
+
     var request = $.ajax({
         url: pageInfo.basePath + '/SmartR/state',
         type: 'POST',
@@ -555,8 +575,8 @@ function startWorkflow() {
         data: { id: params.id }
     });
     request.done(function (response) {
-        if (params.init || params.redraw || response == 'NULL' || response == 'EXIT' || response == 'ERROR') {
-            initSession(params);
+        if (params.init || response == 'NULL' || response == 'EXIT' || response == 'ERROR') {
+            initSession(lastRequest || params);
         } else {
             lastRequest = $.extend(true, {}, params);
         }
@@ -564,6 +584,9 @@ function startWorkflow() {
     request.fail(function () {
         $('#loadingDIV').empty();
         alert('Server does not respond. Network connection lost?');
+    });
+    request.always(function () {
+        return initializingWorkflow = false;
     });
 }
 

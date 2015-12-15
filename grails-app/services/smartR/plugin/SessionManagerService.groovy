@@ -39,7 +39,7 @@ class SessionManagerService {
         sessions[id]?.msg
     }
 
-    def sessionValid(id) {
+    def sessionHasValidConnection(id) {
         def sane = false
         def thread = Thread.start {
             try {
@@ -47,8 +47,9 @@ class SessionManagerService {
                 connection.assign("test1", "123")
                 connection.voidEval("test2 <- test1")
                 sane = connection.eval("test2").asString() == "123"
-            } catch (all) {
+            } catch (Exception e) {
                 sane = false
+                println e.getMessage()
             }
         }
         thread.join(2000)
@@ -62,25 +63,53 @@ class SessionManagerService {
     }
 
     def initSession(id, init) {
-        if (init && sessions[id]) closeSession(id)
-        if (!sessions[id]) sessions[id] = [:]
+        if (init) {
+            closeSession(id)
+        }
+
+        if (!init && !sessions[id]) {
+            setError(id, 'No available session. This probably means that you were inactive for some time. Please restart the workflow.')
+            return
+        }
+
+        if (!init && !sessionHasValidConnection(id)) {
+            setError(id, 'You have an existing session but for some reason the Rserve connection is broken. Restart the workflow or Rserve.')
+            return
+        }
+
+        if (!sessions[id]) {
+            sessions[id] = [:]
+        }
+
         sessions[id].lifetime = System.currentTimeMillis() + SESSION_LIFETIME
         sessions[id].msg = ''
-        if (!sessionValid(id)) {
+
+        if (!sessions[id].connection) {
             try {
                 sessions[id].connection = new RConnection(Holders.config.RModules.host, Holders.config.RModules.port)
                 sessions[id].connection.stringEncoding = 'utf8'
-            } catch (all) { }
+            } catch (Exception e) {
+                setError(id, 'Rserve refused the connection! Is it running?')
+                println e.getMessage()
+                return
+            }
         }
-        if (!sessionValid(id)) {
-            setError(id, 'Rserve refused the connection! Is it running?')
-        } else if (sessions[id].connection.parseAndEval('try(if(!require(jsonlite)) stop(), silent=TRUE)').inherits("try-error")) {
+
+        if (!sessionHasValidConnection(id)) {
+            setError(id, 'At this point a valid Rserve connection should be established. Contact your administrator if you see this message.')
+            return
+        }
+
+        if (sessions[id].connection.parseAndEval('try(if(!require(jsonlite)) stop(), silent=TRUE)').inherits("try-error")) {
             setError(id, 'R Package jsonlite is missing. Please go to https://github.com/sherzinger/SmartR and read the installation instructions.')
-        } else {
-            sessions[id].state = STATE.INIT
+            return
         }
+
         removeExpiredSessions()
         while(sessions.length >= MAX_SESSIONS) closeOldestSession()
+        assert sessions[id]
+
+        sessions[id].state = STATE.INIT
     }
 
     def pushData(id, data) {
@@ -154,8 +183,8 @@ class SessionManagerService {
     }
 
     def closeSession(id) {
-        if (sessionValid(id)) sessions[id].connection.close()
-        sessions.remove(id)
+        if (sessionHasValidConnection(id)) sessions[id].connection.close()
+        if (sessions[id]) sessions.remove(id)
     }
 
     def closeOldestSession() {
