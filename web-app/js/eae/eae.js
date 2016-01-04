@@ -184,12 +184,15 @@ function displayDataForStudy(){
         url: pageInfo.basePath + '/eae/renderDataList',
         type: "POST",
         timeout: '600000',
-        data: {'study': $('noSQLStudies').val()}
-    }).done(function(serverAnswer) {
-        _t.append($('<select/>')).attr("id", "dataTypeSelect");
-        var _h = $('dataTypeSelect');
-        $.each(serverAnswer, function (i, e) {
-            _h.append($("<option></option>")
+        data: {'study': $('#noSQLStudies').val()}
+    }).done(function(dataList) {
+        _t.append($('<select/>').attr("id", "dataTypeSelect"));
+        var _h = $('#dataTypeSelect');
+        var dataListJSON= $.parseJSON(dataList);
+        console.log(dataListJSON.dataList);
+        $.each(dataListJSON.dataList, function (i, e) {
+            console.log(e);
+            _h.append($("<option>")
                 .attr("value",e)
                 .text(e))});
     }).fail(function() {

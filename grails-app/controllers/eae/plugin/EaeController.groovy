@@ -67,9 +67,9 @@ class EaeController {
     }
 
     def renderDataList = {
-        final String NOSQL_URL, database = noSQLParams();
-        def listOfData = eaeNoSQLDataService.getListOfAvailableDataForStudy(NOSQL_URL, database, "studies", params.study);
-        return listOfData;
+        final def (NOSQL_URL, database) = noSQLParams();
+        def listOfData = eaeNoSQLDataService.getDataTypesForStudy(NOSQL_URL, database, params.study);
+        render listOfData;
     }
 
     def runPEForSelectedGenes = {

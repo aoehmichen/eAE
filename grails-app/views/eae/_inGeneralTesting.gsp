@@ -41,7 +41,7 @@
 </div>
 
 <script>
-    var currentWorkflow = "Generaltesting";
+    var currentWorkflow = "GeneralTesting";
     populateCacheDIV(currentWorkflow);
 
     function customSanityCheck() {
