@@ -98,13 +98,22 @@ class MongoCacheService {
         }
     }
 
-    def buildMongoQuery(params){
+    def buildMongoCacheQuery(params){
         def conceptBoxes = new JsonSlurper().parseText(params.conceptBoxes)
         String workflowData = conceptBoxes.concepts[0][0];
         BasicDBObject query = new BasicDBObject();
         query.append('result_instance_id1', params.result_instance_id1);
         query.append('result_instance_id2', params.result_instance_id2);
         query.append('WorkflowData', workflowData);
+        query.append("DocumentType", "Original")
+        return query
+    }
+
+    def buildMongoCacheQueryNoSQL(params){
+        BasicDBObject query = new BasicDBObject();
+        query.append('StudyName', params.studyName);
+        query.append('DataType', params.dataType);
+        query.append('Workflow', params.workflowSelected);
         query.append("DocumentType", "Original")
         return query
     }

@@ -1,49 +1,69 @@
-<mark>Make sure the project folder in the comparison tab is in the cohort selection.</mark> <br/>
 <div id='clinicalData' class="txt">
     This Workflow triggers a generic analysis of the clinical variables.
 </div>
 
 <div id='selectStudy' class="txt">
-    %{--<script>--}%
-        <td style='padding-right: 2em; padding-bottom: 1em'>
-            <select id="correctionSelect"/>
-            <input type="button" class='txt' onclick="clearVarSelection('studyToAnalyse')" value="Clear Window">
-        </td>
+    <table>
+        <tr>
+            <td>
+                <g:select
+                        name="noSQLStudies"
+                        class='txt'
+                        from="${noSQLStudies}"
+                        noSelection="['':'Choose a study']"
+                        onchange="displayDataForStudy()"/>
+                    %{--<g:each in="${noSQLStudies}" var="study">--}%
+                        %{--<option value="${study}">${study}</option>--}%
+                    %{--</g:each>--}%
+            </td>
+            <td>
+                <div id="dataAvailableDiv"></div>
+            </td>
+        </tr>
+    </table>
         <input
-            id="submitCV"
+            id="submitGT"
             class='txt'
             type="button"
             value="Run Genereal Testing"
             onclick="triggerGT()"/>
-        %{--getClinicalMetaDataforEAE();--}%
-    %{--</script>--}%
 </div>
 <br/>
 
 <hr class="myhr"/>
 <div id="cacheTableDiv">
-    <table id="mongocachetable" class ="cachetable"></table>
+    <table id="mongocachetable" class="cachetable"></table>
     <div id="emptyCache">The Cache is Empty</div>
     <button type="button"
             value="refreshCacheDiv"
-            onclick="refreshCVCache()"
+            onclick="refreshCache()"
             class="flatbutton">Refresh</button>
 </div>
 
 <script>
-    var currentWorkflow = "gt";
+    var currentWorkflow = "Generaltesting";
     populateCacheDIV(currentWorkflow);
 
     function customSanityCheck() {
         return true;
     }
 
-    function triggerGT() {
-        registerWorkflowParams(currentWorkflow);
-        runWorkflow();
+    function customWorkflowParameters(){
+        var data = [];
+        var _s = document.getElementById('correctionSelect');
+        var selectedCorrection = _s.options[_s.selectedIndex].value;
+        var genesList = $('#genes').value;
+        data.push({name: 'genesList', value: genesList});
+        data.push({name: 'selectedCorrection', value: selectedCorrection});
+        return data;
     }
 
-    function refreshCVCache(){
+    function triggerGT() {
+        registerWorkflowParams(currentWorkflow);
+        runNoSQLWorkflow(mongoData);
+    }
+
+    function refreshCache(){
         populateCacheDIV(currentWorkflow)
     }
 

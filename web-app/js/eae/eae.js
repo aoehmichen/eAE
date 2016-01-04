@@ -106,6 +106,18 @@ function prepareFormDataEAE(workflowSelected) {
 }
 
 /**
+ *   Prepares data for the AJAX call containing all neccesary information for computation
+ *
+ *   @return {[]}: array of objects containing the information for server side computations
+ */
+function prepareNoSQLFormDataEAE(workflowSelected, mongoData) {
+    var data = customWorkflowParameters(); //method MUST be implemented by _inFoobarAnalysis.gsp
+    data.push({name: 'workflow', value: workflowSelected});
+    data.push({name: 'mongoData', value: mongoData});
+    return data;
+}
+
+/**
  *   Checks for general sanity of all parameters and decided which script specific sanity check to call
  *
  *   @return {bool}: returns true if everything is fine, false otherwise
@@ -152,11 +164,36 @@ function changeEAEInput(){
         url: pageInfo.basePath + '/eae/renderInputs',
         type: "POST",
         timeout: '600000',
-        data: {'script': jQuery('#hpcscriptSelect').val()}
+        data: {'workflow': $('#hpcscriptSelect').val()}
     }).done(function(serverAnswer) {
         jQuery("#eaeinputs").html(serverAnswer);
     }).fail(function() {
         jQuery("#eaeinputs").html("AJAX CALL FAILED!");
+    });
+
+}
+
+/**
+ *   Renders the input form for entering the parameters for a visualization/script
+ */
+function displayDataForStudy(){
+    var _t = $('#dataAvailableDiv');
+    _t.html("");
+
+    jQuery.ajax({
+        url: pageInfo.basePath + '/eae/renderDataList',
+        type: "POST",
+        timeout: '600000',
+        data: {'study': $('noSQLStudies').val()}
+    }).done(function(serverAnswer) {
+        _t.append($('<select/>')).attr("id", "dataTypeSelect");
+        var _h = $('dataTypeSelect');
+        $.each(serverAnswer, function (i, e) {
+            _h.append($("<option></option>")
+                .attr("value",e)
+                .text(e))});
+    }).fail(function() {
+        _t.html("AJAX CALL FAILED!");
     });
 
 }
@@ -251,11 +288,38 @@ function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
  *   Run a pathway enrichment from the eae. I haven't integrated into the general workflow system as it runs slightly
  *   differently than the others. ( no cohort selection, used by the marker selection etc...)
  */
-function runPE(list, selectedCorrection){
+//function runPE(list, selectedCorrection){
+//    jQuery.ajax({
+//        url: pageInfo.basePath + '/eae/runPEForSelectedGenes',
+//        type: "POST",
+//        data: {'genesList': list, 'selectedCorrection': selectedCorrection}
+//    }).done(function(serverAnswer) {
+//        var jsonAnswer= $.parseJSON(serverAnswer);
+//        if(jsonAnswer.iscached === "NotCached"){
+//            jQuery("#eaeoutputs").html(jsonAnswer.result);
+//        }else{
+//            buildOutput(jsonAnswer.result);
+//        }
+//    }).fail(function() {
+//        jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
+//    });
+//}
+
+
+/**
+ * Generic NoSQL workflow trigger
+ * @returns {boolean}
+ */
+function runNoSQLWorkflow(mongoData, workflowSpecificPayload){
+
+    if(!customSanityCheck()){
+        return false;
+    }
+
     jQuery.ajax({
-        url: pageInfo.basePath + '/eae/runPEForSelectedGenes',
+        url: pageInfo.basePath + '/eae/runNoSQLWorkflow',
         type: "POST",
-        data: {'genesList': list, 'selectedCorrection': selectedCorrection}
+        data: prepareNoSQLFormDataEAE(workflowSelected, mongoData)
     }).done(function(serverAnswer) {
         var jsonAnswer= $.parseJSON(serverAnswer);
         if(jsonAnswer.iscached === "NotCached"){

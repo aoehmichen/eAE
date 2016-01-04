@@ -35,7 +35,7 @@
     <div id="emptyCache">The Cache is Empty</div>
     <button type="button"
             value="refreshCacheDiv"
-            onclick="refreshPECache()"
+            onclick="refreshCache()"
             class="flatbutton" >Refresh</button>
 </div>
 
@@ -43,13 +43,27 @@
     var currentWorkflow = "pe";
     populateCacheDIV(currentWorkflow);
 
-    function triggerPE() {
-        var _s = document.getElementById('correctionSelect');
-        var selectedCorrection = _s.options[_s.selectedIndex].value;
-        runPE(document.getElementById("genes").value, selectedCorrection);
+    function customSanityCheck() {
+        return true;
     }
 
-    function refreshPECache(){
+    function customWorkflowParameters(){
+        var data = [];
+        var _s = document.getElementById('correctionSelect');
+        var selectedCorrection = _s.options[_s.selectedIndex].value;
+        var genesList = $('#genes').value;
+        data.push({name: 'genesList', value: genesList});
+        data.push({name: 'selectedCorrection', value: selectedCorrection});
+        return data;
+    }
+
+    function triggerPE() {
+        var mongoData = 'None';
+        registerWorkflowParams(currentWorkflow);
+        runNoSQLWorkflow(mongoData);
+    }
+
+    function refreshCache(){
         populateCacheDIV(currentWorkflow)
     }
 

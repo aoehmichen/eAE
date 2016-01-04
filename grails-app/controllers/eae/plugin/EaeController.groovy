@@ -10,26 +10,9 @@ class EaeController {
     def springSecurityService
     def smartRService
     def eaeDataService
+    def eaeNoSQLDataService
     def eaeService
     def mongoCacheService
-
-    /**
-     *   Go to SmartR
-     */
-    def goToSmartR = {
-        render template: '/smartR/index', model:[ scriptList: smartRService.scriptList] }
-
-
-    /**
-     *   Renders the input form for initial script parameters
-     */
-    def renderInputs = {
-        if (! params.script) {
-            render 'Please select a script to execute.'
-        } else {
-            render template: '/eae/in' + FilenameUtils.getBaseName(params.script).replaceAll("\\s","")
-        }
-    }
 
     def cacheParams(){
         final String SPARK_URL = grailsApplication.config.com.eae.sparkURL;
@@ -39,6 +22,12 @@ class EaeController {
         final String username = springSecurityService.getPrincipal().username;
 
         return [SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username];
+    }
+
+    def noSQLParams(){
+        final String MONGO_URL = grailsApplication.config.com.eae.nosqlURL;
+        final String targetDB = "studies";
+        return [MONGO_URL, targetDB];
     }
 
     def oozieParams(){
@@ -53,8 +42,34 @@ class EaeController {
 
     def interfaceParams(){
         final String INTERFACE_URL = grailsApplication.config.com.eae.interfaceURL;
-
         return INTERFACE_URL
+    }
+
+    /**
+     *   Go to SmartR
+     */
+    def goToSmartR = {
+        render template: '/smartR/index', model:[ scriptList: smartRService.scriptList] }
+
+
+    /**
+     *   Renders the input form for initial script parameters
+     */
+    def renderInputs = {
+        if (! params.workflow) {
+            render 'Please select a script to execute.'
+        } else {
+            String workflowSelected = params.workflow;
+            final def (NOSQL_URL, database) = noSQLParams();
+            render template: '/eae/in' + FilenameUtils.getBaseName(params.workflow).replaceAll("\\s",""),
+                    model:[ noSQLStudies: eaeNoSQLDataService.getStudies(NOSQL_URL, database, workflowSelected) ]
+        }
+    }
+
+    def renderDataList = {
+        final String NOSQL_URL, database = noSQLParams();
+        def listOfData = eaeNoSQLDataService.getListOfAvailableDataForStudy(NOSQL_URL, database, "studies", params.study);
+        return listOfData;
     }
 
     def runPEForSelectedGenes = {
@@ -102,22 +117,76 @@ class EaeController {
         render answer
     }
 
+    def runNoSQLWorkflow = {
+        final def (SPARK_URL,MONGO_CACHE_URL,MONGO_CACHE_PORT,scriptDir,username)= cacheParams();
+        final String NOSQL_URL, database = noSQLParams();
+        String worflow = params.workflow;
+
+        def query = mongoCacheService.buildMongoCacheQueryNoSQL(params);
+        String cached = mongoCacheService.checkIfPresentInCache(MONGO_CACHE_URL, MONGO_CACHE_PORT,database, worflow, query)
+
+
+
+        def parameterMap = eaeNoSQLDataService.queryData(params);
+
+
+        String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join(' ').trim();
+        final def INTERFACE_URL = interfaceParams();
+        def workflowParameters = [:]
+
+        //BasicDBObject query = new BasicDBObject("ListOfGenes", saneGenesList);
+        query.append("DocumentType", "Original")
+        // We check if this query has already been made before
+
+        def result
+        if(cached == "NotCached") {
+            String mongoDocumentID = mongoCacheService.initJob(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, worflow, username, query)
+            String dataFileName = worflow + "-" + username + "-" + mongoDocumentID + ".txt" //"listOfGenes.txt"
+            eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, saneGenesList, scriptDir, SPARK_URL, "data")
+            String workflowSpecificParameters = params.selectedCorrection
+            workflowParameters['workflow'] = worflow;
+            workflowParameters['workflowSpecificParameters'] = workflowSpecificParameters;
+            //eaeService.sparkSubmit(scriptDir, SPARK_URL, "pe.py",dataFileName , workflowSpecificParameters, mongoDocumentID)
+            workflowParameters['mongoDocumentID'] = mongoDocumentID;
+            workflowParameters['dataFileName'] = dataFileName;
+            workflowParameters['additionalFileName'] = "";
+            eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL,workflowParameters);
+            result = "Your Job has been submitted. Please come back later for the result"
+        }else if (cached == "Completed"){
+            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,database, worflow, query);
+            BasicDBObject userQuery = new BasicDBObject("ListOfGenes", saneGenesList);
+            userQuery.append("user", username);
+            Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_URL, MONGO_PORT,database, worflow, userQuery);
+            if(!copyAlreadyExists) {
+                mongoCacheService.duplicatePECacheForUser(MONGO_URL, MONGO_PORT, username, result);
+            }
+        }else{
+            result = "The job requested has been submitted by another user and is now computing. Please try again later for the result."
+        }
+        JSONObject answer = new JSONObject();
+
+        answer.put("iscached", cached);
+        answer.put("result", result);
+
+        render answer
+    }
+
     def runWorkflow = {
-        final def (SPARK_URL,MONGO_URL,MONGO_PORT,scriptDir,username)= cacheParams();
+        final def (SPARK_URL,MONGO_CACHE_URL,MONGO_CACHE_PORT,scriptDir,username)= cacheParams();
         //final def (OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT) = oozieParams();
         final def INTERFACE_URL = interfaceParams();
         String database = "eae";
         String workflow = params.workflow;
 
         def parameterMap = eaeDataService.queryData(params);
-        def query = mongoCacheService.buildMongoQuery(params);
+        def query = mongoCacheService.buildMongoCacheQuery(params);
 
         def result
         // We check if this query has already been made before
-        String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_URL, (String)MONGO_PORT, database, workflow, query)
+        String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_CACHE_URL, (String)MONGO_CACHE_PORT, database, workflow, query)
         if(cached == "NotCached") {
-            def workflowParameters = eaeService.customPreProcessing(params, workflow, MONGO_URL, MONGO_PORT, database, username)
-            String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, workflow, username, query)
+            def workflowParameters = eaeService.customPreProcessing(params, workflow, MONGO_CACHE_URL, MONGO_CACHE_PORT, database, username)
+            String mongoDocumentID = mongoCacheService.initJob(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, workflow, username, query)
             String dataFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "data")
             String additionalFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "additional")
             workflowParameters['mongoDocumentID'] = mongoDocumentID;

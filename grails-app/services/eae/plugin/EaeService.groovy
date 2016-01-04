@@ -14,7 +14,7 @@ class EaeService {
      *   Renders the default view
      */
     def getHpcScriptList() {
-        def scriptList = ['Cross Validation', 'Pathway Enrichment'] //['Cross Validation', 'GWAS - LP', 'Pathway Enrichment', 'General Testing']
+        def scriptList = ['Cross Validation', 'Pathway Enrichment', 'General Testing']
         return scriptList
     }
 
