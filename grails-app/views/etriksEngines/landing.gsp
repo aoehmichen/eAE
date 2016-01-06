@@ -34,7 +34,9 @@
         <div id="controls">
             <input class="engineButton" type="button" value="Initialize SmartR" onclick="goToEngineDIV('smartR')"/>
             &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-            <input class="engineButton" type="button" value="Initialize eAE" onclick="goToEngineDIV('eae')"/>
+            <g:if test="${grailsApplication.config.com.eae.eaeEnabled}">
+                <input class="engineButton" type="button" value="Initialize eAE" onclick="goToEngineDIV('eae')"/>
+            </g:if>
         </div>
     </div>
     <r:layoutResources/>
