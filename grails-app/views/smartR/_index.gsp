@@ -10,6 +10,7 @@
 </head>
 
 <body>
+    <g:if test="${grailsApplication.config.com.eae.eaeEnabled}">
     <div id="switch" style="text-align: right">
     <input
             id="goEAE"
@@ -18,6 +19,7 @@
             value="Go To EAE"
             onclick="goToEAE()"/>
     </div>
+    </g:if>
     <div id="index" style="text-align: center">
         <h1 class="txt"> SmartR - Dynamic data visualization and interaction.</h1>
         <span style='color:red'>Please be aware that this software is currently in a TESTING phase and all results should be handled with care.</span><br/>
