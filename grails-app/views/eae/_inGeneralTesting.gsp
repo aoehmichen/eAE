@@ -12,9 +12,6 @@
                         from="${noSQLStudies}"
                         noSelection="['':'Choose a study']"
                         onchange="displayDataForStudy()"/>
-                    %{--<g:each in="${noSQLStudies}" var="study">--}%
-                        %{--<option value="${study}">${study}</option>--}%
-                    %{--</g:each>--}%
             </td>
             <td>
                 <div id="dataAvailableDiv"></div>
@@ -50,17 +47,16 @@
 
     function customWorkflowParameters(){
         var data = [];
-        var _s = document.getElementById('correctionSelect');
-        var selectedCorrection = _s.options[_s.selectedIndex].value;
-        var genesList = $('#genes').value;
-        data.push({name: 'genesList', value: genesList});
-        data.push({name: 'selectedCorrection', value: selectedCorrection});
+        var studySelected = $('#noSQLStudies').val();
+        var dataSelected = $('#dataAvailableDiv').val();
+        data.push({name: 'studySelected', value: studySelected});
+        data.push({name: 'dataSelected', value: dataSelected});
         return data;
     }
 
     function triggerGT() {
         registerWorkflowParams(currentWorkflow);
-        runNoSQLWorkflow(mongoData);
+        runNoSQLWorkflow();
     }
 
     function refreshCache(){

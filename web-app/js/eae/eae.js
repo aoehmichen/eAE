@@ -110,10 +110,10 @@ function prepareFormDataEAE(workflowSelected) {
  *
  *   @return {[]}: array of objects containing the information for server side computations
  */
-function prepareNoSQLFormDataEAE(workflowSelected, mongoData) {
+function prepareNoSQLFormDataEAE(workflowSelected) {
     var data = customWorkflowParameters(); //method MUST be implemented by _inFoobarAnalysis.gsp
     data.push({name: 'workflow', value: workflowSelected});
-    data.push({name: 'mongoData', value: mongoData});
+    //data.push({name: 'mongoData', value: mongoData});
     return data;
 }
 
@@ -313,7 +313,7 @@ function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
  * Generic NoSQL workflow trigger
  * @returns {boolean}
  */
-function runNoSQLWorkflow(mongoData, workflowSpecificPayload){
+function runNoSQLWorkflow(){
 
     if(!customSanityCheck()){
         return false;
@@ -322,7 +322,7 @@ function runNoSQLWorkflow(mongoData, workflowSpecificPayload){
     jQuery.ajax({
         url: pageInfo.basePath + '/eae/runNoSQLWorkflow',
         type: "POST",
-        data: prepareNoSQLFormDataEAE(workflowSelected, mongoData)
+        data: prepareNoSQLFormDataEAE(workflowSelected)
     }).done(function(serverAnswer) {
         var jsonAnswer= $.parseJSON(serverAnswer);
         if(jsonAnswer.iscached === "NotCached"){

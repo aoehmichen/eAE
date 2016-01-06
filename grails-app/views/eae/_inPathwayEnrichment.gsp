@@ -58,9 +58,10 @@
     }
 
     function triggerPE() {
-        var mongoData = 'None';
+//        var mongoData = 'None';
         registerWorkflowParams(currentWorkflow);
-        runNoSQLWorkflow(mongoData);
+//        runNoSQLWorkflow(mongoData);
+        runNoSQLWorkflow();
     }
 
     function refreshCache(){
