@@ -52,6 +52,7 @@
         data.push({name: 'studySelected', value: studySelected});
         data.push({name: 'dataSelected', value: dataSelected});
         data.push({name: 'customField', value: 'None'});
+        data.push({name: 'WorkflowSpecificParameters', value: 'None'});
         return data;
     }
 

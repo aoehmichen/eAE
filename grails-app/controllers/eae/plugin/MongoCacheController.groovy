@@ -34,11 +34,11 @@ class MongoCacheController {
         render result;
     }
 
-    private def mongoCacheQuery(def params){
+    private def mongoCacheQuery(def params, String workflowType){
         String workflowSelected = params.workflow;
         BasicDBObject query = new BasicDBObject();
-        switch (workflowSelected){
-            case "pe":
+        switch (workflowType){
+            case "NoSQL":
                 query = new BasicDBObject("ListOfGenes", params.ListOfGenes);
                 break;
             default :

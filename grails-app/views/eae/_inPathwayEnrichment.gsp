@@ -53,8 +53,10 @@
         var selectedCorrection = _s.options[_s.selectedIndex].value;
         var genesList = $('#genes').value;
         data.push({name: 'studySelected', value: 'PathwayEnrichment'});
-        data.push({name: 'dataSelected', value: genesList});
-        data.push({name: 'customField', value: selectedCorrection});
+        data.push({name: 'dataSelected', value: 'None'});
+        data.push({name: 'customField', value: genesList});
+//        var workflowSpecificParameters = {name: 'selectedCorrection',  value: selectedCorrection};
+        data.push({name: 'WorkflowSpecificParameters', value: selectedCorrection});
         return data;
     }
 

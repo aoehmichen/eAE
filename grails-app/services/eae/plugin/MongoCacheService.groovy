@@ -44,7 +44,7 @@ class MongoCacheService {
         return copyExists;
     }
 
-    def initJob(String mongoURL, String mongoPort, String dbName, String workflowSelected, String user, BasicDBObject query){
+    def initJob(String mongoURL, String mongoPort, String dbName, String workflowSelected, String typeOfWorkflow, String user, BasicDBObject query){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase db = mongoClient.getDatabase( dbName );
         MongoCollection<Document> coll = db.getCollection(workflowSelected);
@@ -56,9 +56,9 @@ class MongoCacheService {
         doc.append("StartTime", new Date());
         doc.append("EndTime", new Date());
         doc.append("DocumentType", "Original")
-        switch (workflowSelected) {
-            case "pe":
-                cacheRecord = initJobPE(doc, query);
+        switch (typeOfWorkflow) {
+            case "NoSQL":
+                cacheRecord = initJobNoSQL(doc, query);
                 break;
             default:
                 cacheRecord = initJobDefault(doc, query);
@@ -105,7 +105,7 @@ class MongoCacheService {
         query.append('result_instance_id1', params.result_instance_id1);
         query.append('result_instance_id2', params.result_instance_id2);
         query.append('WorkflowData', workflowData);
-        query.append("DocumentType", "Original")
+        query.append("DocumentType", "Original");
         return query
     }
 
@@ -114,8 +114,9 @@ class MongoCacheService {
         query.append('StudyName', params.studyName);
         query.append('DataType', params.dataType);
         query.append('Workflow', params.workflowSelected);
-        query.append('CustomField', params.customField.trim().split(",").sort(Collections.reverseOrder()).join(' ').trim())
-        query.append("DocumentType", "Original")
+        query.append('CustomField', params.customField.trim().split(",").sort(Collections.reverseOrder()).join(' ').trim());
+        query.append('WorkflowSpecificParameter',params.workflowSpecificParameter);
+        query.append("DocumentType", "Original");
         return query
     }
     /**
@@ -157,17 +158,15 @@ class MongoCacheService {
      *                                                                                              *
      ************************************************************************************************/
 
-    def initJobPE(Document doc, query){
-        doc.append("TopPathways", [])
-        doc.append("KeggTopPathway", "")
-
-        doc.append("ListOfGenes", query.get("ListOfGenes"))
-        doc.append("Correction", "")
-
+    def initJobNoSQL(Document doc, query){
+        doc.append("StudyName", query.get("StudyName"))
+        doc.append("DataType", query.get("DataType"))
+        doc.append("CustomField", query.get("CustomField"))
+        doc.append("WorkflowSpecificParameter", query.get("WorkflowSpecificParameter"))
         return doc;
     }
 
-    def retrieveRowsForPE(MongoCursor cursor){
+    def retrieveRowsForNoSQL(MongoCursor cursor){
         def rows = new JSONArray();
         JSONObject result;
         def count = 0;
@@ -185,7 +184,7 @@ class MongoCacheService {
         return [rows, count]
     }
 
-    def duplicatePECacheForUser(String mongoURL, String mongoPort, String username, JSONObject cacheRes){
+    def duplicateCacheForUser(String mongoURL, String mongoPort, String username, JSONObject cacheRes){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase db = mongoClient.getDatabase("eae");
         MongoCollection<Document> coll = db.getCollection("pe");

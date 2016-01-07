@@ -135,25 +135,26 @@ class EaeController {
         // We check if this query has already been made before
         def result
         if(cached == "NotCached") {
-            String mongoDocumentID = mongoCacheService.initJob(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, worflow, username, query)
-            String dataFileName = worflow + "-" + username + "-" + mongoDocumentID + ".txt" //"listOfGenes.txt"
-            eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, saneGenesList, scriptDir, SPARK_URL, "data")
-            String workflowSpecificParameters = params.selectedCorrection
-            workflowParameters['workflow'] = worflow;
-            workflowParameters['workflowSpecificParameters'] = workflowSpecificParameters;
+            String mongoDocumentID = mongoCacheService.initJob(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, worflow, "NoSQL", username, query)
+//            String dataFileName = worflow + "-" + username + "-" + mongoDocumentID + ".txt" //"listOfGenes.txt"
+            //eaeDataService.sendToHDFS(username, mongoDocumentID, worflow, saneGenesList, scriptDir, SPARK_URL, "data")
             //eaeService.sparkSubmit(scriptDir, SPARK_URL, "pe.py",dataFileName , workflowSpecificParameters, mongoDocumentID)
-            workflowParameters['mongoDocumentID'] = mongoDocumentID;
-            workflowParameters['dataFileName'] = dataFileName;
-            workflowParameters['additionalFileName'] = "";
+            workflowParameters['workflow'] = worflow;
+            workflowParameters['workflowType'] = "NoSQL";
+//            workflowParameters['StudyName'] = params.studyName;
+//            workflowParameters['DataType'] = params.dataType;
+//            workflowParameters['CustomField'] = params.customField.trim().split(",").sort(Collections.reverseOrder()).join(' ').trim();
+            workflowParameters['WorkflowSpecificParameters'] = params.workflowSpecificParameters;
+            workflowParameters['MongoDocumentID'] = mongoDocumentID;
             eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL,workflowParameters);
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
-            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT,database, worflow, query);
+            result = mongoCacheService.retrieveValueFromCache(MONGO_CACHE_URL, MONGO_CACHE_PORT,database, worflow, query);
             BasicDBObject userQuery = new BasicDBObject("ListOfGenes", saneGenesList);
             userQuery.append("user", username);
-            Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_URL, MONGO_PORT,database, worflow, userQuery);
+            Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_CACHE_URL, MONGO_CACHE_PORT,database, worflow, userQuery);
             if(!copyAlreadyExists) {
-                mongoCacheService.duplicatePECacheForUser(MONGO_URL, MONGO_PORT, username, result);
+                mongoCacheService.duplicateCacheForUser(MONGO_CACHE_URL, MONGO_CACHE_PORT, username, result);
             }
         }else{
             result = "The job requested has been submitted by another user and is now computing. Please try again later for the result."
@@ -185,6 +186,7 @@ class EaeController {
             String dataFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "data")
             String additionalFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "additional")
             workflowParameters['mongoDocumentID'] = mongoDocumentID;
+            workflowParameters['workflowType'] = "SQL";
             workflowParameters['dataFileName'] = dataFileName;
             workflowParameters['additionalFileName'] = additionalFileName;
             eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL, workflowParameters);
