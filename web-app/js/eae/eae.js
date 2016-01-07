@@ -113,7 +113,6 @@ function prepareFormDataEAE(workflowSelected) {
 function prepareNoSQLFormDataEAE(workflowSelected) {
     var data = customWorkflowParameters(); //method MUST be implemented by _inFoobarAnalysis.gsp
     data.push({name: 'workflow', value: workflowSelected});
-    //data.push({name: 'mongoData', value: mongoData});
     return data;
 }
 

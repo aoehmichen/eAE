@@ -40,7 +40,7 @@
 </div>
 
 <script>
-    var currentWorkflow = "pe";
+    var currentWorkflow = "PathwayEnrichment";
     populateCacheDIV(currentWorkflow);
 
     function customSanityCheck() {
@@ -52,15 +52,14 @@
         var _s = document.getElementById('correctionSelect');
         var selectedCorrection = _s.options[_s.selectedIndex].value;
         var genesList = $('#genes').value;
-        data.push({name: 'genesList', value: genesList});
-        data.push({name: 'selectedCorrection', value: selectedCorrection});
+        data.push({name: 'studySelected', value: 'PathwayEnrichment'});
+        data.push({name: 'dataSelected', value: genesList});
+        data.push({name: 'customField', value: selectedCorrection});
         return data;
     }
 
     function triggerPE() {
-//        var mongoData = 'None';
         registerWorkflowParams(currentWorkflow);
-//        runNoSQLWorkflow(mongoData);
         runNoSQLWorkflow();
     }
 

@@ -53,7 +53,7 @@ class EaeController {
 
 
     /**
-     *   Renders the input form for initial script parameters
+     *   Renders the input form for initial script parameters.
      */
     def renderInputs = {
         if (! params.workflow) {
@@ -66,6 +66,9 @@ class EaeController {
         }
     }
 
+    /**
+     * Sends back the list of available High dimensional data for the selected study.
+     */
     def renderDataList = {
         final def (NOSQL_URL, database) = noSQLParams();
         def listOfData = eaeNoSQLDataService.getDataTypesForStudy(NOSQL_URL, database, params.study);
@@ -119,25 +122,17 @@ class EaeController {
 
     def runNoSQLWorkflow = {
         final def (SPARK_URL,MONGO_CACHE_URL,MONGO_CACHE_PORT,scriptDir,username)= cacheParams();
-        final String NOSQL_URL, database = noSQLParams();
+        // final String NOSQL_URL, database = noSQLParams();
+        String database = "studies";
+        final def INTERFACE_URL = interfaceParams();
         String worflow = params.workflow;
 
         def query = mongoCacheService.buildMongoCacheQueryNoSQL(params);
         String cached = mongoCacheService.checkIfPresentInCache(MONGO_CACHE_URL, MONGO_CACHE_PORT,database, worflow, query)
 
-
-
-        def parameterMap = eaeNoSQLDataService.queryData(params);
-
-
-        String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join(' ').trim();
-        final def INTERFACE_URL = interfaceParams();
         def workflowParameters = [:]
-
-        //BasicDBObject query = new BasicDBObject("ListOfGenes", saneGenesList);
-        query.append("DocumentType", "Original")
+        // def parameterMap = eaeNoSQLDataService.queryData(params);
         // We check if this query has already been made before
-
         def result
         if(cached == "NotCached") {
             String mongoDocumentID = mongoCacheService.initJob(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, worflow, username, query)

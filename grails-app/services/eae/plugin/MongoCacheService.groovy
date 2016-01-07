@@ -114,6 +114,7 @@ class MongoCacheService {
         query.append('StudyName', params.studyName);
         query.append('DataType', params.dataType);
         query.append('Workflow', params.workflowSelected);
+        query.append('CustomField', params.customField.trim().split(",").sort(Collections.reverseOrder()).join(' ').trim())
         query.append("DocumentType", "Original")
         return query
     }
