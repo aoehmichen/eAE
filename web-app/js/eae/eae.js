@@ -88,7 +88,7 @@ function registerConceptBoxEAE(name, cohorts, type, min, max) {
 
 var workflowSelected = "";
 function registerWorkflowParams(workflow){
-    workflowSelected = workflow.toLowerCase();
+    workflowSelected = workflow;
 }
 
 /**

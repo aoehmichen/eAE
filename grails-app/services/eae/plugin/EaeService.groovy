@@ -60,10 +60,10 @@ class EaeService {
         switch (workflow){
             case "cv":
                 return cvPreprocessing(params, MONGO_URL,MONGO_PORT,database,username);
-            case "gt":
-                return gtPreprocessing(params); //TODO
-            case "pe":
-                return pePreprocessing(params);
+//            case "gt":
+//                return gtPreprocessing(params); //TODO
+//            case "pe":
+//                return pePreprocessing(params);
             default:
                 throw new Exception("The workflow in customPreProcessing doesn't exist.")
         }

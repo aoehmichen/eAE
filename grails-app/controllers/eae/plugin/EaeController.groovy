@@ -144,15 +144,14 @@ class EaeController {
 //            workflowParameters['StudyName'] = params.studyName;
 //            workflowParameters['DataType'] = params.dataType;
 //            workflowParameters['CustomField'] = params.customField.trim().split(",").sort(Collections.reverseOrder()).join(' ').trim();
-            workflowParameters['WorkflowSpecificParameters'] = params.workflowSpecificParameters;
-            workflowParameters['MongoDocumentID'] = mongoDocumentID;
+            workflowParameters['workflowSpecificParameters'] = params.workflowSpecificParameters;
+            workflowParameters['mongoDocumentID'] = mongoDocumentID;
             eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL,workflowParameters);
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
             result = mongoCacheService.retrieveValueFromCache(MONGO_CACHE_URL, MONGO_CACHE_PORT,database, worflow, query);
-            BasicDBObject userQuery = new BasicDBObject("ListOfGenes", saneGenesList);
-            userQuery.append("user", username);
-            Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_CACHE_URL, MONGO_CACHE_PORT,database, worflow, userQuery);
+            query.append("user", username);
+            Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_CACHE_URL, MONGO_CACHE_PORT,database, worflow, query);
             if(!copyAlreadyExists) {
                 mongoCacheService.duplicateCacheForUser(MONGO_CACHE_URL, MONGO_CACHE_PORT, username, result);
             }

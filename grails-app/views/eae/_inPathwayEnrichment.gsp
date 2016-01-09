@@ -56,7 +56,7 @@
         data.push({name: 'dataSelected', value: 'None'});
         data.push({name: 'customField', value: genesList});
 //        var workflowSpecificParameters = {name: 'selectedCorrection',  value: selectedCorrection};
-        data.push({name: 'WorkflowSpecificParameters', value: selectedCorrection});
+        data.push({name: 'workflowSpecificParameters', value: selectedCorrection});
         return data;
     }
 

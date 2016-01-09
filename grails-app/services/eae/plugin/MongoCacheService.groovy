@@ -55,7 +55,6 @@ class MongoCacheService {
         doc.append("User", user);
         doc.append("StartTime", new Date());
         doc.append("EndTime", new Date());
-        doc.append("DocumentType", "Original")
         switch (typeOfWorkflow) {
             case "NoSQL":
                 cacheRecord = initJobNoSQL(doc, query);
@@ -81,7 +80,7 @@ class MongoCacheService {
         JSONObject cacheItem;
 
         while(cursor.hasNext()) {
-            cacheItem =new JSONObject(cursor.next().toJson());
+            cacheItem = new JSONObject(cursor.next().toJson());
             recordsCount+=1;
         }
         mongoClient.close();
@@ -162,7 +161,7 @@ class MongoCacheService {
         doc.append("StudyName", query.get("StudyName"))
         doc.append("DataType", query.get("DataType"))
         doc.append("CustomField", query.get("CustomField"))
-        doc.append("WorkflowSpecificParameter", query.get("WorkflowSpecificParameter"))
+        doc.append("WorkflowSpecificParameters", query.get("WorkflowSpecificParameters"))
         return doc;
     }
 
