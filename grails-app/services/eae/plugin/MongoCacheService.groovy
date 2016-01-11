@@ -110,11 +110,11 @@ class MongoCacheService {
 
     def buildMongoCacheQueryNoSQL(params){
         BasicDBObject query = new BasicDBObject();
-        query.append('StudyName', params.studyName);
-        query.append('DataType', params.dataType);
+        query.append('StudyName', params.studySelected);
+        query.append('DataType', params.dataSelected);
         query.append('Workflow', params.workflowSelected);
         query.append('CustomField', params.customField.trim().split(",").sort(Collections.reverseOrder()).join(' ').trim());
-        query.append('WorkflowSpecificParameter',params.workflowSpecificParameter);
+        query.append('workflowSpecificParameters',params.workflowSpecificParameters);
         query.append("DocumentType", "Original");
         return query
     }

@@ -51,7 +51,7 @@
         var data = [];
         var _s = document.getElementById('correctionSelect');
         var selectedCorrection = _s.options[_s.selectedIndex].value;
-        var genesList = $('#genes').value;
+        var genesList = $('#genes').val();
         data.push({name: 'studySelected', value: 'PathwayEnrichment'});
         data.push({name: 'dataSelected', value: 'None'});
         data.push({name: 'customField', value: genesList});

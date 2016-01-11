@@ -123,7 +123,7 @@ class EaeController {
     def runNoSQLWorkflow = {
         final def (SPARK_URL,MONGO_CACHE_URL,MONGO_CACHE_PORT,scriptDir,username)= cacheParams();
         // final String NOSQL_URL, database = noSQLParams();
-        String database = "studies";
+        String database = "eae";
         final def INTERFACE_URL = interfaceParams();
         String worflow = params.workflow;
 
