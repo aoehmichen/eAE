@@ -209,7 +209,7 @@ function populateCacheDIV(currentworkflow){
     _t.empty();
     _t.append($('<tr/>').attr("id", "headersRow"));
 
-    var cacheTableHeaders = ["Query", "Date", "Status", "Cached Results"];
+    var cacheTableHeaders = ["Query", "Workflow Specific Parameters", "Date", "Status", "Cached Results"];
     var _h = $('#headersRow');
     $.each(cacheTableHeaders, function(i, e){
         _h.append($('<th/>').text(e))
@@ -227,20 +227,23 @@ function populateCacheDIV(currentworkflow){
             jQuery("#emptyCache").show();
         }else {
             var date;
+            var workflowspecificparamters;
             jQuery("#mongocachetable").show();
             jQuery("#emptyCache").hide();
             $.each(jsonCache.jobs, function (i, e) {
-                console.log(e)
                 date = new Date(e.starttime.$date);
+                workflowspecificparamters = e.workflowspecificparamters;
                 var holder = cacheDIVCustomName(e); //method MUST be implemented by _inFoobarAnalysis.gsp
                 _t.append($('<tr/>').append(holder).append(
                     $('<td/>').text(e.status)
+                ).append(
+                    $('<td/>').text(workflowspecificparamters)
                 ).append(
                     $('<td/>').text(date)
                 ).append(
                      $('<td/>').append($('<button/>').addClass('flatbutton').attr('data-button', e.name).on('click',function(){
                         var cacheQuery= $(this).attr('data-button');
-                         showWorkflowOutput(currentworkflow,cacheQuery);
+                         showWorkflowOutput(currentworkflow, cacheQuery, workflowspecificparamters);
                      }).text("Result"))
                 ))
             })
@@ -255,36 +258,18 @@ function populateCacheDIV(currentworkflow){
  * @param currentworkflow
  * @param cacheQuery
  */
-function showWorkflowOutput(currentworkflow, cacheQuery){
+function showWorkflowOutput(currentworkflow, cacheQuery, workflowspecificparamters){
     jQuery("#eaeoutputs").html("");
 
     jQuery.ajax({
         url: pageInfo.basePath + '/mongoCache/retrieveSingleCachedJob',
         type: "POST",
-        data: prepareDataForMongoRetrievale(currentworkflow, cacheQuery)
+        data: prepareDataForMongoRetrievale(currentworkflow, cacheQuery, workflowspecificparamters) //method MUST be implemented by _inFoobarAnalysis.gsp
     }).done(function(cachedJob) {
         var jsonRecord= $.parseJSON(cachedJob);
         buildOutput(jsonRecord);
         }
     )
-}
-
-function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
-    var data ;
-    switch (currentworkflow){
-        case "pe":
-            data = {workflow: currentworkflow, ListOfGenes:cacheQuery};
-            return data;
-        default :
-            var tmpData = [];
-            var splitTerms = cacheQuery.split('<br />');
-            $.each(splitTerms, function(i, e){
-                var chunk = e.split(':');
-                tmpData.push(chunk[1].trim());
-            });
-            data = {workflow: currentworkflow, WorkflowData: tmpData[0], result_instance_id1: tmpData[1], result_instance_id2: tmpData[2]};
-            return data;
-    }
 }
 
 /**
@@ -315,7 +300,7 @@ function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
  */
 function runNoSQLWorkflow(){
 
-    if(!customSanityCheck()){
+    if(!customSanityCheck()){ // Must be implemented in
         return false;
     }
 
@@ -356,7 +341,7 @@ function runWorkflow(){
     }
 
     jQuery.ajax({
-        url: pageInfo.basePath + '/eae/runWorkflow', //runCV
+        url: pageInfo.basePath + '/eae/runWorkflow',
         type: "POST",
         data: prepareFormDataEAE(workflowSelected)
     }).done(function(serverAnswer) {

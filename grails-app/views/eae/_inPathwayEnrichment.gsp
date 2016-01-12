@@ -55,7 +55,6 @@
         data.push({name: 'studySelected', value: 'PathwayEnrichment'});
         data.push({name: 'dataSelected', value: 'None'});
         data.push({name: 'customField', value: genesList});
-//        var workflowSpecificParameters = {name: 'selectedCorrection',  value: selectedCorrection};
         data.push({name: 'workflowSpecificParameters', value: selectedCorrection});
         return data;
     }
@@ -77,6 +76,12 @@
             )
         });
     return holder;
+    }
+
+    function prepareDataForMongoRetrievale(currentworkflow, cacheQuery, workflowspecificparameters) {
+        var data = {workflow: currentworkflow, studyname: 'PathwayEnrichment', datatype: 'None', customfield: cacheQuery,
+                    workflowspecificparameters: workflowspecificparameters, workflowtype: "NoSQL"};
+        return data;
     }
 
     function buildOutput(jsonRecord){

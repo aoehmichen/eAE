@@ -60,10 +60,6 @@ class EaeService {
         switch (workflow){
             case "cv":
                 return cvPreprocessing(params, MONGO_URL,MONGO_PORT,database,username);
-//            case "gt":
-//                return gtPreprocessing(params); //TODO
-//            case "pe":
-//                return pePreprocessing(params);
             default:
                 throw new Exception("The workflow in customPreProcessing doesn't exist.")
         }
@@ -91,7 +87,7 @@ class EaeService {
 
     def customPostProcessing(result, workflow) {
         switch (workflow){
-            case "pe":
+            case "PathwayEnrichment":
                 return pePostProcessing(result);
             default:
                 return result

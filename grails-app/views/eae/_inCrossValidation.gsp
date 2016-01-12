@@ -73,6 +73,22 @@
         return data;
     }
 
+    function prepareDataForMongoRetrievale(currentworkflow, cacheQuery) {
+        var tmpData = [];
+        var splitTerms = cacheQuery.split('<br />');
+        $.each(splitTerms, function (i, e) {
+            var chunk = e.split(':');
+            tmpData.push(chunk[1].trim());
+        });
+        var data = {
+            workflow: currentworkflow,
+            WorkflowData: tmpData[0],
+            result_instance_id1: tmpData[1],
+            result_instance_id2: tmpData[2]
+        };
+        return data;
+    }
+
     /**
      *   Display the result retieved from the cache
      *   @param jsonRecord

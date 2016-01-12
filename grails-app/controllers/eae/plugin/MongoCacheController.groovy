@@ -27,7 +27,7 @@ class MongoCacheController {
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
 
-        BasicDBObject query = mongoCacheQuery(params);
+        BasicDBObject query = mongoCacheQuery(params, params.workflowtype);
         def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, "eae", params.workflow, query);
         result = eaeService.customPostProcessing(result, params.workflow)
 
@@ -35,11 +35,14 @@ class MongoCacheController {
     }
 
     private def mongoCacheQuery(def params, String workflowType){
-        String workflowSelected = params.workflow;
+        //String workflowSelected = params.workflow;
         BasicDBObject query = new BasicDBObject();
         switch (workflowType){
             case "NoSQL":
-                query = new BasicDBObject("ListOfGenes", params.ListOfGenes);
+                query.append("StudyName", params.studyname);
+                query.append("DataType", params.datatype);
+                query.append("CustomField", params.customfield);
+                query.append("WorkflowSpecificParameters",params.workflowspecificparameters)
                 break;
             default :
                 query.append("WorkflowData", params.WorkflowData);
