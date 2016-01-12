@@ -131,15 +131,15 @@ class MongoCacheService {
         def cursor = coll.find(query).iterator();
         def rows;
 
-        switch (workflowSelected) {
-            case "pe":
-                rows = retrieveRowsForPE(cursor);
-                break;
-            default:
-                rows = retrieveRowsDefault(cursor);
-                break;
-
-        }
+//        switch (workflowSelected) {
+//            case "NoSQL":
+        rows = retrieveRows(cursor);
+//                break;
+//            default:
+//                rows = retrieveRowsDefault(cursor);
+//                break;
+//
+//        }
 
         JSONObject res =  new JSONObject();
         res.put("success", true)
@@ -165,21 +165,21 @@ class MongoCacheService {
         return doc;
     }
 
-    def retrieveRowsForNoSQL(MongoCursor cursor){
+    def retrieveRows(MongoCursor cursor){
         def rows = new JSONArray();
         JSONObject result;
         def count = 0;
         while(cursor.hasNext()) {
-            JSONObject obj =  new JSONObject(cursor.next().toJson());
+            JSONObject jObject =  new JSONObject(cursor.next().toJson());
+            Iterator<?> keys = jObject.keys();
             result = new JSONObject();
-            String name =  obj.get("ListOfGenes");
-            result.put("status", obj.get("Status"));
-            result.put("start", obj.get("StartTime"));
-            result.put("name", name);
+            while( keys.hasNext() ) {
+                String key = (String)keys.next();
+                result.put(key.toLowerCase(),  jObject.get(key));
+            }
             rows.put(result);
             count+=1;
         }
-
         return [rows, count]
     }
 

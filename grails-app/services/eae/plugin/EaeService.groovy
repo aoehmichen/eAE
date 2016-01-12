@@ -38,23 +38,23 @@ class EaeService {
 
         return jobId;
     }
-
-    def sparkSubmit(String scriptDir, String SparkURL, String workflowFileName, String dataFileName, String workflowSpecificParameters, String mongoDocumentID){
-        def script = scriptDir +'executeSparkJob.sh'
-
-        def scriptFile = new File(script)
-        if (scriptFile.exists()) {
-            if (!scriptFile.canExecute()) {
-                scriptFile.setExecutable(true)
-            }
-        }else {
-            log.error('The Script file spark submit wasn\'t found')
-        }
-        def executeCommand = script + " " + SparkURL + " " + workflowFileName + " " + dataFileName + " " + workflowSpecificParameters + " " + mongoDocumentID
-        println(executeCommand)
-        executeCommand.execute().waitFor()
-        return 0
-    }
+//
+//    def sparkSubmit(String scriptDir, String SparkURL, String workflowFileName, String dataFileName, String workflowSpecificParameters, String mongoDocumentID){
+//        def script = scriptDir +'executeSparkJob.sh'
+//
+//        def scriptFile = new File(script)
+//        if (scriptFile.exists()) {
+//            if (!scriptFile.canExecute()) {
+//                scriptFile.setExecutable(true)
+//            }
+//        }else {
+//            log.error('The Script file spark submit wasn\'t found')
+//        }
+//        def executeCommand = script + " " + SparkURL + " " + workflowFileName + " " + dataFileName + " " + workflowSpecificParameters + " " + mongoDocumentID
+//        println(executeCommand)
+//        executeCommand.execute().waitFor()
+//        return 0
+//    }
 
     def customPreProcessing(params, workflow, MONGO_URL,MONGO_PORT,database,username){
         switch (workflow){
@@ -87,17 +87,6 @@ class EaeService {
         workflowParameters['workflowSpecificParameters'] = algorithmToUse + " " + kfold + " " + resampling + " " +  numberOfFeaturesToRemove + " " + doEnrichement + " " + mongoDocumentIDPE.toString();
 
         return workflowParameters;
-    }
-
-    private def pePreprocessing(params){
-        def workflowParameters = [:]
-        String saneGenesList = ((String)params.genesList).trim().split(",").sort(Collections.reverseOrder()).join(' ').trim();
-
-        workflowParameters['workflow'] = params.workflow;
-        workflowParameters['workflowSpecificParameters'] = params.selectedCorrection
-
-        BasicDBObject query = new BasicDBObject("ListOfGenes", saneGenesList);
-        query.append("DocumentType", "Original")
     }
 
     def customPostProcessing(result, workflow) {

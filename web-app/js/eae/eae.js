@@ -230,8 +230,9 @@ function populateCacheDIV(currentworkflow){
             jQuery("#mongocachetable").show();
             jQuery("#emptyCache").hide();
             $.each(jsonCache.jobs, function (i, e) {
-                date = new Date(e.start.$date);
-                var holder = cacheDIVCustomName(e.name); //method MUST be implemented by _inFoobarAnalysis.gsp
+                console.log(e)
+                date = new Date(e.starttime.$date);
+                var holder = cacheDIVCustomName(e); //method MUST be implemented by _inFoobarAnalysis.gsp
                 _t.append($('<tr/>').append(holder).append(
                     $('<td/>').text(e.status)
                 ).append(

@@ -69,9 +69,9 @@
         populateCacheDIV(currentWorkflow)
     }
 
-    function cacheDIVCustomName(name){
+    function cacheDIVCustomName(job){
         var holder =  $('<td/>');
-        $.each(name.split(' '), function (i, e) {
+        $.each(job.customfield.split(' '), function (i, e) {
             holder.append(
                     $('<span />').addClass('eae_genetag').text(e)
             )
