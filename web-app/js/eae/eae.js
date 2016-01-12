@@ -227,23 +227,23 @@ function populateCacheDIV(currentworkflow){
             jQuery("#emptyCache").show();
         }else {
             var date;
-            var workflowspecificparamters;
+            var workflowspecificparameters;
             jQuery("#mongocachetable").show();
             jQuery("#emptyCache").hide();
             $.each(jsonCache.jobs, function (i, e) {
                 date = new Date(e.starttime.$date);
-                workflowspecificparamters = e.workflowspecificparamters;
-                var holder = cacheDIVCustomName(e); //method MUST be implemented by _inFoobarAnalysis.gsp
-                _t.append($('<tr/>').append(holder).append(
-                    $('<td/>').text(e.status)
-                ).append(
-                    $('<td/>').text(workflowspecificparamters)
+                workflowspecificparameters = e.workflowspecificparameters;
+                var customname = cacheDIVCustomName(e); //method MUST be implemented by _inFoobarAnalysis.gsp
+                _t.append($('<tr/>').append(customname.holder).append(
+                    $('<td/>').text(workflowspecificparameters)
                 ).append(
                     $('<td/>').text(date)
                 ).append(
-                     $('<td/>').append($('<button/>').addClass('flatbutton').attr('data-button', e.name).on('click',function(){
+                    $('<td/>').text(e.status)
+                ).append(
+                     $('<td/>').append($('<button/>').addClass('flatbutton').attr('data-button', customname.name).on('click',function(){
                         var cacheQuery= $(this).attr('data-button');
-                         showWorkflowOutput(currentworkflow, cacheQuery, workflowspecificparamters);
+                         showWorkflowOutput(currentworkflow, cacheQuery, workflowspecificparameters);
                      }).text("Result"))
                 ))
             })

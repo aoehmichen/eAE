@@ -75,7 +75,11 @@
                     $('<span />').addClass('eae_genetag').text(e)
             )
         });
-    return holder;
+
+    return {
+        holder: holder,
+        name: job.customfield
+    };
     }
 
     function prepareDataForMongoRetrievale(currentworkflow, cacheQuery, workflowspecificparameters) {
