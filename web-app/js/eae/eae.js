@@ -258,41 +258,19 @@ function populateCacheDIV(currentworkflow){
  * @param currentworkflow
  * @param cacheQuery
  */
-function showWorkflowOutput(currentworkflow, cacheQuery, workflowspecificparamters){
+function showWorkflowOutput(currentworkflow, cacheQuery, workflowspecificparameters){
     jQuery("#eaeoutputs").html("");
 
     jQuery.ajax({
         url: pageInfo.basePath + '/mongoCache/retrieveSingleCachedJob',
         type: "POST",
-        data: prepareDataForMongoRetrievale(currentworkflow, cacheQuery, workflowspecificparamters) //method MUST be implemented by _inFoobarAnalysis.gsp
+        data: prepareDataForMongoRetrievale(currentworkflow, cacheQuery, workflowspecificparameters) //method MUST be implemented by _inFoobarAnalysis.gsp
     }).done(function(cachedJob) {
         var jsonRecord= $.parseJSON(cachedJob);
         buildOutput(jsonRecord);
         }
     )
 }
-
-/**
- *   Run a pathway enrichment from the eae. I haven't integrated into the general workflow system as it runs slightly
- *   differently than the others. ( no cohort selection, used by the marker selection etc...)
- */
-//function runPE(list, selectedCorrection){
-//    jQuery.ajax({
-//        url: pageInfo.basePath + '/eae/runPEForSelectedGenes',
-//        type: "POST",
-//        data: {'genesList': list, 'selectedCorrection': selectedCorrection}
-//    }).done(function(serverAnswer) {
-//        var jsonAnswer= $.parseJSON(serverAnswer);
-//        if(jsonAnswer.iscached === "NotCached"){
-//            jQuery("#eaeoutputs").html(jsonAnswer.result);
-//        }else{
-//            buildOutput(jsonAnswer.result);
-//        }
-//    }).fail(function() {
-//        jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
-//    });
-//}
-
 
 /**
  * Generic NoSQL workflow trigger

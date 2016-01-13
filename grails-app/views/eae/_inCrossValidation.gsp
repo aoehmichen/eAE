@@ -39,7 +39,7 @@
 </div>
 
 <script>
-    var currentWorkflow = "cv";
+    var currentWorkflow = "CrossValidation";
     populateCacheDIV(currentWorkflow);
     activateDragAndDropEAE('highDimDataCV');
 
@@ -60,10 +60,14 @@
         return true;
     }
 
-    function cacheDIVCustomName(name){
+    function cacheDIVCustomName(job){
+        var name = "HighDim Data: " + job.workflowdata + "\<br /> cohort 1 : " + job.result_instance_id1 + "\<br /> cohort 2 : " + job.result_instance_id2;
         var holder =  $('<td/>');
         holder.html(name);
-        return holder;
+        return {
+            holder: holder,
+            name: name
+        };
     }
 
     function customWorkflowParameters(){
