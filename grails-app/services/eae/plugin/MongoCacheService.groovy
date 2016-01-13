@@ -183,31 +183,57 @@ class MongoCacheService {
         return [rows, count]
     }
 
-    def duplicateCacheForUser(String mongoURL, String mongoPort, String username, JSONObject cacheRes){
+    def duplicateCacheForUser(String mongoURL, String mongoPort, String database, String workflow, String username, JSONObject cacheRes){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
-        MongoDatabase db = mongoClient.getDatabase("eae");
-        MongoCollection<Document> coll = db.getCollection("pe");
-
-        def arrayList = new ArrayList();
-        def topPath = (JSONArray)cacheRes.get("TopPathways")
-        for(int i =0; i < topPath.length();i++){
-            arrayList.add(i,[topPath.get(i).get(0),topPath.get(i).get(1)])
-       }
+        MongoDatabase db = mongoClient.getDatabase(database);
+        MongoCollection<Document> coll = db.getCollection(workflow);
 
         Document doc = new Document();
-        doc.append("TopPathways", arrayList)
-        doc.append("KeggTopPathway",cacheRes.get("KeggTopPathway") )
-        doc.append("Status", "Completed")
-        doc.append("User", username)
-        doc.append("ListOfGenes",cacheRes.get("ListOfGenes") )
-        doc.append("Correction",cacheRes.get("Correction") )
-        doc.append("StartTime", new Date())
-        doc.append("EndTime", new Date())
-        doc.append("DocumentType", "Copy")
+        Iterator<?> keys = cacheRes.keys();
+        def value;
+        while( keys.hasNext() ) {
+            String key = (String)keys.next();
+            value = cacheRes.get(key);
+            if(value instanceof JSONArray){
+                doc.append(key, reshapeArray((JSONArray)value))
+            }else {
+                doc.append(key, value);
+            }
+        }
+
+        doc.remove("StartTime");
+        doc.remove("EndTime");
+        doc.remove("User");
+        doc.remove("DocumentType");
+
+        doc.append("StartTime", new Date());
+        doc.append("EndTime", new Date());
+        doc.append("User", username);
+        doc.append("DocumentType", "Copy");
 
         coll.insertOne(doc)
 
         return 0
+    }
+    
+    def reshapeArray(JSONArray value){
+        def arrayList = new ArrayList();
+        if (value.length()> 1){
+            // Here I assume that all arrays contain n-tuples
+            def tupleLength = value.get(0).length()
+            for(int i=0; i < value.length(); i++){
+                if(tupleLength == 1){
+                    arrayList.add(i, value.get(i))
+                }else {
+                    def newArray = []
+                    for (int j = 0; j < tupleLength; j++) {
+                        newArray.add(j, value.get(i).get(j))
+                    }
+                    arrayList.add(i,newArray)
+                }
+            }
+        }
+        return arrayList;
     }
 
 /************************************************************************************************
