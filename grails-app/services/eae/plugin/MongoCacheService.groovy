@@ -55,6 +55,7 @@ class MongoCacheService {
         doc.append("User", user);
         doc.append("StartTime", new Date());
         doc.append("EndTime", new Date());
+        doc.append("DocumentType","Original");
         switch (typeOfWorkflow) {
             case "NoSQL":
                 cacheRecord = initJobNoSQL(doc, query);
@@ -112,7 +113,7 @@ class MongoCacheService {
         BasicDBObject query = new BasicDBObject();
         query.append('StudyName', params.studySelected);
         query.append('DataType', params.dataSelected);
-        query.append('Workflow', params.workflowSelected);
+//        query.append('Workflow', params.workflow);
         query.append('CustomField', params.customField.trim().split(",").sort(Collections.reverseOrder()).join(' ').trim());
         query.append('WorkflowSpecificParameters',params.workflowSpecificParameters);
         query.append("DocumentType", "Original");
@@ -158,10 +159,10 @@ class MongoCacheService {
      ************************************************************************************************/
 
     def initJobNoSQL(Document doc, query){
-        doc.append("StudyName", query.get("StudyName"))
-        doc.append("DataType", query.get("DataType"))
-        doc.append("CustomField", query.get("CustomField"))
-        doc.append("WorkflowSpecificParameters", query.get("WorkflowSpecificParameters"))
+        doc.append("StudyName", query.get("StudyName"));
+        doc.append("DataType", query.get("DataType"));
+        doc.append("CustomField", query.get("CustomField"));
+        doc.append("WorkflowSpecificParameters", query.get("WorkflowSpecificParameters"));
         return doc;
     }
 
@@ -215,7 +216,7 @@ class MongoCacheService {
 
         return 0
     }
-    
+
     def reshapeArray(JSONArray value){
         def arrayList = new ArrayList();
         if (value.length()> 1){
