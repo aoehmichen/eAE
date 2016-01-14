@@ -62,7 +62,7 @@
     }
 
     function refreshCache(){
-        populateCacheDIV(currentWorkflow)
+        populateCacheDIV(currentWorkflow);
     }
 
     function cacheDIVCustomName(name){

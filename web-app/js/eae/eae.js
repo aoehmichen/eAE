@@ -278,7 +278,7 @@ function showWorkflowOutput(currentworkflow, cacheQuery, workflowspecificparamet
  */
 function runNoSQLWorkflow(){
 
-    if(!customSanityCheck()){ // Must be implemented in
+    if(!customSanityCheck()){ // Must be implemented by _inFoobarAnalysis.gsp
         return false;
     }
 
@@ -288,11 +288,10 @@ function runNoSQLWorkflow(){
         data: prepareNoSQLFormDataEAE(workflowSelected)
     }).done(function(serverAnswer) {
         var jsonAnswer= $.parseJSON(serverAnswer);
-        console.log(jsonAnswer)
-        if(jsonAnswer.iscached === "NotCached"){
-            jQuery("#eaeoutputs").html(jsonAnswer.result);
+        if(jsonAnswer["iscached"] === "NotCached"){
+            jQuery("#eaeoutputs").html(jsonAnswer["result"]);
         }else{
-            buildOutput(jsonAnswer.result);
+            buildOutput($.parseJSON(jsonAnswer["result"]));
         }
     }).fail(function() {
         jQuery("#eaeoutputs").html("AJAX CALL FAILED!");

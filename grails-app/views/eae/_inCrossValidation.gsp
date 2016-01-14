@@ -102,7 +102,7 @@
 
         var startdate = new Date(jsonRecord.StartTime.$date);
         var endDate = new Date(jsonRecord.EndTime.$date);
-        var duration = (endDate - startdate)/1000
+        var duration = (endDate - startdate)/1000;
 
         _o.append($('<table/>').attr("id","cvtable").attr("class", "cachetable")
                 .append($('<tr/>')
