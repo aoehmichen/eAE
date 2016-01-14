@@ -132,15 +132,7 @@ class MongoCacheService {
         def cursor = coll.find(query).iterator();
         def rows;
 
-//        switch (workflowSelected) {
-//            case "NoSQL":
         rows = retrieveRows(cursor);
-//                break;
-//            default:
-//                rows = retrieveRowsDefault(cursor);
-//                break;
-//
-//        }
 
         JSONObject res =  new JSONObject();
         res.put("success", true)
@@ -196,9 +188,11 @@ class MongoCacheService {
             String key = (String)keys.next();
             value = cacheRes.get(key);
             if(value instanceof JSONArray){
-                doc.append(key, reshapeArray((JSONArray)value))
-            }else {
-                doc.append(key, value);
+                doc.append(key.toString(), reshapeArray((JSONArray)value));
+            }else{
+                if (!key.equals("_id")) {
+                    doc.append(key.toString(), value);
+                }
             }
         }
 
@@ -212,7 +206,9 @@ class MongoCacheService {
         doc.append("User", username);
         doc.append("DocumentType", "Copy");
 
-        coll.insertOne(doc)
+        coll.insertOne(doc);
+
+        mongoClient.close();
 
         return 0
     }

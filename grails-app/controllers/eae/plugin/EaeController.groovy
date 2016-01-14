@@ -104,6 +104,7 @@ class EaeController {
             if(!copyAlreadyExists) {
                 mongoCacheService.duplicateCacheForUser(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, workflow, username, result);
             }
+            result = eaeService.customPostProcessing(result, params.workflow)
         }else{
             result = "The job requested has been submitted by another user and is now computing. Please try again later for the result."
         }

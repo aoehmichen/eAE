@@ -288,6 +288,7 @@ function runNoSQLWorkflow(){
         data: prepareNoSQLFormDataEAE(workflowSelected)
     }).done(function(serverAnswer) {
         var jsonAnswer= $.parseJSON(serverAnswer);
+        console.log(jsonAnswer)
         if(jsonAnswer.iscached === "NotCached"){
             jQuery("#eaeoutputs").html(jsonAnswer.result);
         }else{
