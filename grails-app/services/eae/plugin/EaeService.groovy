@@ -9,8 +9,9 @@ import org.springframework.web.context.request.RequestContextHolder
 
 import static groovyx.net.http.ContentType.HTML
 import static groovyx.net.http.ContentType.TEXT
+import static groovyx.net.http.ContentType.JSON
 import static groovyx.net.http.Method.GET
-
+import static groovyx.net.http.Method.POST
 @Transactional
 class EaeService {
 
@@ -142,17 +143,33 @@ class EaeService {
 
 
     def eaeInterfaceSparkSubmit(String interfaceURL, Map paramMap ){
-        def url = interfaceURL + "interfaceEAE/sparkSubmit/runSubmit" //"http://146.169.32.106:8081/interfaceEAE/sparkSubmit/runSubmit"
+        //"http://146.169.32.106:8081/interfaceEAE/sparkSubmit/runSubmit"
+        def httpBuilder = new AsyncHTTPBuilder([uri: interfaceURL, poolSize: 10, contentType: JSON])
         def jsonBody = new JSONObject(paramMap).toString();
-        def rest = new RestBuilder();
+        def sparkSubmitStatus = httpBuilder.request(POST,TEXT) { req ->
+            uri.path = "interfaceEAE/sparkSubmit/runSubmit" // overrides any path in the default URL
+            body = jsonBody
+            response.success = { resp, reader ->
+                assert resp.status == 200
+                reader.text
+            }
 
-        def resp = rest.post(url){
-            accept("application/text")
-            contentType("application/json")
-            body(jsonBody)
+            // called only for a 404 (not found) status code:
+            response.'404' = { resp ->
+                println '404 - Not found'
+            }
         }
 
-        return resp.text
 
+//        def rest = new RestBuilder();
+//
+//        def resp = rest.post(url){
+//            accept("application/text")
+//            contentType("application/json")
+//            body(jsonBody)
+//        }
+//
+//        return resp.text
+            return sparkSubmitStatus.get()
     }
 }
