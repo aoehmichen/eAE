@@ -17,6 +17,15 @@ grails.project.dependency.resolution = {
     dependencies {
         compile 'org.mongodb:mongo-java-driver:3.2.0'
         compile 'org.apache.oozie:oozie-client:4.2.0'
+        compile 'org.apache.httpcomponents:httpcore:4.3.3'
+        compile 'org.apache.httpcomponents:httpclient:4.3.6'
+        compile ('org.codehaus.groovy.modules.http-builder:http-builder:0.5.1') {
+            excludes('httpcore', 'httpclient')
+        }
+//        runtime ('xerces:xercesImpl:2.8.1'){
+//            excludes "xml-apis"
+//        }
+        runtime ('net.sourceforge.nekohtml:nekohtml:1.9.21')
     }
     plugins {
         runtime ':resources:1.2.1'

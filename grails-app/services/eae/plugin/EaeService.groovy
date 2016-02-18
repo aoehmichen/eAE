@@ -2,8 +2,14 @@ package eae.plugin
 import com.mongodb.BasicDBObject
 import grails.plugins.rest.client.RestBuilder
 import grails.transaction.Transactional
+import groovyx.net.http.AsyncHTTPBuilder
 import org.apache.oozie.client.OozieClient
 import org.json.JSONObject
+import org.springframework.web.context.request.RequestContextHolder
+
+import static groovyx.net.http.ContentType.HTML
+import static groovyx.net.http.ContentType.TEXT
+import static groovyx.net.http.Method.GET
 
 @Transactional
 class EaeService {
@@ -98,18 +104,35 @@ class EaeService {
         }
     }
 
-    private def pePostProcessing(result){
+    private def pePostProcessing(result) {
         def topPathway = result.get('TopPathways').get(0).get(0)
-        def url = "http://www.kegg.jp/pathway/" + topPathway;
+        def url = "http://www.kegg.jp/pathway/" ;
         def listOfGenesIDs = result.get('ListOfGenesIDs').split(" ");
 
         for (int i = 0; i < listOfGenesIDs.size(); i++) {
             url += "+" + listOfGenesIDs[i]
         }
 
-        def rest = new RestBuilder();
-        def resp = rest.get(url);
-        result.put("KeggHTML", resp.text);
+        //def rest = new RestBuilder();
+        //def resp = rest.get(url);
+        def httpBuilder = new AsyncHTTPBuilder([uri: url, poolSize: 10, contentType: HTML])
+
+        def keggPageHTML = httpBuilder.request(GET,TEXT) { req ->
+            uri.path = topPathway // overrides any path in the default URL
+
+            response.success = { resp, reader ->
+                assert resp.status == 200
+            }
+
+            // called only for a 404 (not found) status code:
+            response.'404' = { resp ->
+                println 'Not found'
+            }
+        }
+
+
+        result.put("KeggHTML", keggPageHTML.get());
+        //result.put("KeggHTML", resp.text)
 
         return result;
     }
