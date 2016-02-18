@@ -109,19 +109,22 @@ class EaeService {
         def url = "http://www.kegg.jp/pathway/" ;
         def listOfGenesIDs = result.get('ListOfGenesIDs').split(" ");
 
-        for (int i = 0; i < listOfGenesIDs.size(); i++) {
-            url += "+" + listOfGenesIDs[i]
-        }
+
 
         //def rest = new RestBuilder();
         //def resp = rest.get(url);
         def httpBuilder = new AsyncHTTPBuilder([uri: url, poolSize: 10, contentType: HTML])
 
         def keggPageHTML = httpBuilder.request(GET,TEXT) { req ->
-            uri.path = topPathway // overrides any path in the default URL
+            def finalUri = topPathway;
+            for (int i = 0; i < listOfGenesIDs.size(); i++) {
+                finalUri += "+" + listOfGenesIDs[i]
+            }
+            uri.path = finalUri // overrides any path in the default URL
 
             response.success = { resp, reader ->
                 assert resp.status == 200
+                reader.text
             }
 
             // called only for a 404 (not found) status code:
