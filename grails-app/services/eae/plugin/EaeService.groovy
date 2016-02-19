@@ -1,17 +1,14 @@
 package eae.plugin
 import com.mongodb.BasicDBObject
-import grails.plugins.rest.client.RestBuilder
 import grails.transaction.Transactional
 import groovyx.net.http.AsyncHTTPBuilder
 import org.apache.oozie.client.OozieClient
 import org.json.JSONObject
-import org.springframework.web.context.request.RequestContextHolder
 
-import static groovyx.net.http.ContentType.HTML
-import static groovyx.net.http.ContentType.TEXT
-import static groovyx.net.http.ContentType.JSON
+import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.GET
 import static groovyx.net.http.Method.POST
+
 @Transactional
 class EaeService {
 
@@ -110,10 +107,6 @@ class EaeService {
         def url = "http://www.kegg.jp/pathway/" ;
         def listOfGenesIDs = result.get('ListOfGenesIDs').split(" ");
 
-
-
-        //def rest = new RestBuilder();
-        //def resp = rest.get(url);
         def httpBuilder = new AsyncHTTPBuilder([uri: url, poolSize: 10, contentType: HTML])
 
         def keggPageHTML = httpBuilder.request(GET,TEXT) { req ->
@@ -134,9 +127,7 @@ class EaeService {
             }
         }
 
-
         result.put("KeggHTML", keggPageHTML.get());
-        //result.put("KeggHTML", resp.text)
 
         return result;
     }
@@ -159,17 +150,6 @@ class EaeService {
                 println '404 - Not found'
             }
         }
-
-
-//        def rest = new RestBuilder();
-//
-//        def resp = rest.post(url){
-//            accept("application/text")
-//            contentType("application/json")
-//            body(jsonBody)
-//        }
-//
-//        return resp.text
-            return sparkSubmitStatus.get()
+        return sparkSubmitStatus.get()
     }
 }
