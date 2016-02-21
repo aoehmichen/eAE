@@ -31,6 +31,12 @@ class EaeNoSQLDataService {
         return listOfStudies;
     }
 
+    def getMongoData(String mongoURL, String dbName){
+        MongoCollection<Document> coll = getMongoCollection(mongoURL, dbName, "custom_data");
+        def dataTypes = coll.distinct("DataType",String.class).toList();
+        return dataTypes
+    }
+
     def getDataTypesForStudy(String mongoURL, String dbName, String selectedStudy){
         MongoCollection<Document> coll = getMongoCollection(mongoURL, dbName, "metadata");
         BasicDBObject query = new BasicDBObject();

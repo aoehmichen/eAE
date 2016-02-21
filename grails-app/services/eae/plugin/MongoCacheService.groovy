@@ -4,6 +4,8 @@ import com.mongodb.MongoClient
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoCursor
 import com.mongodb.client.MongoDatabase
+import com.mongodb.client.gridfs.GridFSBucket
+import com.mongodb.client.gridfs.GridFSBuckets
 import grails.transaction.Transactional
 import groovy.json.JsonSlurper
 import mongo.MongoCacheFactory
@@ -138,6 +140,29 @@ class MongoCacheService {
         res.put("totalCount", rows[1])
         res.put("jobs", rows[0])
 
+        mongoClient.close();
+
+        return res
+    }
+
+    def retrieveDataFromMongo(String mongoURL, String mongoPort, String dbName, String dataSelected){
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
+        MongoDatabase  db = mongoClient.getDatabase( dbName );
+
+        GridFSBucket gridFSBucket = GridFSBuckets.create(dbName);
+        gridFSFile.getFilename()
+
+
+        BasicDBObject query = new BasicDBObject("User", userName);
+        def cursor = coll.find(query).iterator();
+        def rows;
+
+        rows = retrieveRows(cursor);
+        gridFSFile.getFilename()
+        JSONObject res =  new JSONObject();
+        res.put("success", true)
+        res.put("result", rows[1])
+        res.put("dataDescription", rows[0])
         mongoClient.close();
 
         return res

@@ -60,8 +60,13 @@ class EaeController {
         } else {
             String workflowSelected = params.workflow;
             final def (NOSQL_URL, database) = noSQLParams();
-            render template: '/eae/in' + FilenameUtils.getBaseName(params.workflow).replaceAll("\\s",""),
-                    model:[ noSQLStudies: eaeNoSQLDataService.getStudies(NOSQL_URL, database, workflowSelected) ]
+            if(workflowSelected == "Mongo"){
+                render template: '/eae/in' + FilenameUtils.getBaseName(params.workflow).replaceAll("\\s", ""),
+                        model: [mongoDataTypes: eaeNoSQLDataService.getMongoData(NOSQL_URL, database)]
+            }else {
+                render template: '/eae/in' + FilenameUtils.getBaseName(params.workflow).replaceAll("\\s", ""),
+                        model: [noSQLStudies: eaeNoSQLDataService.getStudies(NOSQL_URL, database, workflowSelected)]
+            }
         }
     }
 

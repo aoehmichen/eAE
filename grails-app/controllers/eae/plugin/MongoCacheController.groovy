@@ -34,6 +34,14 @@ class MongoCacheController {
         render result;
     }
 
+    def retieveDataFromMongoFS = {
+        final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
+        final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
+        def dataSelected = params.dataSelected;
+        def result = mongoCacheService.retrieveDataFromMongo(MONGO_URL, MONGO_PORT, "eae", dataSelected);
+        render result
+    }
+
     private def mongoCacheQuery(def params, String workflowType){
         //String workflowSelected = params.workflow;
         BasicDBObject query = new BasicDBObject();

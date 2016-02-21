@@ -272,6 +272,7 @@ function showWorkflowOutput(currentworkflow, cacheQuery, workflowspecificparamet
     )
 }
 
+
 /**
  * Generic NoSQL workflow trigger
  * @returns {boolean}
