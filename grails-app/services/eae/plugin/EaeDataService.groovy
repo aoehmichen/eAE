@@ -126,13 +126,10 @@ class EaeDataService {
         }
 
         switch (workflow) {
-            case "pe":
-                fp = writePEFile(f, data);
-                break;
-            case "gt":
+            case "GeneralTesting":
                 fp = writeGTFile(f, data);
                 break;
-            case "cv":
+            case "CrossValidation":
                 int size_cohort1 = (int)data['size_cohort1'];
                 int size_cohort2 = (int)data['size_cohort2'];
                 def data_cohort1 = data['data_cohort1'];
@@ -142,7 +139,7 @@ class EaeDataService {
                 f.createNewFile()
                 fp = f.getAbsolutePath()
                 break;
-            case "lp":
+            case "LabelPropagation":
                 fp = writeLPFile(f, data);
                 break;
         }
@@ -205,10 +202,10 @@ class EaeDataService {
         }
 
         switch (workflow) {
-            case "gt":
+            case "GeneralTesting":
                 fp = writeGTFile(f, data);
                 break;
-            case "cv":
+            case "CrossValidation":
                 int size_cohort = (int)data['size_cohort1'];
                 def JSONcohort = new JsonSlurper().parseText(data['data_cohort1']);
                 def data_value = JSONcohort.highDimDataCV.PROBE as String[];
@@ -220,7 +217,7 @@ class EaeDataService {
                     writer.writeLine line
                 }
                 break;
-            case "lp":
+            case "LabelPropagation":
                 fp = writeLPFile(f, data);
                 break;
         }
