@@ -62,7 +62,7 @@ class EaeService {
 
     def customPreProcessing(params, workflow, MONGO_URL,MONGO_PORT,database,username){
         switch (workflow){
-            case "cv":
+            case "CrossValidation":
                 return cvPreprocessing(params, MONGO_URL,MONGO_PORT,database,username);
             default:
                 throw new Exception("The workflow in customPreProcessing doesn't exist.")
