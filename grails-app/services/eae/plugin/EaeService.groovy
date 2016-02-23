@@ -80,7 +80,7 @@ class EaeService {
 
         if( ((String)params.doEnrichment).toBoolean()){
             def query = new BasicDBObject("StudyName" , "PathwayEnrichment")
-            query.append("DataType","CrossValidation")
+            query.append("DataType","None")
             query.append("CustomField","")
             query.append("WorkflowSpecificParameters","Bonferroni")
             mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, "PathwayEnrichment", "NoSQL", username, query )
