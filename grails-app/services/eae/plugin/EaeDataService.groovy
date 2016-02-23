@@ -32,6 +32,8 @@ class EaeDataService {
         def patientIDs_cohort2 = rIID2 ? i2b2HelperService.getSubjectsAsList(rIID2).collect { it.toLong() } : []
         def size_cohort2 = patientIDs_cohort2.size();
 
+        parameterMap['patientIDs_cohort1'] = patientIDs_cohort1.join(' ')
+        parameterMap['patientIDs_cohort2'] = patientIDs_cohort2.join(' ')
         parameterMap['size_cohort1'] = size_cohort1
         parameterMap['size_cohort2'] = size_cohort2
 

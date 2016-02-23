@@ -100,12 +100,14 @@ class MongoCacheService {
         }
     }
 
-    def buildMongoCacheQuery(params){
+    def buildMongoCacheQuery(params,parameterMap){
         def conceptBoxes = new JsonSlurper().parseText(params.conceptBoxes)
         String workflowData = conceptBoxes.concepts[0][0];
         BasicDBObject query = new BasicDBObject();
-        query.append('result_instance_id1', params.result_instance_id1);
-        query.append('result_instance_id2', params.result_instance_id2);
+//        query.append('result_instance_id1', params.result_instance_id1);
+//        query.append('result_instance_id2', params.result_instance_id2);
+        query.append('patientIDs_cohort1', parameterMap['patientIDs_cohort1']);
+        query.append('patientIDs_cohort2', parameterMap['patientIDs_cohort2']);
         query.append('WorkflowData', workflowData);
         query.append("DocumentType", "Original");
         return query
@@ -265,8 +267,8 @@ class MongoCacheService {
 
     def initJobDefault(Document doc, BasicDBObject query){
         doc.append("WorkflowData", query.get("WorkflowData"));
-        doc.append("result_instance_id1", query.get("result_instance_id1"));
-        doc.append("result_instance_id2", query.get("result_instance_id2"));
+        doc.append("patientIDs_cohort1", query.get("patientIDs_cohort1"));
+        doc.append("patientIDs_cohort2", query.get("patientIDs_cohort2"));
         return doc;
     }
 
@@ -278,9 +280,9 @@ class MongoCacheService {
             JSONObject obj =  new JSONObject(cursor.next().toJson());
             result = new JSONObject();
             String highDimName =  obj.get("WorkflowData");
-            String result_instance_id1 =  obj.get("result_instance_id1");
-            String result_instance_id2 =  obj.get("result_instance_id2");
-            String name = "HighDim Data: " +  highDimName + "<br /> cohort 1 : " + result_instance_id1 + "<br /> cohort 2 : " + result_instance_id2;
+            String patientIDs_cohort1 =  obj.get("patientIDs_cohort1");
+            String patientIDs_cohort2 =  obj.get("patientIDs_cohort2");
+            String name = "HighDim Data: " +  highDimName + "<br /> cohort 1 : " + patientIDs_cohort1 + "<br /> cohort 2 : " + patientIDs_cohort2;
             result.put("status", obj.get("Status"));
             result.put("start", obj.get("StartTime"));
             result.put("name", name);

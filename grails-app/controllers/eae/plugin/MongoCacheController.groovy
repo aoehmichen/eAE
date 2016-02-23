@@ -54,8 +54,8 @@ class MongoCacheController {
                 break;
             default :
                 query.append("WorkflowData", params.WorkflowData);
-                query.append("result_instance_id1", params.result_instance_id1);
-                query.append("result_instance_id2", params.result_instance_id2);
+                query.append("patientIDs_cohort1", params.patientIDs_cohort1);
+                query.append("patientIDs_cohort2", params.patientIDs_cohort2);
                 break;
         }
         return query

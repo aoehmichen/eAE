@@ -129,7 +129,7 @@ class EaeController {
         String workflow = params.workflow;
 
         def parameterMap = eaeDataService.queryData(params);
-        def query = mongoCacheService.buildMongoCacheQuery(params);
+        def query = mongoCacheService.buildMongoCacheQuery(params,parameterMap);
 
         def result
         // We check if this query has already been made before
