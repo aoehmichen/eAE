@@ -61,7 +61,7 @@
     }
 
     function cacheDIVCustomName(job){
-        var name = "HighDim Data: " + job.workflowdata + "\<br /> cohort 1 : " + job.patientIDs_cohort1 + "\<br /> cohort 2 : " + job.patientIDs_cohort2;
+        var name = "HighDim Data: " + job.workflowdata + "\<br /> cohort 1 : " + job.patientids_cohort1 + "\<br /> cohort 2 : " + job.patientids_cohort2;
         var holder =  $('<td/>');
         holder.html(name);
         return {
@@ -87,8 +87,8 @@
         var data = {
             workflow: currentworkflow,
             WorkflowData: tmpData[0],
-            patientIDs_cohort1: tmpData[1],
-            patientIDs_cohort2: tmpData[2]
+            patientids_cohort1: tmpData[1],
+            patientids_cohort2: tmpData[2]
         };
         return data;
     }
