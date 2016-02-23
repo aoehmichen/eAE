@@ -78,12 +78,12 @@ class EaeService {
         String resampling = "1";
         String numberOfFeaturesToRemove = "0.4"
 
-        if( params.doEnrichment){
+        if( ((String)params.doEnrichment).toBoolean()){
             def query = new BasicDBObject("StudyName" , "PathwayEnrichment")
             query.append("DataType","CrossValidation")
             query.append("CustomField","")
             query.append("WorkflowSpecificParameters","Bonferroni")
-            mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, "PathwayEnrichement", "NoSQL", username, query )
+            mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, "PathwayEnrichment", "NoSQL", username, query )
             doEnrichement = "true"
         }
 
