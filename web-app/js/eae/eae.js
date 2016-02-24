@@ -328,7 +328,7 @@ function runWorkflow(){
         if(jsonAnswer.iscached === "NotCached"){
             jQuery("#eaeoutputs").html(jsonAnswer.result);
         }else{
-            buildOutput(jsonAnswer.result);
+            buildOutput($.parseJSON(jsonAnswer.result));
         }
     }).fail(function() {
         jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
