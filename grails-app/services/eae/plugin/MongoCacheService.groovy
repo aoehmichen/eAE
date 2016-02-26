@@ -104,8 +104,6 @@ class MongoCacheService {
         def conceptBoxes = new JsonSlurper().parseText(params.conceptBoxes)
         String workflowData = conceptBoxes.concepts[0][0];
         BasicDBObject query = new BasicDBObject();
-//        query.append('result_instance_id1', params.result_instance_id1);
-//        query.append('result_instance_id2', params.result_instance_id2);
         query.append('patientids_cohort1', parameterMap['patientids_cohort1']);
         query.append('patientids_cohort2', parameterMap['patientids_cohort2']);
         query.append('WorkflowData', workflowData);
@@ -243,7 +241,15 @@ class MongoCacheService {
         def arrayList = new ArrayList();
         if (value.length()> 1){
             // Here I assume that all arrays contain n-tuples
-            def tupleLength = value.get(0).length()
+            def tupleLength=0;
+            def type = value.get(0).getClass();
+            if( type == Double.class || type == Float.class || type == Long.class ||
+                    type == Integer.class || type == Short.class || type == Character.class ||
+                    type == Byte.class || type == Boolean.class || type == String.class){
+                tupleLength = 1
+            }else{
+                tupleLength = value.get(0).length();
+            }
             for(int i=0; i < value.length(); i++){
                 if(tupleLength == 1){
                     arrayList.add(i, value.get(i))

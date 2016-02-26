@@ -149,14 +149,14 @@ class EaeController {
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
             result = mongoCacheService.retrieveValueFromCache(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, workflow, query);
-//            query.append("User", username);
-//            query.removeField("DocumentType");
-//            query.append("DocumentType", "Copy")
-//            Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_CACHE_URL, MONGO_CACHE_PORT,database, workflow, userQuery);
-//            if(!copyAlreadyExists) {
-//                mongoCacheService.duplicateCacheForUser(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, workflow, username, result);
-//            }
-//            result = eaeService.customPostProcessing(result, params.workflow)
+            query.append("User", username);
+            query.removeField("DocumentType");
+            query.append("DocumentType", "Copy")
+            Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_CACHE_URL, MONGO_CACHE_PORT,database, workflow, query);
+            if(!copyAlreadyExists) {
+                mongoCacheService.duplicateCacheForUser(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, workflow, username, result);
+            }
+            result = eaeService.customPostProcessing(result, params.workflow)
         }else{
             result = "Your Job has been submitted. Please come back later for the result"
         }
