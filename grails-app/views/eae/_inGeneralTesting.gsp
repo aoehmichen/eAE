@@ -66,7 +66,7 @@
     }
 
     function cacheDIVCustomName(job){
-        var name = "Study Selected : " + job.studyselected + "\<br /> DataSelected : " + job.dataselected ;
+        var name = "Study Selected : " + job.studyname + "\<br /> DataSelected : " + job.datatype ;
         var holder =  $('<td/>');
         holder.html(name);
         return {
@@ -74,4 +74,61 @@
             name: name
         };
     }
+
+    /**
+     *   Display the result retieved from the cache
+     *   @param jsonRecord
+     */
+    function buildOutput(jsonRecord){
+        var _o = $('#eaeoutputs');
+
+        _o.append($('<table/>').attr("id","gttable").append($('<tr/>')
+                        .append($('<th/>').text("Name :"))
+                        .append($('<th/>').text(jsonRecord.PearsonCorrelationHeatmapName))
+        ));
+        $('#gttable').append($('<tr/>')
+                        .append($('<td/>').append($('<div/>').attr('id',"imageerror")))
+                        .append($('<td/>').append($('<img/>').attr("id","correlationHeatmap")))
+        );
+
+
+        jQuery.ajax({
+            url: pageInfo.basePath + '/mongoCache/retieveDataFromMongoFS',
+            type: "POST",
+            timeout: '600000',
+            data: {'FileName': jsonRecord.PearsonCorrelationHeatmapName}
+        }).done(function(serverAnswer) {
+            //var serverAnswerJSON = $.parseJSON(serverAnswer);
+
+            //var arrayBufferView = new Array(serverAnswerJSON.bytearray);
+           // var blob = new Blob([ serverAnswerJSON.bytearray ], { type: "image/png" });
+            //var urlCreator = window.URL || window.webkitURL;
+           // var imageUrl = urlCreator.createObjectURL(blob);
+            $('#correlationHeatmap').attr("src", 'data:' + serverAnswer);
+        }).fail(function() {
+            $('#correlationHeatmap').html("Cannot get the Image!")
+        });
+
+//        _o.append($('<div/>').attr('id', "cvPerformanceGraph"));
+        // d3.select('#cvPerformanceGraph').datum(formatData(jsonRecord.PerformanceCurve)).call(chart);
+    }
+
+    function prepareDataForMongoRetrievale(currentworkflow, cacheQuery) {
+        var tmpData = [];
+        var splitTerms = cacheQuery.split('<br />');
+        $.each(splitTerms, function (i, e) {
+            var chunk = e.split(':');
+            tmpData.push(chunk[1].trim());
+        });
+        var data = {
+            Workflow: currentworkflow,
+            WorkflowType: "NoSQL",
+            StudyName: tmpData[0],
+            DataType: tmpData[1],
+            CustomField: 'None',
+            WorkflowSpecificParameters: 'None'
+        };
+        return data;
+    }
+
 </script>

@@ -144,27 +144,23 @@ class MongoCacheService {
         return res
     }
 
-    def retrieveDataFromMongo(String mongoURL, String mongoPort, String dbName, String dataSelected){
+    def retrieveDataFromMongo(String mongoURL, String mongoPort, String dbName, String fileName){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase  db = mongoClient.getDatabase( dbName );
+        GridFSBucket gridFSBucket = GridFSBuckets.create(db);
 
-        GridFSBucket gridFSBucket = GridFSBuckets.create(dbName);
-        gridFSFile.getFilename()
+        OutputStream outputstream = new ByteArrayOutputStream();
+        gridFSBucket.downloadToStreamByName(fileName, outputstream);
 
-
-        BasicDBObject query = new BasicDBObject("User", userName);
-        def cursor = coll.find(query).iterator();
-        def rows;
-
-        rows = retrieveRows(cursor);
-        gridFSFile.getFilename()
         JSONObject res =  new JSONObject();
-        res.put("success", true)
-        res.put("result", rows[1])
-        res.put("dataDescription", rows[0])
+        //byte[] data = outputstream.toByteArray();
+//        String stringifyData = new String(outputstream.toByteArray(), StandardCharsets.UTF_8);
+//        res.put("bytearray",stringifyData);
+//        //res.put("bytearray",outputstream)
+//        res.put("filename", fileName);
         mongoClient.close();
 
-        return res
+        return outputstream.toByteArray()
     }
 
     /************************************************************************************************

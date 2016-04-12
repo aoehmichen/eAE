@@ -83,8 +83,8 @@
     }
 
     function prepareDataForMongoRetrievale(currentworkflow, cacheQuery, workflowspecificparameters) {
-        var data = {workflow: currentworkflow, studyname: 'PathwayEnrichment', datatype: 'None', customfield: cacheQuery,
-                    workflowspecificparameters: workflowspecificparameters, workflowtype: "NoSQL"};
+        var data = {Workflow: currentworkflow, StudyName: 'PathwayEnrichment', DataType: 'None', CustomField: cacheQuery,
+            WorkflowSpecificParameters: workflowspecificparameters, WorkflowType: "NoSQL"};
         return data;
     }
 

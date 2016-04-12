@@ -27,9 +27,9 @@ class MongoCacheController {
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
 
-        BasicDBObject query = mongoCacheQuery(params, params.workflowtype);
-        def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, "eae", params.workflow, query);
-        result = eaeService.customPostProcessing(result, params.workflow)
+        BasicDBObject query = mongoCacheQuery(params, params.WorkflowType);
+        def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, "eae", params.Workflow, query);
+        result = eaeService.customPostProcessing(result, params.Workflow)
 
         render result;
     }
@@ -37,20 +37,19 @@ class MongoCacheController {
     def retieveDataFromMongoFS = {
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
-        def dataSelected = params.dataSelected;
+        def dataSelected = params.FileName;
         def result = mongoCacheService.retrieveDataFromMongo(MONGO_URL, MONGO_PORT, "eae", dataSelected);
         render result
     }
 
     private def mongoCacheQuery(def params, String workflowType){
-        //String workflowSelected = params.workflow;
         BasicDBObject query = new BasicDBObject();
         switch (workflowType){
             case "NoSQL":
-                query.append("StudyName", params.studyname);
-                query.append("DataType", params.datatype);
-                query.append("CustomField", params.customfield);
-                query.append("WorkflowSpecificParameters",params.workflowspecificparameters)
+                query.append("StudyName", params.StudyName);
+                query.append("DataType", params.DataType);
+                query.append("CustomField", params.CustomField);
+                query.append("WorkflowSpecificParameters",params.WorkflowSpecificParameters)
                 break;
             default :
                 query.append("WorkflowData", params.WorkflowData);

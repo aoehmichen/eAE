@@ -56,7 +56,7 @@
         jQuery.ajax({
             url: pageInfo.basePath + '/mongoCache/retieveDataFromMongoFS',
             type: "POST",
-            data: {'dataSelected':$('#dataSelect').val()}
+            data: {'FileName':$('#dataSelect').val()}
         }).done(function(serverAnswer) {
             var jsonAnswer= $.parseJSON(serverAnswer);
             buildOutput(jsonAnswer);

@@ -85,7 +85,7 @@
             tmpData.push(chunk[1].trim());
         });
         var data = {
-            workflow: currentworkflow,
+            Workflow: currentworkflow,
             WorkflowData: tmpData[0],
             patientids_cohort1: tmpData[1],
             patientids_cohort2: tmpData[2]

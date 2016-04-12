@@ -142,7 +142,6 @@ function saneEAE() { // FIXME: somehow check for subset2 to be non empty iff two
  * @param eae
  * @returns {Array}
  */
-
 function formatData(eae) {
     var data = [];
     for (var i = 0; i < eae.length; i++)
@@ -151,6 +150,31 @@ function formatData(eae) {
             y: eae[i][1]
         })
     return data
+}
+
+/**
+ *
+ * @param imageName
+ * @returns {byteArray}
+ */
+function insertImageFromMongo(imageName, holderName){
+
+    jQuery.ajax({
+        url: pageInfo.basePath + '/eae/retieveDataFromMongoFS',
+        type: "POST",
+        timeout: '600000',
+        data: {'FileName': imageName}
+    }).done(function(serverAnswer) {
+        console.log("I am here")
+        var arrayBufferView = new Uint8Array(serverAnswer);
+        var blob = new Blob([ arrayBufferView ], { type: "image/jpeg" });
+        var urlCreator = window.URL || window.webkitURL;
+        var imageUrl = urlCreator.createObjectURL(blob);
+        $(holderName).attr("src", imageUrl);
+        return "Image found"
+    }).fail(function() {
+       return "Cannot get the Image!"
+    });
 }
 
 /**
@@ -188,7 +212,6 @@ function displayDataForStudy(){
         _t.append($('<select/>').attr("id", "dataTypeSelect"));
         var _h = $('#dataTypeSelect');
         var dataListJSON= $.parseJSON(dataList);
-        console.log(dataListJSON.dataList);
         $.each(dataListJSON.dataList, function (i, e) {
             console.log(e);
             _h.append($("<option>")
