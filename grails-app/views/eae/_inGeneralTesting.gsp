@@ -104,7 +104,7 @@
            // var blob = new Blob([ serverAnswerJSON.bytearray ], { type: "image/png" });
             //var urlCreator = window.URL || window.webkitURL;
            // var imageUrl = urlCreator.createObjectURL(blob);
-            $('#correlationHeatmap').attr("src", 'data:' + serverAnswer);
+            $('#correlationHeatmap').attr("src", serverAnswer );
         }).fail(function() {
             $('#correlationHeatmap').html("Cannot get the Image!")
         });

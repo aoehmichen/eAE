@@ -9,9 +9,12 @@ import com.mongodb.client.gridfs.GridFSBuckets
 import grails.transaction.Transactional
 import groovy.json.JsonSlurper
 import mongo.MongoCacheFactory
+import org.apache.commons.codec.binary.Base64
 import org.bson.Document
 import org.json.JSONArray
 import org.json.JSONObject
+
+import javax.persistence.Convert
 
 @Transactional
 class MongoCacheService {
@@ -160,7 +163,10 @@ class MongoCacheService {
 //        res.put("filename", fileName);
         mongoClient.close();
 
-        return outputstream.toByteArray()
+        String imageBase64 = Base64.encodeBase64(outputstream.toByteArray());
+        String imageSrc = String.format("data:image/gif;base64,{0}", imageBase64);
+
+        return imageSrc
     }
 
     /************************************************************************************************
