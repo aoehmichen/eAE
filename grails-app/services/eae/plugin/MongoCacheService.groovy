@@ -53,7 +53,7 @@ class MongoCacheService {
 
         Document cacheRecord = new Document();
         Document doc = new Document();
-        doc.append("Status", "started");
+        doc.append("Status", "Started");
         doc.append("User", user);
         doc.append("StartTime", new Date());
         doc.append("EndTime", new Date());
@@ -65,7 +65,6 @@ class MongoCacheService {
             default:
                 cacheRecord = initJobDefault(doc, query);
                 break;
-
         }
 
         coll.insertOne(cacheRecord)
@@ -92,7 +91,7 @@ class MongoCacheService {
         }else{
             if (recordsCount == 0){
                 return "NotCached"
-            }else if(cacheItem.get("Status") == "started" ){
+            }else if(cacheItem.get("Status") == "Started" ){
                 return "started"
             }else{
                 return "Completed"
@@ -123,7 +122,7 @@ class MongoCacheService {
     /**
      * Method that will get the list of jobs to show in the eae jobs table
      */
-    def getjobsFromMongo(String mongoURL, String mongoPort, String dbName, String userName, String workflowSelected) {
+    def getJobsFromMongo(String mongoURL, String mongoPort, String dbName, String userName, String workflowSelected) {
 
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase  db = mongoClient.getDatabase( dbName );

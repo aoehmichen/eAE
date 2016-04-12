@@ -18,7 +18,7 @@ class MongoCacheController {
         if(params.workflow == null) {
             throw new RuntimeException("The params in MongoCacheController are Null")
         }
-        def result = mongoCacheService.getjobsFromMongo(MONGO_URL, MONGO_PORT, "eae", username, params.workflow )
+        def result = mongoCacheService.getJobsFromMongo(MONGO_URL, MONGO_PORT, "eae", username, params.workflow )
 
         render result
     }

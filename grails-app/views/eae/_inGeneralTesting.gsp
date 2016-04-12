@@ -49,10 +49,10 @@
         var data = [];
         var studySelected = $('#noSQLStudies').val();
         var dataSelected = $('#dataAvailableDiv').val();
-        data.push({name: 'studySelected', value: studySelected});
-        data.push({name: 'dataSelected', value: dataSelected});
-        data.push({name: 'customField', value: 'None'});
-        data.push({name: 'workflowSpecificParameters', value: 'None'});
+        data.push({name: 'StudySelected', value: studySelected});
+        data.push({name: 'DataSelected', value: dataSelected});
+        data.push({name: 'CustomField', value: 'None'});
+        data.push({name: 'WorkflowSpecificParameters', value: 'None'});
         return data;
     }
 
@@ -65,9 +65,13 @@
         populateCacheDIV(currentWorkflow);
     }
 
-    function cacheDIVCustomName(name){
+    function cacheDIVCustomName(job){
+        var name = "Study Selected : " + job.studyselected + "\<br /> DataSelected : " + job.dataselected ;
         var holder =  $('<td/>');
         holder.html(name);
-        return holder;
+        return {
+            holder: holder,
+            name: name
+        };
     }
 </script>
