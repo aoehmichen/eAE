@@ -26,11 +26,9 @@ class MongoCacheController {
     def retrieveSingleCachedJob = {
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
-
         BasicDBObject query = mongoCacheQuery(params, params.WorkflowType);
         def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, "eae", params.Workflow, query);
         result = eaeService.customPostProcessing(result, params.Workflow)
-
         render result;
     }
 
@@ -38,8 +36,8 @@ class MongoCacheController {
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
         def dataSelected = params.FileName;
-        def result = mongoCacheService.retrieveDataFromMongo(MONGO_URL, MONGO_PORT, "eae", dataSelected);
-        render result
+        def file = mongoCacheService.retrieveDataFromMongoFS(MONGO_URL, MONGO_PORT, "eae", dataSelected);
+        render file
     }
 
     private def mongoCacheQuery(def params, String workflowType){

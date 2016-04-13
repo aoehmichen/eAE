@@ -9,18 +9,14 @@ import com.mongodb.client.gridfs.GridFSBuckets
 import grails.transaction.Transactional
 import groovy.json.JsonSlurper
 import mongo.MongoCacheFactory
-import org.apache.commons.codec.binary.Base64
 import org.bson.Document
 import org.json.JSONArray
 import org.json.JSONObject
-
-import javax.persistence.Convert
 
 @Transactional
 class MongoCacheService {
 
     def retrieveValueFromCache(String mongoURL, String mongoPort, String dbName, String collectionName, BasicDBObject query) {
-
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort)
         MongoDatabase db = mongoClient.getDatabase( dbName )
         MongoCollection<Document> coll = db.getCollection(collectionName)
@@ -147,24 +143,21 @@ class MongoCacheService {
         return res
     }
 
-    def retrieveDataFromMongo(String mongoURL, String mongoPort, String dbName, String fileName){
-        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
-        MongoDatabase  db = mongoClient.getDatabase( dbName );
+    def retrieveDataFromMongoFS(String mongoURL, String mongoPort, String dbName, String fileName){
+        String extension = fileName.split('\\.')[1]
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL, mongoPort);
+        MongoDatabase db = mongoClient.getDatabase(dbName);
         GridFSBucket gridFSBucket = GridFSBuckets.create(db);
 
         OutputStream outputstream = new ByteArrayOutputStream();
         gridFSBucket.downloadToStreamByName(fileName, outputstream);
+        String imageBase64 = outputstream.toByteArray().encodeAsBase64().toString()
 
-        JSONObject res =  new JSONObject();
-        //byte[] data = outputstream.toByteArray();
-//        String stringifyData = new String(outputstream.toByteArray(), StandardCharsets.UTF_8);
-//        res.put("bytearray",stringifyData);
-//        //res.put("bytearray",outputstream)
-//        res.put("filename", fileName);
+        outputstream.flush();
+        outputstream.close()
         mongoClient.close();
 
-        String imageBase64 = Base64.encodeBase64(outputstream.toByteArray());
-        String imageSrc = String.format("data:image/gif;base64,{0}", imageBase64);
+        String imageSrc = "data:image/"+ extension + ";base64,"+imageBase64;
 
         return imageSrc
     }

@@ -66,7 +66,7 @@
     }
 
     function cacheDIVCustomName(job){
-        var name = "Study Selected : " + job.studyname + "\<br /> DataSelected : " + job.datatype ;
+        var name = "Study Selected : " + job.studyname + "\<br /> Data Selected : " + job.datatype ;
         var holder =  $('<td/>');
         holder.html(name);
         return {
@@ -98,13 +98,7 @@
             timeout: '600000',
             data: {'FileName': jsonRecord.PearsonCorrelationHeatmapName}
         }).done(function(serverAnswer) {
-            //var serverAnswerJSON = $.parseJSON(serverAnswer);
-
-            //var arrayBufferView = new Array(serverAnswerJSON.bytearray);
-           // var blob = new Blob([ serverAnswerJSON.bytearray ], { type: "image/png" });
-            //var urlCreator = window.URL || window.webkitURL;
-           // var imageUrl = urlCreator.createObjectURL(blob);
-            $('#correlationHeatmap').attr("src", serverAnswer );
+            $('#correlationHeatmap').attr("src", serverAnswer);
         }).fail(function() {
             $('#correlationHeatmap').html("Cannot get the Image!")
         });
