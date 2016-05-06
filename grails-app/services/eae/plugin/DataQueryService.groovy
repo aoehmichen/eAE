@@ -1,4 +1,4 @@
-package smartR.plugin
+package eae.plugin
 
 import org.transmartproject.rest.marshallers.ObservationWrapper
 import org.transmartproject.core.ontology.OntologyTerm

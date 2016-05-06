@@ -1,4 +1,4 @@
-class smartRGrailsPlugin {
+class eAEGrailsPlugin {
     // the plugin version
     def version = "0.5"
     // the version or versions of Grails the plugin is designed for
@@ -43,7 +43,7 @@ class smartRGrailsPlugin {
     }
 
     def doWithSpring = {
-        dataQueryService(smartR.plugin.DataQueryService) {
+        dataQueryService(eae.plugin.DataQueryService) {
             studiesResourceService = ref('studiesResourceService')
             conceptsResourceService = ref('conceptsResourceService')
             clinicalDataResourceService = ref('clinicalDataResourceService')
