@@ -199,17 +199,17 @@ class EaeController {
      *   @return {str}: path to the script folder
      */
     def getWebAppFolder() {
-        def smartRFileSystemName = applicationContext.getBean('pluginManager').allPlugins.sort({ it.name.toUpperCase() }).find { it.fileSystemName ==~ /smart-r-\w.\w/}
+        def eaeFileSystemName = applicationContext.getBean('pluginManager').allPlugins.sort({ it.name.toUpperCase() }).find { it.fileSystemName ==~ /eae-\w.\w/}
         if (Environment.current == Environment.DEVELOPMENT) {
             return org.codehaus.groovy.grails.plugins.GrailsPluginUtils
-                    .getPluginDirForName('smart-r')
+                    .getPluginDirForName('eae')
                     .getFile()
                     .absolutePath + '/web-app/'
         } else {
             return grailsApplication
                     .mainContext
                     .servletContext
-                    .getRealPath('/plugins/') + '/'+ smartRFileSystemName.fileSystemName.toString() + '/'
+                    .getRealPath('/plugins/') + '/'+ eaeFileSystemName.fileSystemName.toString() + '/'
         }
     }
 }
