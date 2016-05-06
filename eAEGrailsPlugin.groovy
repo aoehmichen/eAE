@@ -9,9 +9,9 @@ class smartRGrailsPlugin {
     ]
 
     // TODO Fill in these fields
-    def title = "SmartR Plugin" // Headline display name of the plugin
-    def author = "Sascha Herzinger"
-    def authorEmail = "sascha.herzinger@uni.lu"
+    def title = "eAE" // Headline display name of the plugin
+    def author = "Axel Oehmichen"
+    def authorEmail = "ao1011@imperial.ac.uk"
     def description =
             '''
             Brief summary/description of the plugin.

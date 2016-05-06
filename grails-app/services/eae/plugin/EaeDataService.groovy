@@ -17,7 +17,11 @@ class EaeDataService {
     def i2b2HelperService
     def dataQueryService
 
-
+    /**
+     *  The method retrieves the selected data from tranSMART database.
+     * @param params
+     * @return {dict}
+     */
     def queryData(params) {
 
         def parameterMap = createParameterMap(params)
@@ -94,6 +98,17 @@ class EaeDataService {
         return parameterMap
     }
 
+    /**
+     * Intermediary method for the transfer of the data files to HDFS
+     * @param username
+     * @param mongoDocumentID
+     * @param workflow
+     * @param data
+     * @param scriptDir
+     * @param sparkURL
+     * @param typeOfFile
+     * @return
+     */
     def sendToHDFS(String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL, String typeOfFile){
         def fileToTransfer = "";
         switch (typeOfFile) {
@@ -107,7 +122,16 @@ class EaeDataService {
         return fileToTransfer;
     }
 
-
+    /**
+     * This method exectues on the flight curation for the data to fit the required format by the workflow.
+     * @param username
+     * @param mongoDocumentID
+     * @param workflow
+     * @param data
+     * @param scriptDir
+     * @param sparkURL
+     * @return
+     */
     def  sendDataToHDFS (String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL) {
         def script = scriptDir +'transferToHDFS.sh';
         def fileToTransfer = workflow + "-" + username + "-" + mongoDocumentID + ".txt";
@@ -155,17 +179,14 @@ class EaeDataService {
         return fileToTransfer
     }
 
-    def writePEFile(File f, genesList){
-
-        f.withWriter('utf-8') { writer ->
-            writer.writeLine genesList
-        }
-
-        f.createNewFile()
-        String fp = f.getAbsolutePath()
-        return fp
-    }
-
+    /**
+     * This method writes the retrived values to file.
+     * @param f
+     * @param size_cohort
+     * @param data_cohort
+     * @param k
+     * @return {file}
+     */
     def writeCVFile(File f, int size_cohort, data_cohort, String k){
         def JSONcohort = new JsonSlurper().parseText(data_cohort);
         def data_value = JSONcohort.highDimDataCV.VALUE as Float[];
@@ -183,7 +204,16 @@ class EaeDataService {
         return f
     }
 
-
+    /**
+     * This method exectues on the flight curation for the additional data to fit the required format by the workflow.
+     * @param username
+     * @param mongoDocumentID
+     * @param workflow
+     * @param data
+     * @param scriptDir
+     * @param sparkURL
+     * @return
+     */
     def  sendAdditionalToHDFS(String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL){
         def script = scriptDir +'transferToHDFS.sh';
         def fileToTransfer = workflow + "-additional" + "-" + username + "-" + mongoDocumentID + ".txt";

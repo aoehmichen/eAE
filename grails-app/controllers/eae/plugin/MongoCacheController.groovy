@@ -9,6 +9,8 @@ class MongoCacheController {
 
     /**
      * Method that will create the get the list of jobs to show in the etriks jobs tab
+     *
+     * @return {json} : returns a json containing all the jobs for the specified user and workflow
      */
     def retrieveCachedJobs = {
         def username = springSecurityService.getPrincipal().username;
@@ -23,6 +25,11 @@ class MongoCacheController {
         render result
     }
 
+    /**
+     * Method that retrieves a single record from the cache
+     *
+     * @return {json} : returns the mongo document
+     */
     def retrieveSingleCachedJob = {
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
@@ -32,6 +39,12 @@ class MongoCacheController {
         render result;
     }
 
+    /**
+     * Method that retrieves a file from Mongo. It is currently used to support image storage and display in tranSMART.
+     * NB: this function supports DICOM images but it require some further dev of the front end to get the full dicom support in tm.
+     *
+     * @return {str} : a serialized image contained in a string.
+     */
     def retieveDataFromMongoFS = {
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
@@ -40,6 +53,12 @@ class MongoCacheController {
         render file
     }
 
+    /**
+     * Create the basic query with the appropriate fields depending if it is a SQL or NoSQL pipeline.
+     * @param params
+     * @param workflowType
+     * @return {json} : query fields use for mongo.
+     */
     private def mongoCacheQuery(def params, String workflowType){
         BasicDBObject query = new BasicDBObject();
         switch (workflowType){

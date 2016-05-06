@@ -153,7 +153,8 @@ function formatData(eae) {
 }
 
 /**
- *
+ *  Method to display a standard png or jpeg image into tm.
+ *  The image is retrieved from mongoFS
  * @param imageName
  * @returns {byteArray}
  */
@@ -277,7 +278,7 @@ function populateCacheDIV(currentworkflow){
 }
 
 /**
- *
+ *  This method builds the output in tm interface once the result has been retirved from mongo
  * @param currentworkflow
  * @param cacheQuery
  */
@@ -290,6 +291,8 @@ function showWorkflowOutput(currentworkflow, cacheQuery, workflowspecificparamet
         data: prepareDataForMongoRetrievale(currentworkflow, cacheQuery, workflowspecificparameters) //method MUST be implemented by _inFoobarAnalysis.gsp
     }).done(function(cachedJob) {
         var jsonRecord= $.parseJSON(cachedJob);
+        // The method buildOutput must be implemented by _inFoobarAnalysis.gsp
+        // this enables us to build custom outputs for each workflow
         buildOutput(jsonRecord);
         }
     )
@@ -326,7 +329,6 @@ function runNoSQLWorkflow(){
  * Generic workflow trigger
  * @returns {boolean}
  */
-
 function runWorkflow(){
     conceptBoxes = [];
     sanityCheckErrors = [];
@@ -360,7 +362,7 @@ function runWorkflow(){
 
 /*****************************************************
  *
- *     D3 Section
+ *     D3 Section for workflows
  *
  ****************************************************/
 

@@ -72,6 +72,8 @@ class EaeController {
 
     /**
      * Sends back the list of available High dimensional data for the selected study.
+     *
+     * @return {list(str)}
      */
     def renderDataList = {
         final def (NOSQL_URL, database) = noSQLParams();
@@ -79,6 +81,11 @@ class EaeController {
         render listOfData;
     }
 
+    /**
+     * Workflows which are using data coming from Mongo trigger this function.
+     *
+     * @return {json}: returns the result if it was cached or a message if it wasn't.
+     */
     def runNoSQLWorkflow = {
         final def (SPARK_URL,MONGO_CACHE_URL,MONGO_CACHE_PORT,scriptDir,username)= cacheParams();
         // final String NOSQL_URL, database = noSQLParams();
@@ -86,12 +93,13 @@ class EaeController {
         final def INTERFACE_URL = interfaceParams();
         String workflow = params.workflow;
 
+        // We start building the mongo cache query and check if the workflow has already been run before
         def query = mongoCacheService.buildMongoCacheQueryNoSQL(params);
         String cached = mongoCacheService.checkIfPresentInCache(MONGO_CACHE_URL, MONGO_CACHE_PORT,database, workflow, query)
 
-        def workflowParameters = [:]
         // We check if this query has already been made before
         def result
+        def workflowParameters = [:]
         if(cached == "NotCached") {
             String mongoDocumentID = mongoCacheService.initJob(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, workflow, "NoSQL", username, query)
             workflowParameters['workflow'] = workflow;
@@ -121,6 +129,11 @@ class EaeController {
         render answer
     }
 
+    /**
+     * Workflows which are using data coming from tranSMART trigger this function.
+     *
+     * @return {json}: returns the result if it was cached or a message if it wasn't.
+     */
     def runWorkflow = {
         final def (SPARK_URL,MONGO_CACHE_URL,MONGO_CACHE_PORT,scriptDir,username)= cacheParams();
         //final def (OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT) = oozieParams();
@@ -128,17 +141,25 @@ class EaeController {
         String database = "eae";
         String workflow = params.workflow;
 
+        // We start building the mongo cache query and check if the workflow has already been run before
         def parameterMap = eaeDataService.queryData(params);
         def query = mongoCacheService.buildMongoCacheQuery(params,parameterMap);
 
-        def result
+
         // We check if this query has already been made before
         String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_CACHE_URL, (String)MONGO_CACHE_PORT, database, workflow, query)
+        def result
         if(cached == "NotCached") {
+            // The pre processing step is required to add default parameters that are not available in the UI to set but required by the workflow.
+            // this could be removed in the eventuallity all parameters can be set in the workflow UI for all workflows.
             def workflowParameters = eaeService.customPreProcessing(params, workflow, MONGO_CACHE_URL, MONGO_CACHE_PORT, database, username)
+
             String mongoDocumentID = mongoCacheService.initJob(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, workflow, "SQL", username, query)
+
+            // Transfer the data file and additional file to HDFS
             String dataFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "data")
             String additionalFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "additional")
+
             workflowParameters['mongoDocumentID'] = mongoDocumentID;
             workflowParameters['workflowType'] = "SQL";
             workflowParameters['dataFileName'] = dataFileName;
@@ -147,13 +168,16 @@ class EaeController {
             //eaeService.scheduleOOzieJob(OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT, workflow, workflowParameters);
             //eaeService.sparkSubmit(scriptDir, SPARK_URL, workflow+".py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
+
         }else if (cached == "Completed"){
+            // The result is already available and we send back the result right away.
             result = mongoCacheService.retrieveValueFromCache(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, workflow, query);
             query.append("User", username);
             query.removeField("DocumentType");
             query.append("DocumentType", "Copy")
             Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_CACHE_URL, MONGO_CACHE_PORT,database, workflow, query);
             if(!copyAlreadyExists) {
+                // We create a copy to be listed in the mongo cache list of the workflow for the user.
                 mongoCacheService.duplicateCacheForUser(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, workflow, username, result);
             }
             result = eaeService.customPostProcessing(result, params.workflow)

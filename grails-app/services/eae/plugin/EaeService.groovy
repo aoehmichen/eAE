@@ -22,6 +22,7 @@ class EaeService {
         return scriptList
     }
 
+    //TODO: Depreciated. To be removed
     def scheduleOOzieJob(String OOZIE_URL, String JOB_TRACKER, String JOB_TRACKER_PORT, String NAMENODE, String NAMENODE_PORT, String workflow, workflowParameters){
         // get a OozieClient for local Oozie
         OozieClient wc = new OozieClient(OOZIE_URL);
@@ -42,23 +43,6 @@ class EaeService {
 
         return jobId;
     }
-//
-//    def sparkSubmit(String scriptDir, String SparkURL, String workflowFileName, String dataFileName, String workflowSpecificParameters, String mongoDocumentID){
-//        def script = scriptDir +'executeSparkJob.sh'
-//
-//        def scriptFile = new File(script)
-//        if (scriptFile.exists()) {
-//            if (!scriptFile.canExecute()) {
-//                scriptFile.setExecutable(true)
-//            }
-//        }else {
-//            log.error('The Script file spark submit wasn\'t found')
-//        }
-//        def executeCommand = script + " " + SparkURL + " " + workflowFileName + " " + dataFileName + " " + workflowSpecificParameters + " " + mongoDocumentID
-//        println(executeCommand)
-//        executeCommand.execute().waitFor()
-//        return 0
-//    }
 
     def customPreProcessing(params, workflow, MONGO_URL,MONGO_PORT,database,username){
         switch (workflow){
@@ -69,6 +53,17 @@ class EaeService {
         }
     }
 
+    /**
+     * Sets all required parameters for the cross validation pipeline.
+     * @param params
+     * @param MONGO_URL
+     * @param MONGO_PORT
+     * @param database
+     * @param username
+     * @return
+     *
+     * NB: Not the most elegant solution. TO BE IMPROVED
+     */
     private def cvPreprocessing(params, MONGO_URL,MONGO_PORT,database,username){
         def workflowParameters = [:];
         String mongoDocumentIDPE = "abcd0000" ;// fake mongoId
@@ -102,6 +97,11 @@ class EaeService {
         }
     }
 
+    /**
+     * This custom post processing is the only way to retrieve in real time the required data from KEGG
+     * @param result
+     * @return
+     */
     private def pePostProcessing(result) {
         def topPathway = result.get('TopPathways').get(0).get(0)
         def url = "http://www.kegg.jp/pathway/" ;
@@ -132,7 +132,14 @@ class EaeService {
         return result;
     }
 
-
+    /**
+     * This methods handles the remote submission to the eAEIterface which in return will trigger the Spark Job
+     * I had to define all the queries manuall as the default rest plugin overrides some marshallers which causes massive
+     * problem with tranSMART.
+     * @param interfaceURL
+     * @param paramMap
+     * @return {str} : status of the submission
+     */
     def eaeInterfaceSparkSubmit(String interfaceURL, Map paramMap ){
         //"http://146.169.32.106:8081/interfaceEAE/sparkSubmit/runSubmit"
         def httpBuilder = new AsyncHTTPBuilder([uri: interfaceURL, poolSize: 10, contentType: JSON])

@@ -16,6 +16,15 @@ import org.json.JSONObject
 @Transactional
 class MongoCacheService {
 
+    /**
+     *
+     * @param mongoURL
+     * @param mongoPort
+     * @param dbName
+     * @param collectionName
+     * @param query
+     * @return a JSON object containing the requested document
+     */
     def retrieveValueFromCache(String mongoURL, String mongoPort, String dbName, String collectionName, BasicDBObject query) {
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort)
         MongoDatabase db = mongoClient.getDatabase( dbName )
@@ -27,6 +36,15 @@ class MongoCacheService {
         return result;
     }
 
+    /**
+     *
+     * @param mongoURL
+     * @param mongoPort
+     * @param dbName
+     * @param collectionName
+     * @param query
+     * @return true if a copy exists in the cache. false otherwise
+     */
     def copyPresentInCache(String mongoURL, String mongoPort, String dbName, String collectionName, BasicDBObject query) {
 
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort)
@@ -45,6 +63,17 @@ class MongoCacheService {
         return copyExists;
     }
 
+    /**
+     *
+     * @param mongoURL
+     * @param mongoPort
+     * @param dbName
+     * @param workflowSelected
+     * @param typeOfWorkflow
+     * @param user
+     * @param query
+     * @return the _id of the mongo record
+     */
     def initJob(String mongoURL, String mongoPort, String dbName, String workflowSelected, String typeOfWorkflow, String user, BasicDBObject query){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase db = mongoClient.getDatabase( dbName );
@@ -72,6 +101,15 @@ class MongoCacheService {
         return jobId;
     }
 
+    /**
+     *
+     * @param mongoURL
+     * @param mongoPort
+     * @param dbName
+     * @param collectionName
+     * @param query
+     * @return One of the three possible status of the Job.( NotCached, Started, Completed)
+     */
     def checkIfPresentInCache(String mongoURL, String mongoPort, String dbName, String collectionName, query ){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase db = mongoClient.getDatabase( dbName );
@@ -91,13 +129,19 @@ class MongoCacheService {
             if (recordsCount == 0){
                 return "NotCached"
             }else if(cacheItem.get("Status") == "Started" ){
-                return "started"
+                return "Started"
             }else{
                 return "Completed"
             }
         }
     }
 
+    /**
+     * Puts the minimal set of parameters required by the mongo cache for a SQL type workflow
+     * @param params
+     * @param parameterMap
+     * @return
+     */
     def buildMongoCacheQuery(params,parameterMap){
         def conceptBoxes = new JsonSlurper().parseText(params.conceptBoxes)
         String workflowData = conceptBoxes.concepts[0][0];
@@ -109,6 +153,11 @@ class MongoCacheService {
         return query
     }
 
+    /**
+     * Puts the minimal set of parameters required by the mongo cache for a NoSQL type workflow
+     * @param params
+     * @return
+     */
     def buildMongoCacheQueryNoSQL(params){
         BasicDBObject query = new BasicDBObject();
         query.append('StudyName', params.studySelected);
@@ -118,8 +167,15 @@ class MongoCacheService {
         query.append("DocumentType", "Original");
         return query
     }
+
     /**
-     * Method that will get the list of jobs to show in the eae jobs table
+     * Method that will get the list of jobs to populate the eae jobs table
+     * @param mongoURL
+     * @param mongoPort
+     * @param dbName
+     * @param userName
+     * @param workflowSelected
+     * @return
      */
     def getJobsFromMongo(String mongoURL, String mongoPort, String dbName, String userName, String workflowSelected) {
 
@@ -143,6 +199,14 @@ class MongoCacheService {
         return res
     }
 
+    /**
+     *
+     * @param mongoURL
+     * @param mongoPort
+     * @param dbName
+     * @param fileName
+     * @return
+     */
     def retrieveDataFromMongoFS(String mongoURL, String mongoPort, String dbName, String fileName){
         String extension = fileName.split('\\.')[1]
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL, mongoPort);
@@ -162,12 +226,25 @@ class MongoCacheService {
         return imageSrc
     }
 
-    /************************************************************************************************
-     *                                                                                              *
-     *  Pathway Enrichement section                                                                    *
-     *                                                                                              *
-     ************************************************************************************************/
+    /**
+     *
+     * @param doc
+     * @param query
+     * @return
+     */
+    def initJobDefault(Document doc, BasicDBObject query){
+        doc.append("WorkflowData", query.get("WorkflowData"));
+        doc.append("patientids_cohort1", query.get("patientids_cohort1"));
+        doc.append("patientids_cohort2", query.get("patientids_cohort2"));
+        return doc;
+    }
 
+    /**
+     *
+     * @param doc
+     * @param query
+     * @return
+     */
     def initJobNoSQL(Document doc, query){
         doc.append("StudyName", query.get("StudyName"));
         doc.append("DataType", query.get("DataType"));
@@ -176,6 +253,11 @@ class MongoCacheService {
         return doc;
     }
 
+    /**
+     * Retrieves all the records from mongo using the cursor.
+     * @param cursor
+     * @return {list} : contains all records matching the query.
+     */
     def retrieveRows(MongoCursor cursor){
         def rows = new JSONArray();
         JSONObject result;
@@ -194,6 +276,16 @@ class MongoCacheService {
         return [rows, count]
     }
 
+    /**
+     * We duplicate the record for the user so that it shows up in the cache table.
+     * @param mongoURL
+     * @param mongoPort
+     * @param database
+     * @param workflow
+     * @param username
+     * @param cacheRes
+     * @return {0}
+     */
     def duplicateCacheForUser(String mongoURL, String mongoPort, String database, String workflow, String username, JSONObject cacheRes){
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
         MongoDatabase db = mongoClient.getDatabase(database);
@@ -231,6 +323,11 @@ class MongoCacheService {
         return 0
     }
 
+    /**
+     * General method to rebuild the arrays coming from a mongo record.
+     * @param value
+     * @return
+     */
     def reshapeArray(JSONArray value){
         def arrayList = new ArrayList();
         if (value.length()> 1){
@@ -265,13 +362,14 @@ class MongoCacheService {
  *                                                                                              *
  ************************************************************************************************/
 
-    def initJobDefault(Document doc, BasicDBObject query){
-        doc.append("WorkflowData", query.get("WorkflowData"));
-        doc.append("patientids_cohort1", query.get("patientids_cohort1"));
-        doc.append("patientids_cohort2", query.get("patientids_cohort2"));
-        return doc;
-    }
 
+
+    /**
+     * Unused. To be deleted at a later stage
+     * @param cursor
+     * @return
+     * TODO: to be deleted
+     */
     def retrieveRowsDefault(MongoCursor cursor){
         def rows = new JSONArray();
         JSONObject result;
