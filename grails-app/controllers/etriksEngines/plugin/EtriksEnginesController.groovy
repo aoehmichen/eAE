@@ -17,7 +17,7 @@ class EtriksEnginesController {
     }
 
     /**
-     *   Called to get the path to smartR.js such that the plugin can be loaded in the datasetExplorer
+     *   Called to get the path to smartR.es6 such that the plugin can be loaded in the datasetExplorer
      */
     def loadScripts = {
         JSONObject result = new JSONObject()

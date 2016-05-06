@@ -1,6 +1,6 @@
 class smartRGrailsPlugin {
     // the plugin version
-    def version = "0.4"
+    def version = "0.5"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.3 > *"
     // resources that are excluded from plugin packaging
@@ -9,9 +9,9 @@ class smartRGrailsPlugin {
     ]
 
     // TODO Fill in these fields
-    def title = "SmartR Plugin" // Headline display name of the plugin
-    def author = "Sascha Herzinger"
-    def authorEmail = "sascha.herzinger@uni.lu"
+    def title = "eAE" // Headline display name of the plugin
+    def author = "Axel Oehmichen"
+    def authorEmail = "ao1011@imperial.ac.uk"
     def description =
             '''
             Brief summary/description of the plugin.

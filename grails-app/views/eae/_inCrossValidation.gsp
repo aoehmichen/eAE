@@ -39,7 +39,7 @@
 </div>
 
 <script>
-    var currentWorkflow = "cv";
+    var currentWorkflow = "CrossValidation";
     populateCacheDIV(currentWorkflow);
     activateDragAndDropEAE('highDimDataCV');
 
@@ -60,16 +60,36 @@
         return true;
     }
 
-    function cacheDIVCustomName(name){
+    function cacheDIVCustomName(job){
+        var name = "HighDim Data: " + job.workflowdata + "\<br /> cohort 1 : " + job.patientids_cohort1 + "\<br /> cohort 2 : " + job.patientids_cohort2;
         var holder =  $('<td/>');
         holder.html(name);
-        return holder;
+        return {
+            holder: holder,
+            name: name
+        };
     }
 
     function customWorkflowParameters(){
         var data = [];
         var doEnrichement = $('#addPE').is(":checked");
         data.push({name: 'doEnrichment', value: doEnrichement});
+        return data;
+    }
+
+    function prepareDataForMongoRetrievale(currentworkflow, cacheQuery) {
+        var tmpData = [];
+        var splitTerms = cacheQuery.split('<br />');
+        $.each(splitTerms, function (i, e) {
+            var chunk = e.split(':');
+            tmpData.push(chunk[1].trim());
+        });
+        var data = {
+            Workflow: currentworkflow,
+            WorkflowData: tmpData[0],
+            patientids_cohort1: tmpData[1],
+            patientids_cohort2: tmpData[2]
+        };
         return data;
     }
 
@@ -82,7 +102,7 @@
 
         var startdate = new Date(jsonRecord.StartTime.$date);
         var endDate = new Date(jsonRecord.EndTime.$date);
-        var duration = (endDate - startdate)/1000
+        var duration = (endDate - startdate)/1000;
 
         _o.append($('<table/>').attr("id","cvtable").attr("class", "cachetable")
                 .append($('<tr/>')

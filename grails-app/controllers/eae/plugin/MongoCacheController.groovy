@@ -9,6 +9,8 @@ class MongoCacheController {
 
     /**
      * Method that will create the get the list of jobs to show in the etriks jobs tab
+     *
+     * @return {json} : returns a json containing all the jobs for the specified user and workflow
      */
     def retrieveCachedJobs = {
         def username = springSecurityService.getPrincipal().username;
@@ -18,33 +20,58 @@ class MongoCacheController {
         if(params.workflow == null) {
             throw new RuntimeException("The params in MongoCacheController are Null")
         }
-        def result = mongoCacheService.getjobsFromMongo(MONGO_URL, MONGO_PORT, "eae", username, params.workflow )
+        def result = mongoCacheService.getJobsFromMongo(MONGO_URL, MONGO_PORT, "eae", username, params.workflow )
 
         render result
     }
 
+    /**
+     * Method that retrieves a single record from the cache
+     *
+     * @return {json} : returns the mongo document
+     */
     def retrieveSingleCachedJob = {
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
-
-        BasicDBObject query = mongoCacheQuery(params);
-        def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, "eae", params.workflow, query);
-        result = eaeService.customPostProcessing(result, params.workflow)
-
+        BasicDBObject query = mongoCacheQuery(params, params.WorkflowType);
+        def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, "eae", params.Workflow, query);
+        result = eaeService.customPostProcessing(result, params.Workflow)
         render result;
     }
 
-    private def mongoCacheQuery(def params){
-        String workflowSelected = params.workflow;
+    /**
+     * Method that retrieves a file from Mongo. It is currently used to support image storage and display in tranSMART.
+     * NB: this function supports DICOM images but it require some further dev of the front end to get the full dicom support in tm.
+     *
+     * @return {str} : a serialized image contained in a string.
+     */
+    def retieveDataFromMongoFS = {
+        final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
+        final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
+        def dataSelected = params.FileName;
+        def file = mongoCacheService.retrieveDataFromMongoFS(MONGO_URL, MONGO_PORT, "eae", dataSelected);
+        render file
+    }
+
+    /**
+     * Create the basic query with the appropriate fields depending if it is a SQL or NoSQL pipeline.
+     * @param params
+     * @param workflowType
+     * @return {json} : query fields use for mongo.
+     */
+    private def mongoCacheQuery(def params, String workflowType){
         BasicDBObject query = new BasicDBObject();
-        switch (workflowSelected){
-            case "pe":
-                query = new BasicDBObject("ListOfGenes", params.ListOfGenes);
+        switch (workflowType){
+            case "NoSQL":
+                query.append("StudyName", params.StudyName);
+                query.append("DataType", params.DataType);
+                query.append("CustomField", params.CustomField);
+                query.append("WorkflowSpecificParameters",params.WorkflowSpecificParameters)
                 break;
             default :
                 query.append("WorkflowData", params.WorkflowData);
-                query.append("result_instance_id1", params.result_instance_id1);
-                query.append("result_instance_id2", params.result_instance_id2);
+                query.append("patientids_cohort1", params.patientids_cohort1);
+                query.append("patientids_cohort2", params.patientids_cohort2);
                 break;
         }
         return query

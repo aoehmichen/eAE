@@ -1,1 +1,1 @@
-# eAE Beta.
+# eAE transmart plugin Beta.

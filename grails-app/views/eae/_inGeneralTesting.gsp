@@ -1,38 +1,128 @@
-<mark>Make sure the project folder in the comparison tab is in the cohort selection.</mark> <br/>
 <div id='clinicalData' class="txt">
     This Workflow triggers a generic analysis of the clinical variables.
 </div>
 
-<div id='selectedCohort' class="txt">
-    %{--<script>--}%
-        <td style='padding-right: 2em; padding-bottom: 1em'>
-                <div id='studyToAnalyse' class="queryGroupInclude"></div>
-                <input type="button" class='txt' onclick="clearVarSelection('studyToAnalyse')" value="Clear Window">
-        </td>
+<div id='selectStudy' class="txt">
+    <table>
+        <tr>
+            <td>
+                <g:select
+                        name="noSQLStudies"
+                        class='txt'
+                        from="${noSQLStudies}"
+                        noSelection="['':'Choose a study']"
+                        onchange="displayDataForStudy()"/>
+            </td>
+            <td>
+                <div id="dataAvailableDiv"></div>
+            </td>
+        </tr>
+    </table>
         <input
-            id="submitCV"
+            id="submitGT"
             class='txt'
             type="button"
             value="Run Genereal Testing"
             onclick="triggerGT()"/>
-        %{--getClinicalMetaDataforEAE();--}%
-    %{--</script>--}%
 </div>
 <br/>
 
+<hr class="myhr"/>
+<div id="cacheTableDiv">
+    <table id="mongocachetable" class="cachetable"></table>
+    <div id="emptyCache">The Cache is Empty</div>
+    <button type="button"
+            value="refreshCacheDiv"
+            onclick="refreshCache()"
+            class="flatbutton">Refresh</button>
+</div>
+
 <script>
+    var currentWorkflow = "GeneralTesting";
+    populateCacheDIV(currentWorkflow);
 
-    activateDragAndDropEAE('studyToAnalyse');
+    function customSanityCheck() {
+        return true;
+    }
 
-    registerConceptBoxEAE('studyToAnalyse', 1, 'studyicon', 0, undefined);
+    function customWorkflowParameters(){
+        var data = [];
+        var studySelected = $('#noSQLStudies').val();
+        var dataSelected = $('#dataAvailableDiv').val();
+        data.push({name: 'StudySelected', value: studySelected});
+        data.push({name: 'DataSelected', value: dataSelected});
+        data.push({name: 'CustomField', value: 'None'});
+        data.push({name: 'WorkflowSpecificParameters', value: 'None'});
+        return data;
+    }
 
     function triggerGT() {
-        jQuery("#outputs").html("AJAX CALL success!");
+        registerWorkflowParams(currentWorkflow);
+        runNoSQLWorkflow();
     }
 
-    function cacheDIVCustomName(name){
+    function refreshCache(){
+        populateCacheDIV(currentWorkflow);
+    }
+
+    function cacheDIVCustomName(job){
+        var name = "Study Selected : " + job.studyname + "\<br /> Data Selected : " + job.datatype ;
         var holder =  $('<td/>');
         holder.html(name);
-        return holder;
+        return {
+            holder: holder,
+            name: name
+        };
     }
+
+    /**
+     *   Display the result retieved from the cache
+     *   @param jsonRecord
+     */
+    function buildOutput(jsonRecord){
+        var _o = $('#eaeoutputs');
+
+        _o.append($('<table/>').attr("id","gttable").append($('<tr/>')
+                        .append($('<th/>').text("Name :"))
+                        .append($('<th/>').text(jsonRecord.PearsonCorrelationHeatmapName))
+        ));
+        $('#gttable').append($('<tr/>')
+                        .append($('<td/>').append($('<div/>').attr('id',"imageerror")))
+                        .append($('<td/>').append($('<img/>').attr("id","correlationHeatmap")))
+        );
+
+
+        jQuery.ajax({
+            url: pageInfo.basePath + '/mongoCache/retieveDataFromMongoFS',
+            type: "POST",
+            timeout: '600000',
+            data: {'FileName': jsonRecord.PearsonCorrelationHeatmapName}
+        }).done(function(serverAnswer) {
+            $('#correlationHeatmap').attr("src", serverAnswer);
+        }).fail(function() {
+            $('#correlationHeatmap').html("Cannot get the Image!")
+        });
+
+//        _o.append($('<div/>').attr('id', "cvPerformanceGraph"));
+        // d3.select('#cvPerformanceGraph').datum(formatData(jsonRecord.PerformanceCurve)).call(chart);
+    }
+
+    function prepareDataForMongoRetrievale(currentworkflow, cacheQuery) {
+        var tmpData = [];
+        var splitTerms = cacheQuery.split('<br />');
+        $.each(splitTerms, function (i, e) {
+            var chunk = e.split(':');
+            tmpData.push(chunk[1].trim());
+        });
+        var data = {
+            Workflow: currentworkflow,
+            WorkflowType: "NoSQL",
+            StudyName: tmpData[0],
+            DataType: tmpData[1],
+            CustomField: 'None',
+            WorkflowSpecificParameters: 'None'
+        };
+        return data;
+    }
+
 </script>

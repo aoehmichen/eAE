@@ -1,7 +1,7 @@
 package smartR.plugin
 
-import groovy.json.JsonBuilder
 import grails.converters.JSON
+import groovy.json.JsonSlurper
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.apache.commons.io.FilenameUtils
@@ -9,47 +9,62 @@ import org.apache.commons.io.FilenameUtils
 class SmartRController {
 
     def smartRService
-    def scriptExecutorService
+    def sessionManagerService
     def eaeService
 
-    def computeResults = {
-        params.init = params.init == null ? true : params.init // defaults to true
-        def retCode = smartRService.runScript(params)
-        render retCode.toString()
+    def state = {
+        render sessionManagerService.getState(params.id)
     }
 
-    def reComputeResults = {
-        params.init = false
-        def retCode = smartRService.runScript(params)
-        render retCode.toString()
+    def msg = {
+        render sessionManagerService.getMsg(params.id)
     }
 
-    // For handling results yourself
-    def renderResults = {
-        params.init = false
-        def (success, results) = scriptExecutorService.getResults(params.cookieID)
-        if (! success) {
-            render new JsonBuilder([error: results]).toString()
-        } else {
-            render results.json // TODO: return json AND image
+    def initSession = {
+        try {
+            sessionManagerService.initSession(params.id, params.init.toBoolean())
+        } catch (Exception e) {
+            sessionManagerService.createFallbackErrorSession(params.id, e.getMessage())
         }
+        render ''
     }
 
-    // For (re)drawing the whole visualization
-    def renderResultsInTemplate = {
-        def (success, results) = scriptExecutorService.getResults(params.cookieID)
-        if (! success) {
-            render results
-        } else {
+    def loadDataIntoSession = {
+        sessionManagerService.sessions[params.id].state = SessionManagerService.STATE.LOADING
+        try {
+            if (params.init.toBoolean()) {
+                def data = smartRService.queryData(params.rIID1, params.rIID2, new JsonSlurper().parseText(params.conceptBoxes))
+                sessionManagerService.pushData(params.id, data)
+            }
+            sessionManagerService.pushSettings(params.id, params.settings)
+        } catch (Exception e) {
+            sessionManagerService.setError(params.id, e.getMessage())
+        }
+        render ''
+    }
+
+    def runWorkflowScript = {
+        sessionManagerService.sessions[params.id].state = SessionManagerService.STATE.WORKING
+        try {
+            sessionManagerService.runWorkflowScript(params.id, smartRService.getWebAppFolder() + '/Scripts/smartR/' + params.script)
+        } catch (Exception e) {
+            sessionManagerService.setError(params.id, e.getMessage())
+        }
+        render ''
+    }
+
+    def results = {
+        sessionManagerService.sessions[params.id].state = SessionManagerService.STATE.EXIT
+        def results = sessionManagerService.pullData(params.id)
+        if (params.redraw.toBoolean()) {
             render template: "/visualizations/out${FilenameUtils.getBaseName(params.script)}",
-                    model: [results: results.json, image: results.img.toString()]
+                    model: [results: results]
+        } else {
+            render results
         }
     }
 
-    /**
-    *   Renders the input form for initial script parameters
-    */
-    def renderInputDIV = {
+    def inputDIV = {
         if (! params.script) {
             render 'Please select a script to execute.'
         } else {
@@ -57,14 +72,10 @@ class SmartRController {
         }
     }
 
-    def renderLoadingScreen = {
+    def loadingScreen = {
         render template: "/visualizations/outLoading"
     }
 
-
-    /**
-     *   Go to eTRIKS Analytical Engine
-     */
     def goToEAEngine = {
         render template: '/eae/home', model:[ hpcScriptList: eaeService.hpcScriptList]
     }

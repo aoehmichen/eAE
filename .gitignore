@@ -32,3 +32,5 @@
 .idea
 *.DS_Store
 /SmartR.todo
+.slcache/
+.settings

@@ -73,7 +73,7 @@
     }
 
     .uid {
-        font-size: 9pt;
+        font-size: 12pt;
     }
 
     .selectText {
@@ -116,7 +116,6 @@
 </style>
 
 <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-<g:javascript src="resource/d3.js"/>
 
 <div id='visualization' class='text'>
     <div id="heatmap" class='text'></div>
@@ -201,8 +200,8 @@
     var featureColorSetBinary = ['#FF8000', '#FFFF00'];
     var featureColorSetSequential = ['rgb(247,252,253)','rgb(224,236,244)','rgb(191,211,230)','rgb(158,188,218)','rgb(140,150,198)','rgb(140,107,177)','rgb(136,65,157)','rgb(129,15,124)','rgb(77,0,75)'];
 
-    var gridFieldWidth = 40;
-    var gridFieldHeight = 40;
+    var gridFieldWidth = 20;
+    var gridFieldHeight = 20;
     var dendrogramHeight = 300;
     var histogramHeight = 200;
 
@@ -799,7 +798,7 @@
         .style('font-size', Math.ceil(16 * zoomLevel) + 'px');
 
         d3.selectAll('.uid')
-        .style('font-size', Math.ceil(9 * zoomLevel) + 'px');
+        .style('font-size', Math.ceil(12 * zoomLevel) + 'px');
 
         d3.selectAll('.feature')
         .style('font-size', Math.ceil(10 * zoomLevel) + 'px');
@@ -810,8 +809,8 @@
         d3.selectAll('.featureSortText')
         .style('font-size', Math.ceil(10 * zoomLevel) + 'px');
 
-        gridFieldWidth = 40 * zoomLevel;
-        gridFieldHeight = 40 * zoomLevel;
+        gridFieldWidth = 20 * zoomLevel;
+        gridFieldHeight = 20 * zoomLevel;
         width = gridFieldWidth * patientIDs.length;
         height = gridFieldHeight * uids.length;
         heatmap
@@ -960,7 +959,7 @@
                 var patientID = patientIDs[leafs[i]];
                 selectCol(patientID);
             }
-            if (arrEqual(previousSelection, selectedPatientIDs)) {
+            if (previousSelection.sort().toString() === selectedPatientIDs.sort().toString()) {
                 unselectAll();
             }
         })
@@ -1141,15 +1140,14 @@
     function loadRows(nrows) {
         var maxRows = nrows === undefined ? uids.length + 100 : nrows;
         loadFeatureButton.select('text').text('Loading...');
-        var data = prepareFormData();
-        data = addSettingsToData(data, { maxRows: maxRows });
+        var settings = { maxRows: maxRows };
 
         var onResponse = function() {
             loadFeatureButton.select('text').text('Load 100 additional rows');
             cuttoffButton.select('text').text('Apply Cutoff');
         };
 
-        computeResults(onResponse, data, false, true);
+        startWorkflow(onResponse, settings, false, true);
     }
 
     function init() {

@@ -121,7 +121,7 @@
 </style>
 
 <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-<g:javascript src="resource/d3.js"/>
+<g:javascript src="resource/d3.min.js"/>
 
 <div id="visualization">
     <div id="controls" style='float: left; padding-right: 10px'></div>
@@ -333,16 +333,12 @@
     var excludedPatientIDs = [];
     function excludeSelection() {
         excludedPatientIDs = excludedPatientIDs.concat(currentSelection);
-        var data = prepareFormData();
-        data = addSettingsToData(data, { excludedPatientIDs: excludedPatientIDs });
-
-
+        var settings = { excludedPatientIDs: excludedPatientIDs };
         var onResponse = function(response) {
             results = response;
             init();
         };
-
-        computeResults(onResponse, data, false, false);
+        startWorkflow(onResponse, settings, false, false);
     }
 
     function removeOutliers() {

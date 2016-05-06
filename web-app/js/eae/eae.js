@@ -88,7 +88,7 @@ function registerConceptBoxEAE(name, cohorts, type, min, max) {
 
 var workflowSelected = "";
 function registerWorkflowParams(workflow){
-    workflowSelected = workflow.toUpperCase();
+    workflowSelected = workflow;
 }
 
 /**
@@ -102,6 +102,17 @@ function prepareFormDataEAE(workflowSelected) {
     data.push({name: 'conceptBoxes', value: JSON.stringify(conceptBoxes)});
     data.push({name: 'result_instance_id1', value: GLOBAL.CurrentSubsetIDs[1]});
     data.push({name: 'result_instance_id2', value: GLOBAL.CurrentSubsetIDs[2]});
+    return data;
+}
+
+/**
+ *   Prepares data for the AJAX call containing all neccesary information for computation
+ *
+ *   @return {[]}: array of objects containing the information for server side computations
+ */
+function prepareNoSQLFormDataEAE(workflowSelected) {
+    var data = customWorkflowParameters(); //method MUST be implemented by _inFoobarAnalysis.gsp
+    data.push({name: 'workflow', value: workflowSelected});
     return data;
 }
 
@@ -131,7 +142,6 @@ function saneEAE() { // FIXME: somehow check for subset2 to be non empty iff two
  * @param eae
  * @returns {Array}
  */
-
 function formatData(eae) {
     var data = [];
     for (var i = 0; i < eae.length; i++)
@@ -140,6 +150,32 @@ function formatData(eae) {
             y: eae[i][1]
         })
     return data
+}
+
+/**
+ *  Method to display a standard png or jpeg image into tm.
+ *  The image is retrieved from mongoFS
+ * @param imageName
+ * @returns {byteArray}
+ */
+function insertImageFromMongo(imageName, holderName){
+
+    jQuery.ajax({
+        url: pageInfo.basePath + '/eae/retieveDataFromMongoFS',
+        type: "POST",
+        timeout: '600000',
+        data: {'FileName': imageName}
+    }).done(function(serverAnswer) {
+        console.log("I am here")
+        var arrayBufferView = new Uint8Array(serverAnswer);
+        var blob = new Blob([ arrayBufferView ], { type: "image/jpeg" });
+        var urlCreator = window.URL || window.webkitURL;
+        var imageUrl = urlCreator.createObjectURL(blob);
+        $(holderName).attr("src", imageUrl);
+        return "Image found"
+    }).fail(function() {
+       return "Cannot get the Image!"
+    });
 }
 
 /**
@@ -152,11 +188,38 @@ function changeEAEInput(){
         url: pageInfo.basePath + '/eae/renderInputs',
         type: "POST",
         timeout: '600000',
-        data: {'script': jQuery('#hpcscriptSelect').val()}
+        data: {'workflow': $('#hpcscriptSelect').val()}
     }).done(function(serverAnswer) {
         jQuery("#eaeinputs").html(serverAnswer);
     }).fail(function() {
         jQuery("#eaeinputs").html("AJAX CALL FAILED!");
+    });
+
+}
+
+/**
+ *   Renders the input form for entering the parameters for a visualization/script
+ */
+function displayDataForStudy(){
+    var _t = $('#dataAvailableDiv');
+    _t.html("");
+
+    jQuery.ajax({
+        url: pageInfo.basePath + '/eae/renderDataList',
+        type: "POST",
+        timeout: '600000',
+        data: {'study': $('#noSQLStudies').val()}
+    }).done(function(dataList) {
+        _t.append($('<select/>').attr("id", "dataTypeSelect"));
+        var _h = $('#dataTypeSelect');
+        var dataListJSON= $.parseJSON(dataList);
+        $.each(dataListJSON.dataList, function (i, e) {
+            console.log(e);
+            _h.append($("<option>")
+                .attr("value",e)
+                .text(e))});
+    }).fail(function() {
+        _t.html("AJAX CALL FAILED!");
     });
 
 }
@@ -170,7 +233,7 @@ function populateCacheDIV(currentworkflow){
     _t.empty();
     _t.append($('<tr/>').attr("id", "headersRow"));
 
-    var cacheTableHeaders = ["Query", "Date", "Status", "Cached Results"];
+    var cacheTableHeaders = ["Query", "Workflow Specific Parameters", "Date", "Status", "Cached Results"];
     var _h = $('#headersRow');
     $.each(cacheTableHeaders, function(i, e){
         _h.append($('<th/>').text(e))
@@ -188,19 +251,23 @@ function populateCacheDIV(currentworkflow){
             jQuery("#emptyCache").show();
         }else {
             var date;
+            var workflowspecificparameters;
             jQuery("#mongocachetable").show();
             jQuery("#emptyCache").hide();
             $.each(jsonCache.jobs, function (i, e) {
-                date = new Date(e.start.$date);
-                var holder = cacheDIVCustomName(e.name); //method MUST be implemented by _inFoobarAnalysis.gsp
-                _t.append($('<tr/>').append(holder).append(
-                    $('<td/>').text(e.status)
+                date = new Date(e.starttime.$date);
+                workflowspecificparameters = e.workflowspecificparameters;
+                var customname = cacheDIVCustomName(e); //method MUST be implemented by _inFoobarAnalysis.gsp
+                _t.append($('<tr/>').append(customname.holder).append(
+                    $('<td/>').text(workflowspecificparameters)
                 ).append(
                     $('<td/>').text(date)
                 ).append(
-                     $('<td/>').append($('<button/>').addClass('flatbutton').attr('data-button', e.name).on('click',function(){
+                    $('<td/>').text(e.status)
+                ).append(
+                     $('<td/>').append($('<button/>').addClass('flatbutton').attr('data-button', customname.name).on('click',function(){
                         var cacheQuery= $(this).attr('data-button');
-                         showWorkflowOutput(currentworkflow,cacheQuery);
+                         showWorkflowOutput(currentworkflow, cacheQuery, workflowspecificparameters);
                      }).text("Result"))
                 ))
             })
@@ -211,57 +278,47 @@ function populateCacheDIV(currentworkflow){
 }
 
 /**
- *
+ *  This method builds the output in tm interface once the result has been retirved from mongo
  * @param currentworkflow
  * @param cacheQuery
  */
-function showWorkflowOutput(currentworkflow, cacheQuery){
+function showWorkflowOutput(currentworkflow, cacheQuery, workflowspecificparameters){
     jQuery("#eaeoutputs").html("");
 
     jQuery.ajax({
         url: pageInfo.basePath + '/mongoCache/retrieveSingleCachedJob',
         type: "POST",
-        data: prepareDataForMongoRetrievale(currentworkflow, cacheQuery)
+        data: prepareDataForMongoRetrievale(currentworkflow, cacheQuery, workflowspecificparameters) //method MUST be implemented by _inFoobarAnalysis.gsp
     }).done(function(cachedJob) {
         var jsonRecord= $.parseJSON(cachedJob);
+        // The method buildOutput must be implemented by _inFoobarAnalysis.gsp
+        // this enables us to build custom outputs for each workflow
         buildOutput(jsonRecord);
         }
     )
 }
 
-function prepareDataForMongoRetrievale(currentworkflow, cacheQuery){
-    var data ;
-    switch (currentworkflow){
-        case "pe":
-            data = {workflow: currentworkflow, ListOfGenes:cacheQuery};
-            return data;
-        default :
-            var tmpData = [];
-            var splitTerms = cacheQuery.split('<br />');
-            $.each(splitTerms, function(i, e){
-                var chunk = e.split(':');
-                tmpData.push(chunk[1].trim());
-            });
-            data = {workflow: currentworkflow, WorkflowData: tmpData[0], result_instance_id1: tmpData[1], result_instance_id2: tmpData[2]};
-            return data;
-    }
-}
 
 /**
- *   Run a pathway enrichment from the eae. I haven't integrated into the general workflow system as it runs slightly
- *   differently than the others. ( no cohort selection, used by the marker selection etc...)
+ * Generic NoSQL workflow trigger
+ * @returns {boolean}
  */
-function runPE(list, selectedCorrection){
+function runNoSQLWorkflow(){
+
+    if(!customSanityCheck()){ // Must be implemented by _inFoobarAnalysis.gsp
+        return false;
+    }
+
     jQuery.ajax({
-        url: pageInfo.basePath + '/eae/runPEForSelectedGenes',
+        url: pageInfo.basePath + '/eae/runNoSQLWorkflow',
         type: "POST",
-        data: {'genesList': list, 'selectedCorrection': selectedCorrection}
+        data: prepareNoSQLFormDataEAE(workflowSelected)
     }).done(function(serverAnswer) {
         var jsonAnswer= $.parseJSON(serverAnswer);
-        if(jsonAnswer.iscached === "NotCached"){
-            jQuery("#eaeoutputs").html(jsonAnswer.result);
+        if(jsonAnswer["iscached"] === "NotCached"){
+            jQuery("#eaeoutputs").html(jsonAnswer["result"]);
         }else{
-            buildOutput(jsonAnswer.result);
+            buildOutput($.parseJSON(jsonAnswer["result"]));
         }
     }).fail(function() {
         jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
@@ -272,11 +329,9 @@ function runPE(list, selectedCorrection){
  * Generic workflow trigger
  * @returns {boolean}
  */
-
 function runWorkflow(){
     conceptBoxes = [];
     sanityCheckErrors = [];
-    workflowSelected = "";
     register();
 
     if(!saneEAE()){
@@ -288,9 +343,9 @@ function runWorkflow(){
         runAllQueries(runWorkflow);
         return false;
     }
-    console.log(workflowSelected)
+
     jQuery.ajax({
-        url: pageInfo.basePath + '/eae/runWorkflow', //runCV
+        url: pageInfo.basePath + '/eae/runWorkflow',
         type: "POST",
         data: prepareFormDataEAE(workflowSelected)
     }).done(function(serverAnswer) {
@@ -298,7 +353,7 @@ function runWorkflow(){
         if(jsonAnswer.iscached === "NotCached"){
             jQuery("#eaeoutputs").html(jsonAnswer.result);
         }else{
-            buildOutput(jsonAnswer.result);
+            buildOutput($.parseJSON(jsonAnswer.result));
         }
     }).fail(function() {
         jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
@@ -307,7 +362,7 @@ function runWorkflow(){
 
 /*****************************************************
  *
- *     D3 Section
+ *     D3 Section for workflows
  *
  ****************************************************/
 

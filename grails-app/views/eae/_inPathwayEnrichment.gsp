@@ -35,32 +35,57 @@
     <div id="emptyCache">The Cache is Empty</div>
     <button type="button"
             value="refreshCacheDiv"
-            onclick="refreshPECache()"
+            onclick="refreshCache()"
             class="flatbutton" >Refresh</button>
 </div>
 
 <script>
-    var currentWorkflow = "pe";
+    var currentWorkflow = "PathwayEnrichment";
     populateCacheDIV(currentWorkflow);
 
-    function triggerPE() {
-        var _s = document.getElementById('correctionSelect');
-        var selectedCorrection = _s.options[_s.selectedIndex].value;
-        runPE(document.getElementById("genes").value, selectedCorrection);
+    function customSanityCheck() {
+        return true;
     }
 
-    function refreshPECache(){
+    function customWorkflowParameters(){
+        var data = [];
+        var _s = document.getElementById('correctionSelect');
+        var selectedCorrection = _s.options[_s.selectedIndex].value;
+        var genesList = $('#genes').val();
+        data.push({name: 'studySelected', value: 'PathwayEnrichment'});
+        data.push({name: 'dataSelected', value: 'None'});
+        data.push({name: 'customField', value: genesList});
+        data.push({name: 'workflowSpecificParameters', value: selectedCorrection});
+        return data;
+    }
+
+    function triggerPE() {
+        registerWorkflowParams(currentWorkflow);
+        runNoSQLWorkflow();
+    }
+
+    function refreshCache(){
         populateCacheDIV(currentWorkflow)
     }
 
-    function cacheDIVCustomName(name){
+    function cacheDIVCustomName(job){
         var holder =  $('<td/>');
-        $.each(name.split(' '), function (i, e) {
+        $.each(job.customfield.split(' '), function (i, e) {
             holder.append(
                     $('<span />').addClass('eae_genetag').text(e)
             )
         });
-    return holder;
+
+    return {
+        holder: holder,
+        name: job.customfield
+    };
+    }
+
+    function prepareDataForMongoRetrievale(currentworkflow, cacheQuery, workflowspecificparameters) {
+        var data = {Workflow: currentworkflow, StudyName: 'PathwayEnrichment', DataType: 'None', CustomField: cacheQuery,
+            WorkflowSpecificParameters: workflowspecificparameters, WorkflowType: "NoSQL"};
+        return data;
     }
 
     function buildOutput(jsonRecord){
