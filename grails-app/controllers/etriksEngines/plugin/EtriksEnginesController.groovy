@@ -12,7 +12,7 @@ class EtriksEnginesController {
      *   Renders the default view
      */
     def landing = {
-        def engineList = ['smartR', 'EAE'];
+        def engineList = ['EAE'];
         render view: 'landing', model: [engineList: engineList]
     }
 
