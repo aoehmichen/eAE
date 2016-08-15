@@ -32,8 +32,6 @@
         <span style='color:#0200ff; font-size:16px;'>Please select which engine you want to use.</span><br/>
         <br/>
         <div id="controls">
-            <input class="engineButton" type="button" value="Initialize SmartR" onclick="goToEngineDIV('smartR')"/>
-            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
             <g:if test="${grailsApplication.config.com.eae.eaeEnabled}">
                 <input class="engineButton" type="button" value="Initialize eAE" onclick="goToEngineDIV('eae')"/>
             </g:if>

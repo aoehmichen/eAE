@@ -93,7 +93,7 @@
         _o.append($('<table/>').attr("id","TopPathways").attr("class", "cachetable")
                 .append($('<tr/>')
                         .append($('<th/>').text("Pathways"))
-                        .append($('<th/>').text("Correction: " + jsonRecord.Correction))));
+                        .append($('<th/>').text("Correction: " + jsonRecord.WorkflowSpecificParameters))));
         $.each(jsonRecord.TopPathways, function(i, e){
             $('#TopPathways').append($('<tr/>')
                     .append($('<td/>').text(e[0]))
