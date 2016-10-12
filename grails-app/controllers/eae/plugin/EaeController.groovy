@@ -106,6 +106,7 @@ class EaeController {
             workflowParameters['workflowType'] = "NoSQL";
             workflowParameters['workflowSpecificParameters'] = params.workflowSpecificParameters;
             workflowParameters['mongoDocumentID'] = mongoDocumentID;
+            workflowParameters['zipFile'] = "";
             eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL,workflowParameters);
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
@@ -145,7 +146,6 @@ class EaeController {
         def parameterMap = eaeDataService.queryData(params);
         def query = mongoCacheService.buildMongoCacheQuery(params,parameterMap);
 
-
         // We check if this query has already been made before
         String cached = mongoCacheService.checkIfPresentInCache((String)MONGO_CACHE_URL, (String)MONGO_CACHE_PORT, database, workflow, query)
         def result
@@ -159,11 +159,15 @@ class EaeController {
             // Transfer the data file and additional file to HDFS
             String dataFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "data")
             String additionalFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "additional")
+            String zipFileName = workflow + "-" + username + "-" + mongoDocumentID;
+
+            eaeDataService.zipFiles([dataFileName,additionalFileName], zipFileName)
 
             workflowParameters['mongoDocumentID'] = mongoDocumentID;
             workflowParameters['workflowType'] = "SQL";
-            workflowParameters['dataFileName'] = dataFileName;
-            workflowParameters['additionalFileName'] = additionalFileName;
+            workflowParameters['zipFile'] = zipFileName;
+//            workflowParameters['dataFileName'] = dataFileName;
+//            workflowParameters['additionalFileName'] = additionalFileName;
             eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL, workflowParameters);
             //eaeService.scheduleOOzieJob(OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT, workflow, workflowParameters);
             //eaeService.sparkSubmit(scriptDir, SPARK_URL, workflow+".py", dataFileName , workflowSpecificParameters, mongoDocumentID)

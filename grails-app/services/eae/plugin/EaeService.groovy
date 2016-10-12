@@ -141,11 +141,11 @@ class EaeService {
      * @return {str} : status of the submission
      */
     def eaeInterfaceSparkSubmit(String interfaceURL, Map paramMap ){
-        //"http://146.169.32.106:8081/interfaceEAE/sparkSubmit/runSubmit"
+        //"https://146.169.32.106:8081/interfaceEAE/sparkSubmit/runSubmit"
         def httpBuilder = new AsyncHTTPBuilder([uri: interfaceURL, poolSize: 10, contentType: JSON])
         def jsonBody = new JSONObject(paramMap).toString();
         def sparkSubmitStatus = httpBuilder.request(POST,TEXT) { req ->
-            uri.path = "interfaceEAE/sparkSubmit/runSubmit" // overrides any path in the default URL
+            uri.path = "interfaceEAE/transmart/runSubmit" // overrides any path in the default URL
             body = jsonBody
             response.success = { resp, reader ->
                 assert resp.status == 200

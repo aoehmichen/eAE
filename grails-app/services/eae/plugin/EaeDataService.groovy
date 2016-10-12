@@ -6,11 +6,15 @@ import grails.util.Holders
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
+
 @Transactional
 class EaeDataService {
 
     def DEBUG =  Environment.current == Environment.DEVELOPMENT
     def DEBUG_TMP_DIR = '/tmp/'
+    private static final String SOURCE_FOLDER = "/tmp/eae/";
 
     def grailsApplication = Holders.grailsApplication
     def springSecurityService
@@ -133,18 +137,18 @@ class EaeDataService {
      * @return
      */
     def  sendDataToHDFS (String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL) {
-        def script = scriptDir +'transferToHDFS.sh';
+//        def script = scriptDir +'transferToHDFS.sh';
         def fileToTransfer = workflow + "-" + username + "-" + mongoDocumentID + ".txt";
         String fp;
 
-        def scriptFile = new File(script);
-        if (scriptFile.exists()) {
-            if(!scriptFile.canExecute()){
-                scriptFile.setExecutable(true)
-            }
-        }else {
-            log.error('The Script file to transfer to HDFS wasn\'t found')
-        }
+//        def scriptFile = new File(script);
+//        if (scriptFile.exists()) {
+//            if(!scriptFile.canExecute()){
+//                scriptFile.setExecutable(true)
+//            }
+//        }else {
+//            log.error('The Script file to transfer to HDFS wasn\'t found')
+//        }
 
         File f = new File("/tmp/eae/",fileToTransfer);
         if(f.exists()){
@@ -170,11 +174,11 @@ class EaeDataService {
                 break;
         }
 
-        def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL;
-        executeCommand.execute().waitFor();
-
-        // We cleanup
-        f.delete();
+//        def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL;
+//        executeCommand.execute().waitFor();
+//
+//        // We cleanup
+//        f.delete();
 
         return fileToTransfer
     }
@@ -215,18 +219,18 @@ class EaeDataService {
      * @return
      */
     def  sendAdditionalToHDFS(String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL){
-        def script = scriptDir +'transferToHDFS.sh';
+//        def script = scriptDir +'transferToHDFS.sh';
         def fileToTransfer = workflow + "-additional" + "-" + username + "-" + mongoDocumentID + ".txt";
         String fp;
 
-        def scriptFile = new File(script);
-        if (scriptFile.exists()) {
-            if(!scriptFile.canExecute()){
-                scriptFile.setExecutable(true)
-            }
-        }else {
-            log.error('The Script file to transfer to HDFS wasn\'t found')
-        }
+//        def scriptFile = new File(script);
+//        if (scriptFile.exists()) {
+//            if(!scriptFile.canExecute()){
+//                scriptFile.setExecutable(true)
+//            }
+//        }else {
+//            log.error('The Script file to transfer to HDFS wasn\'t found')
+//        }
 
         File f = new File("/tmp/eae/",fileToTransfer);
         if(f.exists()){
@@ -255,15 +259,51 @@ class EaeDataService {
         }
 
         f.createNewFile()
-        fp = f.getAbsolutePath()
-        def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL;
-        println(executeCommand)
-        executeCommand.execute().waitFor();
-
-        // We cleanup
-        f.delete();
+        //fp = f.getAbsolutePath()
+//        def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL;
+//        println(executeCommand)
+//        executeCommand.execute().waitFor();
+//
+//        // We cleanup
+//        f.delete();
 
         return fileToTransfer
     }
 
+
+    def zipFiles(ArrayList<String> filesToZip, String zipName){
+        byte[] buffer = new byte[1024];
+
+        try{
+
+            FileOutputStream fos = new FileOutputStream(zipName);
+            ZipOutputStream zos = new ZipOutputStream(fos);
+
+            System.out.println("Output to Zip : " + zipName);
+
+            for(String file : filesToZip){
+
+                System.out.println("File Added : " + file);
+                ZipEntry ze= new ZipEntry(file);
+                zos.putNextEntry(ze);
+
+                FileInputStream fileIn = new FileInputStream(SOURCE_FOLDER + file);
+
+                int len;
+                while ((len = fileIn.read(buffer)) > 0) {
+                    zos.write(buffer, 0, len);
+                }
+                fileIn.close();
+            }
+
+            zos.closeEntry();
+            //remember close it
+            zos.close();
+
+            System.out.println("Done");
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+        return "OK"
+    }
 }
