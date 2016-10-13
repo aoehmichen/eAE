@@ -166,6 +166,7 @@ class EaeController {
             workflowParameters['mongoDocumentID'] = mongoDocumentID;
             workflowParameters['workflowType'] = "SQL";
             workflowParameters['zipFile'] = zipFileName;
+            workflowParameters['workflowSpecificParameters'] = "";
 //            workflowParameters['dataFileName'] = dataFileName;
 //            workflowParameters['additionalFileName'] = additionalFileName;
             eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL, workflowParameters);
