@@ -4,6 +4,7 @@ import grails.transaction.Transactional
 import groovyx.net.http.AsyncHTTPBuilder
 import org.apache.oozie.client.OozieClient
 import org.json.JSONObject
+import eae.plugin.RestServiceFactory
 
 import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.GET
@@ -141,8 +142,8 @@ class EaeService {
      * @return {str} : status of the submission
      */
     def eaeInterfaceSparkSubmit(String interfaceURL, Map paramMap ){
-        //"https://146.169.32.106:8081/interfaceEAE/sparkSubmit/runSubmit"
-        def httpBuilder = new AsyncHTTPBuilder([uri: interfaceURL, poolSize: 10, contentType: JSON])
+        //"https://146.169.15.140:8081/interfaceEAE/transmart/runSubmit"
+        def httpBuilder = RestServiceFactory.initializeHttpBuilder(interfaceURL)
         def jsonBody = new JSONObject(paramMap).toString();
         def sparkSubmitStatus = httpBuilder.request(POST,TEXT) { req ->
             uri.path = "interfaceEAE/transmart/runSubmit" // overrides any path in the default URL
@@ -156,7 +157,12 @@ class EaeService {
             response.'404' = { resp ->
                 println '404 - Not found'
             }
+
+            response.failure = { resp, text ->
+                println("eAE - Error (${resp.status}) :: $text")
+            }
         }
+
         return sparkSubmitStatus.get()
     }
 }

@@ -14,7 +14,7 @@ class EaeController {
     def mongoCacheService
 
     def cacheParams(){
-        final String SPARK_URL = grailsApplication.config.com.eae.sparkURL;
+        final String SPARK_URL = grailsApplication.config.com.eae.interfaceEAEURL;
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
         final String scriptDir = getWebAppFolder() + 'Scripts/eae/';
@@ -40,7 +40,7 @@ class EaeController {
     }
 
     def interfaceParams(){
-        final String INTERFACE_URL = grailsApplication.config.com.eae.interfaceURL;
+        final String INTERFACE_URL = grailsApplication.config.com.eae.interfaceEAEURL;
         return INTERFACE_URL
     }
 
@@ -107,7 +107,7 @@ class EaeController {
             workflowParameters['workflowSpecificParameters'] = params.workflowSpecificParameters;
             workflowParameters['mongoDocumentID'] = mongoDocumentID;
             workflowParameters['zipFile'] = "";
-            eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL,workflowParameters);
+            def status = eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL,workflowParameters);
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
             result = mongoCacheService.retrieveValueFromCache(MONGO_CACHE_URL, MONGO_CACHE_PORT,database, workflow, query);
