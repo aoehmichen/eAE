@@ -55,3 +55,23 @@
     text-align: left;
     padding-top: 10px;
 }
+
+.CrossValidation {
+    text-align: center;
+    padding-top: 10px;
+}
+
+.modeltable {
+    text-align: center;
+    border-collapse: collapse;
+    margin: auto;
+}
+.modeltable th {
+    text-align: center;
+    font-weight: bold;
+    padding: 5px;
+}
+.modeltable td, .modeltable th {
+    padding: 5px;
+    border: 1px solid grey;
+}

@@ -118,7 +118,20 @@
                         .append($('<td/>').text(duration+ 's'))
         );
 
-        _o.append($('<div/>').attr('id', "cvPerformanceGraph"));
+        _o.append($('<div/>').attr('id', "cvPerformanceGraph").attr("class", "CrossValidation"));
+
+        _o.append($('<div/>').attr('id', "modeltableDiv").append($('<table/>').attr("id","modeltable").attr("class", "modeltable")
+                .append($('<tr/>')
+                        .append($('<th/>').text("Model Features"))
+                        .append($('<th/>').text("Weight"))
+                )));
+
+        var _h = $('#modeltable');
+        $.each(jsonRecord.ModelFeatures, function (i, e) {
+            _h.append($('<tr/>')
+                    .append($('<td/>').text(e))
+                    .append($('<td/>').text(jsonRecord.ModelWeights[i])));
+        });
 
 
         var chart = scatterPlot()

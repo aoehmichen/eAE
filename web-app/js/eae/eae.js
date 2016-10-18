@@ -214,7 +214,6 @@ function displayDataForStudy(){
         var _h = $('#dataTypeSelect');
         var dataListJSON= $.parseJSON(dataList);
         $.each(dataListJSON.dataList, function (i, e) {
-            console.log(e);
             _h.append($("<option>")
                 .attr("value",e)
                 .text(e))});
