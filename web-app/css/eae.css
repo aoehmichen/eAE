@@ -50,3 +50,8 @@
 #addPE {
     padding: 4px;
 }
+
+.PathwayEnrichment {
+    text-align: left;
+    padding-top: 10px;
+}

@@ -110,7 +110,7 @@
             }
         });
 
-        _o.append($('<div/>').html(jsonRecord.KeggTopPathway.replace(/\n/g, '<br/>')));
+        _o.append($('<pre/>').html(jsonRecord.KeggTopPathway).attr("class", "PathwayEnrichment"));
     }
 
 </script>
