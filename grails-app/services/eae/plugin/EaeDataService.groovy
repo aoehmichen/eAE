@@ -14,7 +14,7 @@ class EaeDataService {
 
     def DEBUG =  Environment.current == Environment.DEVELOPMENT
     def DEBUG_TMP_DIR = '/tmp/'
-    private static final String SOURCE_FOLDER = "/tmp/eae/";
+    private static final String SOURCE_FOLDER = "/tmp/";
 
     def grailsApplication = Holders.grailsApplication
     def springSecurityService
@@ -113,14 +113,14 @@ class EaeDataService {
      * @param typeOfFile
      * @return
      */
-    def sendToHDFS(String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL, String typeOfFile){
+    def writeDataFile(String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL, String typeOfFile){
         def fileToTransfer = "";
         switch (typeOfFile) {
             case "data":
-                fileToTransfer = sendDataToHDFS( username, mongoDocumentID, workflow, data,  scriptDir, sparkURL);
+                fileToTransfer = writeDataToTmp( username, mongoDocumentID, workflow, data,  scriptDir, sparkURL);
                 break;
             case "additional":
-                fileToTransfer = sendAdditionalToHDFS( username, mongoDocumentID, workflow, data,  scriptDir, sparkURL);
+                fileToTransfer = writeAdditionalFileToTmp( username, mongoDocumentID, workflow, data,  scriptDir, sparkURL);
                 break;
         }
         return fileToTransfer;
@@ -136,21 +136,11 @@ class EaeDataService {
      * @param sparkURL
      * @return
      */
-    def  sendDataToHDFS (String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL) {
-//        def script = scriptDir +'transferToHDFS.sh';
+    def  writeDataToTmp (String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL) {
         def fileToTransfer = workflow + "-" + username + "-" + mongoDocumentID + ".txt";
         String fp;
 
-//        def scriptFile = new File(script);
-//        if (scriptFile.exists()) {
-//            if(!scriptFile.canExecute()){
-//                scriptFile.setExecutable(true)
-//            }
-//        }else {
-//            log.error('The Script file to transfer to HDFS wasn\'t found')
-//        }
-
-        File f = new File("/tmp/eae/",fileToTransfer);
+        File f = new File("/tmp/",fileToTransfer);
         if(f.exists()){
             f.delete();
         }
@@ -173,12 +163,6 @@ class EaeDataService {
                 fp = writeLPFile(f, data);
                 break;
         }
-
-//        def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL;
-//        executeCommand.execute().waitFor();
-//
-//        // We cleanup
-//        f.delete();
 
         return fileToTransfer
     }
@@ -218,19 +202,9 @@ class EaeDataService {
      * @param sparkURL
      * @return
      */
-    def  sendAdditionalToHDFS(String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL){
-//        def script = scriptDir +'transferToHDFS.sh';
+    def  writeAdditionalFileToTmp(String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL){
         def fileToTransfer = workflow + "-additional" + "-" + username + "-" + mongoDocumentID + ".txt";
         String fp;
-
-//        def scriptFile = new File(script);
-//        if (scriptFile.exists()) {
-//            if(!scriptFile.canExecute()){
-//                scriptFile.setExecutable(true)
-//            }
-//        }else {
-//            log.error('The Script file to transfer to HDFS wasn\'t found')
-//        }
 
         File f = new File("/tmp/eae/",fileToTransfer);
         if(f.exists()){
@@ -259,13 +233,6 @@ class EaeDataService {
         }
 
         f.createNewFile()
-        //fp = f.getAbsolutePath()
-//        def executeCommand = script + " " + fp + " "  + fileToTransfer + " " + sparkURL;
-//        println(executeCommand)
-//        executeCommand.execute().waitFor();
-//
-//        // We cleanup
-//        f.delete();
 
         return fileToTransfer
     }
@@ -300,7 +267,7 @@ class EaeDataService {
             //remember close it
             zos.close();
 
-            System.out.println("Done");
+            println("Done");
         }catch(IOException ex){
             ex.printStackTrace();
         }

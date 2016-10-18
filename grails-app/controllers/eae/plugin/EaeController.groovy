@@ -88,7 +88,6 @@ class EaeController {
      */
     def runNoSQLWorkflow = {
         final def (SPARK_URL,MONGO_CACHE_URL,MONGO_CACHE_PORT,scriptDir,username)= cacheParams();
-        // final String NOSQL_URL, database = noSQLParams();
         String database = "eae";
         final def INTERFACE_URL = interfaceParams();
         String workflow = params.workflow;
@@ -102,12 +101,15 @@ class EaeController {
         def workflowParameters = [:]
         if(cached == "NotCached") {
             String mongoDocumentID = mongoCacheService.initJob(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, workflow, "NoSQL", username, query)
+
             workflowParameters['workflow'] = workflow;
             workflowParameters['workflowType'] = "NoSQL";
             workflowParameters['workflowSpecificParameters'] = params.workflowSpecificParameters;
             workflowParameters['mongoDocumentID'] = mongoDocumentID;
-            workflowParameters['zipFile'] = "";
+            workflowParameters['dataZipFile'] = "";
+
             def status = eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL,workflowParameters);
+
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
             result = mongoCacheService.retrieveValueFromCache(MONGO_CACHE_URL, MONGO_CACHE_PORT,database, workflow, query);
@@ -137,7 +139,6 @@ class EaeController {
      */
     def runWorkflow = {
         final def (SPARK_URL,MONGO_CACHE_URL,MONGO_CACHE_PORT,scriptDir,username)= cacheParams();
-        //final def (OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT) = oozieParams();
         final def INTERFACE_URL = interfaceParams();
         String database = "eae";
         String workflow = params.workflow;
@@ -157,9 +158,9 @@ class EaeController {
             String mongoDocumentID = mongoCacheService.initJob(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, workflow, "SQL", username, query)
 
             // Transfer the data file and additional file to HDFS
-            String dataFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "data")
-            String additionalFileName = eaeDataService.sendToHDFS(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "additional")
-            String zipFileName = workflow + "-" + username + "-" + mongoDocumentID;
+            String dataFileName = eaeDataService.writeDataFile(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "data")
+            String additionalFileName = eaeDataService.writeDataFile(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "additional")
+            String zipFileName = "tranSMART-" + workflow + "-" + username + "-" + mongoDocumentID;
 
             eaeDataService.zipFiles([dataFileName,additionalFileName], zipFileName)
 
@@ -167,11 +168,7 @@ class EaeController {
             workflowParameters['workflowType'] = "SQL";
             workflowParameters['zipFile'] = zipFileName;
             workflowParameters['workflowSpecificParameters'] = "";
-//            workflowParameters['dataFileName'] = dataFileName;
-//            workflowParameters['additionalFileName'] = additionalFileName;
             eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL, workflowParameters);
-            //eaeService.scheduleOOzieJob(OOZIE_URL, JOB_TRACKER, JOB_TRACKER_PORT, NAMENODE, NAMENODE_PORT, workflow, workflowParameters);
-            //eaeService.sparkSubmit(scriptDir, SPARK_URL, workflow+".py", dataFileName , workflowSpecificParameters, mongoDocumentID)
             result = "Your Job has been submitted. Please come back later for the result"
 
         }else if (cached == "Completed"){
