@@ -206,7 +206,7 @@ class EaeDataService {
         def fileToTransfer = workflow + "-additional" + "-" + username + "-" + mongoDocumentID + ".txt";
         String fp;
 
-        File f = new File("/tmp/eae/",fileToTransfer);
+        File f = new File("/tmp/",fileToTransfer);
         if(f.exists()){
             f.delete();
         }
