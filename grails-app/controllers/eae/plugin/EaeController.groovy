@@ -162,7 +162,7 @@ class EaeController {
             String additionalFileName = eaeDataService.writeDataFile(username, mongoDocumentID, workflow, parameterMap, "additional")
             String zipFileName = "tranSMART-" + workflow + "-" + username + "-" + mongoDocumentID;
 
-            eaeDataService.zipFiles([dataFileName,additionalFileName], zipFileName)
+            eaeDataService.zipFiles([dataFileName,additionalFileName], scriptDir, zipFileName)
 
             workflowParameters['mongoDocumentID'] = mongoDocumentID;
             workflowParameters['workflowType'] = "SQL";

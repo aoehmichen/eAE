@@ -234,39 +234,56 @@ class EaeDataService {
     }
 
 
-    def zipFiles(ArrayList<String> filesToZip, String zipName){
-        byte[] buffer = new byte[1024];
+    def zipFiles(ArrayList<String> filesToZip, String scriptDir, String zipName){
+        def sout = new StringBuilder();
+        def serr = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-        try{
-
-            FileOutputStream fos = new FileOutputStream(zipName);
-            ZipOutputStream zos = new ZipOutputStream(fos);
-
-            System.out.println("Output to Zip : " + zipName);
-
-            for(String file : filesToZip){
-
-                System.out.println("File Added : " + file);
-                ZipEntry ze= new ZipEntry(file);
-                zos.putNextEntry(ze);
-
-                FileInputStream fileIn = new FileInputStream(SOURCE_FOLDER + file);
-
-                int len;
-                while ((len = fileIn.read(buffer)) > 0) {
-                    zos.write(buffer, 0, len);
-                }
-                fileIn.close();
-            }
-
-            zos.closeEntry();
-            //remember close it
-            zos.close();
-
-            println("Done");
-        }catch(IOException ex){
-            ex.printStackTrace();
+        for (String s : filesToZip)
+        {
+            sb.append(s);
+            sb.append("\t");
         }
+
+        def executeCommand = scriptDir + "zipFiles.sh " + zipName + " " + sb.toString();
+        def proc = executeCommand.execute();
+        proc.consumeProcessOutput(sout, serr);
+        proc.waitForOrKill(1000);
+        println executeCommand
+        println "out> $sout err> $serr"
+
+//        byte[] buffer = new byte[1024];
+//
+//        try{
+//
+//            FileOutputStream fos = new FileOutputStream(zipName);
+//            ZipOutputStream zos = new ZipOutputStream(fos);
+//
+//            System.out.println("Output to Zip : " + zipName);
+//
+//            for(String file : filesToZip){
+//
+//                System.out.println("File Added : " + file);
+//                ZipEntry ze= new ZipEntry(file);
+//                zos.putNextEntry(ze);
+//
+//                FileInputStream fileIn = new FileInputStream(SOURCE_FOLDER + file);
+//
+//                int len;
+//                while ((len = fileIn.read(buffer)) > 0) {
+//                    zos.write(buffer, 0, len);
+//                }
+//                fileIn.close();
+//            }
+//
+//            zos.closeEntry();
+//            //remember close it
+//            zos.close();
+//
+//            println("Done");
+//        }catch(IOException ex){
+//            ex.printStackTrace();
+//        }
         return "OK"
     }
 }
