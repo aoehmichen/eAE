@@ -103,13 +103,11 @@ class EaeDataService {
     }
 
     /**
-     * Intermediary method for the transfer of the data files to HDFS
+     * Intermediary method for the transfer of the data files to EAE
      * @param username
      * @param mongoDocumentID
      * @param workflow
      * @param data
-     * @param scriptDir
-     * @param sparkURL
      * @param typeOfFile
      * @return
      */
@@ -132,8 +130,6 @@ class EaeDataService {
      * @param mongoDocumentID
      * @param workflow
      * @param data
-     * @param scriptDir
-     * @param sparkURL
      * @return
      */
     def  writeDataToTmp (String username, String mongoDocumentID, String workflow, data) {
