@@ -48,11 +48,11 @@
     function customWorkflowParameters(){
         var data = [];
         var studySelected = $('#noSQLStudies').val();
-        var dataSelected = $('#dataAvailableDiv').val();
-        data.push({name: 'StudySelected', value: studySelected});
-        data.push({name: 'DataSelected', value: dataSelected});
-        data.push({name: 'CustomField', value: 'None'});
-        data.push({name: 'WorkflowSpecificParameters', value: 'None'});
+        var dataSelected = $('#dataTypeSelect').val();
+        data.push({name: 'studySelected', value: studySelected});
+        data.push({name: 'dataSelected', value: dataSelected});
+        data.push({name: 'customField', value: 'None'});
+        data.push({name: 'workflowSpecificParameters', value: 'None'});
         return data;
     }
 
