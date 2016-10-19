@@ -133,7 +133,7 @@ class EaeDataService {
      * @return
      */
     def  writeDataToTmp (String username, String mongoDocumentID, String workflow, data) {
-        def fileToTransfer = workflow + "-" + username + "-" + mongoDocumentID + ".txt";
+        def fileToTransfer = "tranSMART-" + workflow + "-" + username + "-" + mongoDocumentID + ".txt";
         String fp;
 
         File f = new File("/tmp/",fileToTransfer);
@@ -199,7 +199,7 @@ class EaeDataService {
      * @return
      */
     def  writeAdditionalFileToTmp(String username, String mongoDocumentID, String workflow, data){
-        def fileToTransfer = workflow + "-additional" + "-" + username + "-" + mongoDocumentID + ".txt";
+        def fileToTransfer = "tranSMART-" + workflow + "-additional" + "-" + username + "-" + mongoDocumentID + ".txt";
         String fp;
 
         File f = new File("/tmp/",fileToTransfer);
