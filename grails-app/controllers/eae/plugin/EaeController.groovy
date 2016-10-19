@@ -157,7 +157,7 @@ class EaeController {
 
             String mongoDocumentID = mongoCacheService.initJob(MONGO_CACHE_URL, MONGO_CACHE_PORT, database, workflow, "SQL", username, query)
 
-            // Transfer the data file and additional file to HDFS
+            // Transfer the data file and additional file
             String dataFileName = eaeDataService.writeDataFile(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "data")
             String additionalFileName = eaeDataService.writeDataFile(username, mongoDocumentID, workflow, parameterMap, scriptDir, SPARK_URL, "additional")
             String zipFileName = "tranSMART-" + workflow + "-" + username + "-" + mongoDocumentID;

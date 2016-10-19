@@ -113,14 +113,14 @@ class EaeDataService {
      * @param typeOfFile
      * @return
      */
-    def writeDataFile(String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL, String typeOfFile){
+    def writeDataFile(String username, String mongoDocumentID, String workflow, data, String typeOfFile){
         def fileToTransfer = "";
         switch (typeOfFile) {
             case "data":
-                fileToTransfer = writeDataToTmp( username, mongoDocumentID, workflow, data,  scriptDir, sparkURL);
+                fileToTransfer = writeDataToTmp( username, mongoDocumentID, workflow, data);
                 break;
             case "additional":
-                fileToTransfer = writeAdditionalFileToTmp( username, mongoDocumentID, workflow, data,  scriptDir, sparkURL);
+                fileToTransfer = writeAdditionalFileToTmp( username, mongoDocumentID, workflow, data);
                 break;
         }
         return fileToTransfer;
@@ -136,7 +136,7 @@ class EaeDataService {
      * @param sparkURL
      * @return
      */
-    def  writeDataToTmp (String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL) {
+    def  writeDataToTmp (String username, String mongoDocumentID, String workflow, data) {
         def fileToTransfer = workflow + "-" + username + "-" + mongoDocumentID + ".txt";
         String fp;
 
@@ -202,7 +202,7 @@ class EaeDataService {
      * @param sparkURL
      * @return
      */
-    def  writeAdditionalFileToTmp(String username, String mongoDocumentID, String workflow, data, String scriptDir, String sparkURL){
+    def  writeAdditionalFileToTmp(String username, String mongoDocumentID, String workflow, data){
         def fileToTransfer = workflow + "-additional" + "-" + username + "-" + mongoDocumentID + ".txt";
         String fp;
 

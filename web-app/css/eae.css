@@ -3,6 +3,7 @@
 }
 .cachetable {
     border-collapse: collapse;
+    word-wrap: break-word;
     margin: auto;
 }
 .cachetable th {

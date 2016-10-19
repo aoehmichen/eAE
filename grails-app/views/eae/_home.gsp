@@ -38,7 +38,7 @@
     <hr class="myhr"/>
     </div>
 
-    <div id="eaeoutputs" ></div>
+    <div id="eaeoutputs" style="text-align: center"></div>
 </body>
 
 <script>
