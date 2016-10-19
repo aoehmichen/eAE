@@ -168,7 +168,7 @@ class EaeController {
             workflowParameters['mongoDocumentID'] = mongoDocumentID;
             workflowParameters['workflowType'] = "SQL";
             workflowParameters['zipFile'] = zipFileName;
-            workflowParameters['dataFilesNames'] = dataFileName + ".txt" + " " + additionalFileName + ".txt"
+            workflowParameters['dataFilesNames'] = dataFileName + " " + additionalFileName;
             // workflowParameters['workflowSpecificParameters'] are set in the custom preprocessing.
             eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL, workflowParameters);
             result = "Your Job has been submitted. Please come back later for the result"
