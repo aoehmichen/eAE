@@ -98,6 +98,8 @@ class MongoCacheService {
         coll.insertOne(cacheRecord)
         def jobId = doc.get( "_id" );
 
+        mongoClient.close()
+
         return jobId;
     }
 
