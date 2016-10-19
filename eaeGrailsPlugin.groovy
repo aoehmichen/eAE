@@ -1,6 +1,6 @@
 class eaeGrailsPlugin {
     // the plugin version
-    def version = "0.5"
+    def version = "0.9"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.3 > *"
     // resources that are excluded from plugin packaging
@@ -58,6 +58,22 @@ class eaeGrailsPlugin {
 
     def doWithApplicationContext = { ctx ->
         // TODO Implement post initialization spring config (optional)
+        // Set the scripts to executable
+        def eaeFileSystemName = ctx.getBean('pluginManager').allPlugins.sort({ it.name.toUpperCase() }).find { it.fileSystemName ==~ /eae-\w.\w/}
+        String path = ctx.servletContext.getRealPath("web-app") + '/'+ eaeFileSystemName.fileSystemName.toString() + '/Scripts/';
+        File scriptsFolder = new File(path);
+        if(scriptsFolder.exists() && scriptsFolder.isDirectory()){
+            File[] files = scriptsFolder.listFiles();
+            for (File file : files) {
+                if (file.isFile()) {
+                    if(!file.canExecute()){
+                        file.setExecutable(true)
+                    }
+                }
+            }
+        }
+
+        println("Bootstrapping Completed. Scripts are executable.")
     }
 
     def onChange = { event ->
