@@ -60,7 +60,7 @@ class eaeGrailsPlugin {
         // TODO Implement post initialization spring config (optional)
         // Set the scripts to executable
         def eaeFileSystemName = ctx.getBean('pluginManager').allPlugins.sort({ it.name.toUpperCase() }).find { it.fileSystemName ==~ /eae-\w.\w/}
-        String path = ctx.servletContext.getRealPath("") + '/plugins/'+ eaeFileSystemName.fileSystemName.toString()
+        String path = ctx.servletContext.getRealPath("") + '/plugins/'+ eaeFileSystemName.fileSystemName.toString() + '/Scripts/eae'
         File scriptsFolder = new File(path);
         if(scriptsFolder.exists() && scriptsFolder.isDirectory()){
             File[] files = scriptsFolder.listFiles();
