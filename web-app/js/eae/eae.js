@@ -9,7 +9,7 @@ function goToSmartRScript() {
     }).done(function(serverAnswer) {
         jQuery("#index").html(serverAnswer);
     }).fail(function() {
-        jQuery("#index").html("AJAX CALL FAILED!");
+        jQuery("#index").html("Something went wrong in the submission process please contact your system administrator.");
     });
 
     showCohortInfo();
@@ -192,7 +192,7 @@ function changeEAEInput(){
     }).done(function(serverAnswer) {
         jQuery("#eaeinputs").html(serverAnswer);
     }).fail(function() {
-        jQuery("#eaeinputs").html("AJAX CALL FAILED!");
+        jQuery("#eaeinputs").html("Something went wrong in the submission process please contact your system administrator.");
     });
 
 }
@@ -218,7 +218,7 @@ function displayDataForStudy(){
                 .attr("value",e)
                 .text(e))});
     }).fail(function() {
-        _t.html("AJAX CALL FAILED!");
+        _t.html("Something went wrong in the submission process please contact your system administrator.");
     });
 
 }
@@ -272,7 +272,7 @@ function populateCacheDIV(currentworkflow){
             })
         }
     }).fail(function() {
-        jQuery("#cacheTableDiv").html("AJAX CALL FAILED!");
+        jQuery("#cacheTableDiv").html("Something went wrong in the submission process please contact your system administrator.");
     });
 }
 
@@ -320,7 +320,7 @@ function runNoSQLWorkflow(){
             buildOutput($.parseJSON(jsonAnswer["result"]));
         }
     }).fail(function() {
-        jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
+        jQuery("#eaeoutputs").html("Something went wrong in the submission process please contact your system administrator.");
     });
 }
 
@@ -355,7 +355,7 @@ function runWorkflow(){
             buildOutput($.parseJSON(jsonAnswer.result));
         }
     }).fail(function() {
-        jQuery("#eaeoutputs").html("AJAX CALL FAILED!");
+        jQuery("#eaeoutputs").html("Something went wrong in the submission process please contact your system administrator.");
     });
 }
 

@@ -53,6 +53,12 @@
     populateCacheDIV(currentWorkflow);
 
     function customSanityCheck() {
+        var studySelected = $('#noSQLStudies').val();
+        var dataSelected = $('#dataTypeSelect').val();
+        if(studySelected === undefined || dataSelected === undefined){
+            alert("Please select a study and data to be used.");
+            return false;
+        }
         return true;
     }
 
