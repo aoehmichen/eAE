@@ -125,7 +125,7 @@
         // d3.select('#cvPerformanceGraph').datum(formatData(jsonRecord.PerformanceCurve)).call(chart);
     }
 
-    function prepareDataForMongoRetrievale(currentworkflow, cacheQuery) {
+    function prepareDataForMongoRetrievale(currentworkflow, cacheQuery, workflowspecificparameters) {
         var tmpData = [];
         var splitTerms = cacheQuery.split('<br />');
         $.each(splitTerms, function (i, e) {
@@ -134,11 +134,10 @@
         });
         var data = {
             Workflow: currentworkflow,
-            WorkflowType: "NoSQL",
             StudyName: tmpData[0],
             DataType: tmpData[1],
             CustomField: 'None',
-            WorkflowSpecificParameters: 'None'
+            WorkflowSpecificParameters: workflowspecificparameters
         };
         return data;
     }
