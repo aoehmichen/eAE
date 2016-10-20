@@ -18,7 +18,18 @@
             </td>
         </tr>
     </table>
-        <input
+    <br/>
+    <span>Confidence for the normality test:</span>
+    <select id='confidenceNormality'>
+        <option value="15.0">15.0</option>
+        <option value="10.0">10.0</option>
+        <option value="5.0">5.0</option>
+        <option value="2.5">2.5</option>
+        <option value="1.0">1.0</option>
+    </select>
+    <br/>
+    <br/>
+    <input
             id="submitGT"
             class='txt'
             type="button"
@@ -49,10 +60,11 @@
         var data = [];
         var studySelected = $('#noSQLStudies').val();
         var dataSelected = $('#dataTypeSelect').val();
+        var confidenceNormality = $('#confidenceNormality').val();
         data.push({name: 'studySelected', value: studySelected});
         data.push({name: 'dataSelected', value: dataSelected});
         data.push({name: 'customField', value: 'None'});
-        data.push({name: 'workflowSpecificParameters', value: 'None'});
+        data.push({name: 'workflowSpecificParameters', value: confidenceNormality + " " + studySelected + " " + dataSelected});
         return data;
     }
 
