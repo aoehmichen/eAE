@@ -106,7 +106,7 @@ class EaeController {
             workflowParameters['workflowType'] = "NoSQL";
             workflowParameters['workflowSpecificParameters'] = params.workflowSpecificParameters;
             workflowParameters['mongoDocumentID'] = mongoDocumentID;
-            workflowParameters['dataZipFile'] = "";
+            workflowParameters['zipFile'] = "";
             workflowParameters['dataFilesNames'] = "";
 
             def status = eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL,workflowParameters);
