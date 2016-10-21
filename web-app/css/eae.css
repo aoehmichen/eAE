@@ -76,3 +76,15 @@
     padding: 5px;
     border: 1px solid grey;
 }
+.gt th {
+    min-width: 50px;
+    padding: 5px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.inlineTable {
+    display: inline-block;
+    vertical-align: top;
+    padding:0px 20px;
+}

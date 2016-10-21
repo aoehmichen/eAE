@@ -41,7 +41,7 @@
 <hr class="myhr"/>
 <div id="cacheTableDiv">
     <table id="mongocachetable" class="cachetable"></table>
-    <div id="emptyCache">The Cache is Empty</div>
+    <div id="emptyCache">There is no prior computation to display in the history.</div>
     <button type="button"
             value="refreshCacheDiv"
             onclick="refreshCache()"
@@ -100,14 +100,51 @@
     function buildOutput(jsonRecord){
         var _o = $('#eaeoutputs');
 
-        _o.append($('<table/>').attr("id","gttable").append($('<tr/>')
-                        .append($('<th/>').text("Name :"))
-                        .append($('<th/>').text(jsonRecord.PearsonCorrelationHeatmapName))
+        _o.append($('<div/>').attr("id","data-tables"));
+
+        var _p =  $('#data-tables');
+        _p.append($('<table/>').attr("id","data-types-table").attr("class", "inlineTable gt cachetable")
+                .append($('<tr/>')
+                        .append($('<th/>').text("Data types"))
+                        .append($('<th/>').text("Count"))
+                ));
+        $.each(jsonRecord.NumberOfData, function(i, e){
+            var name = i.match(/[A-Z][a-z]+/g);
+            $('#data-types-table').append($('<tr/>')
+                    .append($('<td/>').text(name[0] + " " +  name[1]))
+                    .append($('<td/>').text(e)))
+        });
+        _p.append($('<table/>').attr("id","data-nas-table").attr("class", "inlineTable gt cachetable")
+                .append($('<tr/>')
+                        .append($('<th/>').text("Feature Name"))
+                        .append($('<th/>').text("Number of NAs"))
+                ));
+        $.each(jsonRecord.NumberOfNAs, function(i, e){
+            $('#data-nas-table').append($('<tr/>')
+                    .append($('<td/>').text(e[0]))
+                    .append($('<td/>').text(e[1])))
+        });
+        _p.append($('<table/>').attr("id","data-ChiSquare-table").attr("class", "inlineTable gt cachetable")
+                .append($('<tr/>')
+                        .append($('<th/>').text("Chi-squared test statistic"))
+                        .append($('<th/>').text("p-value"))
+                ));
+        $.each(jsonRecord.ChiSquareTest, function(i, e){
+            $('#data-ChiSquare-table').append($('<tr/>')
+                    .append($('<td/>').text(e[0]))
+                    .append($('<td/>').text(e[1])))
+        });
+
+
+        _o.append($('<table/>').attr("id","gttable").attr("class", "gt").append($('<tr/>')
+                .append($('<th/>').text("Name :"))
+                .append($('<th/>').text(jsonRecord.PearsonCorrelationHeatmapName))
         ));
         $('#gttable').append($('<tr/>')
                         .append($('<td/>').append($('<div/>').attr('id',"imageerror")))
                         .append($('<td/>').append($('<img/>').attr("id","correlationHeatmap")))
         );
+
 
 
         jQuery.ajax({
@@ -120,6 +157,7 @@
         }).fail(function() {
             $('#correlationHeatmap').html("Cannot get the Image!")
         });
+
 
 //        _o.append($('<div/>').attr('id', "cvPerformanceGraph"));
         // d3.select('#cvPerformanceGraph').datum(formatData(jsonRecord.PerformanceCurve)).call(chart);

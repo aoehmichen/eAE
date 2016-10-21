@@ -32,7 +32,7 @@
 <hr class="myhr"/>
 <div id="cacheTableDiv">
     <table id="mongocachetable" class ="cachetable"></table>
-    <div id="emptyCache">The Cache is Empty</div>
+    <div id="emptyCache">There is no prior computation to display in the history.</div>
     <button type="button"
             value="refreshCacheDiv"
             onclick="refreshCache()"
