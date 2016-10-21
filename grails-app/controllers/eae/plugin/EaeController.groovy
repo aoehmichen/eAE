@@ -44,12 +44,6 @@ class EaeController {
         return INTERFACE_URL
     }
 
-    /**
-     *   Go to SmartR
-     */
-    def goToSmartR = {
-        render template: '/smartR/index', model:[ scriptList: smartRService.scriptList] }
-
 
     /**
      *   Renders the input form for initial script parameters.
@@ -167,7 +161,7 @@ class EaeController {
 
             workflowParameters['mongoDocumentID'] = mongoDocumentID;
             workflowParameters['workflowType'] = "SQL";
-            workflowParameters['zipFile'] = zipFileName;
+            workflowParameters['zipFile'] = "/tmp/" + zipFileName + ".zip";
             workflowParameters['dataFilesNames'] = dataFileName + " " + additionalFileName;
             // workflowParameters['workflowSpecificParameters'] are set in the custom preprocessing.
             eaeService.eaeInterfaceSparkSubmit(INTERFACE_URL, workflowParameters);
