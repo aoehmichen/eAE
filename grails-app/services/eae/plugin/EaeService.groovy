@@ -23,28 +23,6 @@ class EaeService {
         return scriptList
     }
 
-    //TODO: Depreciated. To be removed
-    def scheduleOOzieJob(String OOZIE_URL, String JOB_TRACKER, String JOB_TRACKER_PORT, String NAMENODE, String NAMENODE_PORT, String workflow, workflowParameters){
-        // get a OozieClient for local Oozie
-        OozieClient wc = new OozieClient(OOZIE_URL);
-
-        // create a workflow job configuration and set the workflow application path
-        Properties conf = wc.createConfiguration();
-        conf.setProperty(OozieClient.USER_NAME, "ubuntu");
-        conf.setProperty("jobTracker", JOB_TRACKER + ":" + JOB_TRACKER_PORT); // the port must match yarn.resourcemanager.address's
-        conf.setProperty("nameNode", "hdfs://" + NAMENODE + ":" + NAMENODE_PORT); //this is for the regular install but mapr needs maprfs ....
-        conf.setProperty(OozieClient.APP_PATH, "hdfs://"+ NAMENODE + ":" + NAMENODE_PORT + "/user/ubuntu/workflows/" + workflow +"_workflow.xml");
-
-        // setting workflow parameters
-        workflowParameters.each{
-            k, v -> conf.setProperty(k,v) }
-
-        // submit and start the workflow job
-        String jobId = wc.run(conf);
-
-        return jobId;
-    }
-
     def customPreProcessing(params, workflow, MONGO_URL,MONGO_PORT,database,username){
         switch (workflow){
             case "CrossValidation":

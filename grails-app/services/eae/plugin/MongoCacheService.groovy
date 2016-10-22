@@ -25,8 +25,8 @@ class MongoCacheService {
      * @param query
      * @return a JSON object containing the requested document
      */
-    def retrieveValueFromCache(String mongoURL, String mongoPort, String dbName, String collectionName, BasicDBObject query) {
-        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort)
+    def retrieveValueFromCache(String mongoURL, String mongoPort, String mongoUser, String dbName, char[] password, String collectionName, BasicDBObject query) {
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort,mongoUser,dbName,password)
         MongoDatabase db = mongoClient.getDatabase( dbName )
         MongoCollection<Document> coll = db.getCollection(collectionName)
 
@@ -45,9 +45,9 @@ class MongoCacheService {
      * @param query
      * @return true if a copy exists in the cache. false otherwise
      */
-    def copyPresentInCache(String mongoURL, String mongoPort, String dbName, String collectionName, BasicDBObject query) {
+    def copyPresentInCache(String mongoURL, String mongoPort, String mongoUser, String dbName, char[] password, String collectionName, BasicDBObject query) {
 
-        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort)
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort,mongoUser,dbName,password)
         MongoDatabase db = mongoClient.getDatabase( dbName )
         MongoCollection<Document> coll = db.getCollection(collectionName)
 
@@ -74,8 +74,8 @@ class MongoCacheService {
      * @param query
      * @return the _id of the mongo record
      */
-    def initJob(String mongoURL, String mongoPort, String dbName, String workflowSelected, String typeOfWorkflow, String user, BasicDBObject query){
-        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
+    def initJob(String mongoURL, String mongoPort, String mongoUser, String dbName, char[] password, String workflowSelected, String typeOfWorkflow, String user, BasicDBObject query){
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort,mongoUser,dbName,password);
         MongoDatabase db = mongoClient.getDatabase( dbName );
         MongoCollection<Document> coll = db.getCollection(workflowSelected);
 
@@ -112,8 +112,8 @@ class MongoCacheService {
      * @param query
      * @return One of the three possible status of the Job.( NotCached, Started, Completed)
      */
-    def checkIfPresentInCache(String mongoURL, String mongoPort, String dbName, String collectionName, query ){
-        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
+    def checkIfPresentInCache(String mongoURL, String mongoPort, String mongoUser, char[] password, String dbName, String collectionName, query ){
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort,mongoUser,dbName,password);
         MongoDatabase db = mongoClient.getDatabase( dbName );
 
         def cursor = db.getCollection(collectionName).find(query).iterator();
@@ -179,9 +179,8 @@ class MongoCacheService {
      * @param workflowSelected
      * @return
      */
-    def getJobsFromMongo(String mongoURL, String mongoPort, String dbName, String userName, String workflowSelected) {
-
-        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
+    def getJobsFromMongo(String mongoURL, String mongoPort, String mongoUser, String dbName, char[] password, String userName, String workflowSelected) {
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort,mongoUser,dbName,password);
         MongoDatabase  db = mongoClient.getDatabase( dbName );
         MongoCollection coll = db.getCollection(workflowSelected);
 
@@ -209,9 +208,9 @@ class MongoCacheService {
      * @param fileName
      * @return
      */
-    def retrieveDataFromMongoFS(String mongoURL, String mongoPort, String dbName, String fileName){
+    def retrieveDataFromMongoFS(String mongoURL, String mongoPort, String mongoUser, String dbName, char[] password, String fileName){
         String extension = fileName.split('\\.')[1]
-        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL, mongoPort);
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort,mongoUser,dbName,password);
         MongoDatabase db = mongoClient.getDatabase(dbName);
         GridFSBucket gridFSBucket = GridFSBuckets.create(db);
 
@@ -288,8 +287,8 @@ class MongoCacheService {
      * @param cacheRes
      * @return {0}
      */
-    def duplicateCacheForUser(String mongoURL, String mongoPort, String database, String workflow, String username, JSONObject cacheRes){
-        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort);
+    def duplicateCacheForUser(String mongoURL, String mongoPort, String mongoUser, String database, char[] password, String workflow, String username, JSONObject cacheRes){
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort, mongoUser,database,password);
         MongoDatabase db = mongoClient.getDatabase(database);
         MongoCollection<Document> coll = db.getCollection(workflow);
 

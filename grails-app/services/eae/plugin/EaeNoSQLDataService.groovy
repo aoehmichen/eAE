@@ -19,16 +19,16 @@ class EaeNoSQLDataService {
      * @param collectionName
      * @return {MongoCollection}
      */
-    def getMongoCollection(String mongoURL, String dbName, String collectionName){
+    def getMongoCollection(String mongoURL, String mongoUser, String dbName, char[] password, String collectionName){
         def url = mongoURL.split(':');
-        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(url[0], url[1]);
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(url[0], url[1],mongoUser,dbName,password);
         MongoDatabase db = mongoClient.getDatabase( dbName );
         MongoCollection<Document> coll = db.getCollection(collectionName);
         return coll;
     }
 
-    def queryData(String mongoURL, String dbName, String collectionName, params) {
-        MongoCollection<Document> coll = getMongoCollection(mongoURL, dbName, collectionName);
+    def queryData(String mongoURL, String dbName, String mongoUser, char[] password, String collectionName, params) {
+        MongoCollection<Document> coll = getMongoCollection(mongoURL, mongoUser, dbName, password, collectionName);
 
     }
 
@@ -39,8 +39,8 @@ class EaeNoSQLDataService {
      * @param workflowSelected
      * @return
      */
-    def getStudies(String mongoURL, String dbName, String workflowSelected){
-        MongoCollection<Document> coll = getMongoCollection(mongoURL, dbName, "metadata");
+    def getStudies(String mongoURL, String mongoUser, String dbName, char[] password, String workflowSelected){
+        MongoCollection<Document> coll = getMongoCollection(mongoURL, mongoUser, dbName, password, "metadata");
         def listOfStudies = coll.distinct("StudyName",String.class).toList();
         return listOfStudies;
     }
@@ -51,8 +51,8 @@ class EaeNoSQLDataService {
      * @param dbName
      * @return
      */
-    def getMongoData(String mongoURL, String dbName){
-        MongoCollection<Document> coll = getMongoCollection(mongoURL, dbName, "custom_data");
+    def getMongoData(String mongoURL, String mongoUser, String dbName, char[] password){
+        MongoCollection<Document> coll = getMongoCollection(mongoURL, mongoUser, dbName, password, "custom_data");
         def dataTypes = coll.distinct("DataType",String.class).toList();
         return dataTypes
     }
@@ -64,8 +64,8 @@ class EaeNoSQLDataService {
      * @param selectedStudy
      * @return
      */
-    def getDataTypesForStudy(String mongoURL, String dbName, String selectedStudy){
-        MongoCollection<Document> coll = getMongoCollection(mongoURL, dbName, "metadata");
+    def getDataTypesForStudy(String mongoURL, String mongoUser, String dbName, char[] password, String selectedStudy){
+        MongoCollection<Document> coll = getMongoCollection(mongoURL, mongoUser, dbName, password, "metadata");
         BasicDBObject query = new BasicDBObject();
         query.append('StudyName', selectedStudy);
 
