@@ -359,10 +359,144 @@ function runWorkflow(){
     });
 }
 
+
+/****************************************************
+*                                                   *
+*       Crossvalidation Table                       *
+*                                                   *
+****************************************************/
+
+var gradient = [
+    [
+        0,
+        [0,0,255]
+    ],
+    [
+        50,
+        [240,240,240]
+    ],
+    [
+        100,
+        [255,0,0]
+    ]
+];
+
+function gradientTarget(min, max, value) {
+
+    var norm = (max - value) * 100 / (max - min);
+    norm = norm <= 0 ? 0.1 : norm;
+
+    var range = [];
+    $.each(gradient, function(index, colors) {
+        if(norm <= colors[0]) {
+            range = [index - 1 , index]
+            return false;
+        }
+    });
+
+    var fc = gradient[range[0]][1];
+    var sc = gradient[range[1]][1];
+    var tcp = 100 * (gradient[range[0]][0] / 100);
+    var scp = 100 * (gradient[range[1]][0] / 100) - tcp;
+    var slider_x = 100 * (norm / 100) - tcp;
+    var ratio = slider_x / scp;
+    var result = colorTarget(sc, fc, ratio);
+    return result.join();
+}
+
+function colorTarget(up, down, weight) {
+    var p = weight;
+    var w = p * 2 - 1;
+    var w1 = (w / 1 + 1) / 2;
+    var w2 = 1 - w1;
+    var rgb = [
+        Math.round(up[0] * w1 + down[0] * w2),
+        Math.round(up[1] * w1 + down[1] * w2),
+        Math.round(up[2] * w1 + down[2] * w2)
+    ];
+    return rgb;
+}
+
+function delfation(value) {
+    var n = value;
+    var c = 0;
+    if (n < 0)
+        c++;
+    n = Math.abs(n);
+    while (n >= 10) {
+        c++;
+        n /= 10;
+    }
+    return c;
+}
+
+function tablePad(el, col) {
+    var p = 0;
+    var x = null;
+    var n = null;
+    var table = $('tbody', $(el));
+    $('tr>td:nth-of-type(' + col + ')', table).each(function () {
+        var v = parseFloat($(this).text());
+        var c = delfation(v);
+        if (x == null || n == null)
+            x = n = v;
+        p = c > p ? c : p;
+        x = v > x ? v : x;
+        n = v < n ? v : n;
+    }).each(function () {
+        var v = parseFloat($(this).text());
+        var d = delfation(v);
+        var c = p - d;
+        while (c-- > 0)
+            $(this).prepend('&nbsp;');
+        $(this).prepend($('<span>').css('background-color', 'rgb(' + gradientTarget(n, x, v) + ')'));
+    });
+}
+
+function tableSort(el) {
+    $('th', $(el)).each(function (i) {
+        $(this).data({idx: i, dir: 0}).click(function () {
+            var h = $(this);
+            var idx = h.data('idx');
+            var dir = h.data('dir');
+            var table = $('tbody', $(el));
+            var rows = table.children('tr').detach();
+            $('th', $(el)).removeClass('s0 s1');
+            h.addClass('s' + ((dir > 0) ? '0' : '1'));
+
+            console.log(dir)
+            rows.sort(function(up, down) {
+
+                var u = $('td:nth-of-type(' + (idx + 1) + ')', $(up)).text();
+                var d = $('td:nth-of-type(' + (idx + 1) + ')', $(down)).text();
+                var pu = parseFloat(u);
+                var pd = parseFloat(d);
+
+                if (pu != 'Nan' && pd != 'Nan') {
+                    if (dir > 0)
+                        return (pu < pd) ? -1 : 1;
+                    return (pu > pd) ? -1 : 1;
+                }
+            });
+
+            if (dir > 0)
+                h.data('dir', 0);
+            else
+                h.data('dir', 1);
+
+            $(rows).each(function(){
+                table.append($(this));
+            });
+        }).append($('<span>').addClass('d').html('&#9662;')).append($('<span>').addClass('u').html('&#9652;'))
+    });
+}
+
+
+
 /*****************************************************
- *
- *     D3 Section for workflows
- *
+ *                                                   *
+ *     D3 Section for workflows                      *
+ *                                                   *
  ****************************************************/
 
 function scatterPlot(){
@@ -481,6 +615,8 @@ function scatterPlot(){
 
     return chart;
 }
+
+
 
 
 

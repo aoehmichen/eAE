@@ -118,13 +118,16 @@
                         .append($('<td/>').text(duration+ 's'))
         );
 
-        _o.append($('<div/>').attr('id', "cvPerformanceGraph").attr("class", "CrossValidation"));
-
-        _o.append($('<div/>').attr('id', "modeltableDiv").append($('<table/>').attr("id","modeltable").attr("class", "modeltable")
+        _o.append($('<table/>').attr('id', "cvInfo").attr("class", "cvInfo" )
+                    .append($('<th/>').text("Performance Graph"))
+                    .append($('<th/>').text("Best Model characteristics"))
                 .append($('<tr/>')
-                        .append($('<th/>').text("Model Features"))
-                        .append($('<th/>').text("Weight"))
-                )));
+                        .append($('<td/>').append($('<div/>').attr('id', "cvPerformanceGraph").attr("class", "CrossValidation")))
+                        .append($('<td/>').append($('<table/>').attr("id","modeltable").attr("class", "modeltable")
+                        .append($('<tr/>')
+                            .append($('<th/>').text("Model Features"))
+                            .append($('<th/>').text("Weight"))
+                )))));
 
         var _h = $('#modeltable');
         $.each(jsonRecord.ModelFeatures, function (i, e) {
@@ -144,6 +147,8 @@
                 .height(250);
         
         d3.select('#cvPerformanceGraph').datum(formatData(jsonRecord.PerformanceCurve)).call(chart);
+        tablePad('#modeltable', 2);
+        tableSort('#modeltable');
     }
 
 </script>

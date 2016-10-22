@@ -88,3 +88,83 @@
     vertical-align: top;
     padding:0px 20px;
 }
+
+.cvInfo {
+    margin: auto;
+}
+
+.cvInfo th{
+    text-align: center;
+    font-weight: bold;
+    padding-top: 10px;
+    padding-bottom: 5px;
+}
+.cvInfo td{
+    vertical-align: top;
+}
+
+#modeltableDiv {
+    width: 100%;
+    height: 100%;
+}
+
+#modeltable {
+    margin: auto;
+    border: solid 1px #ddd;
+    background-color: #fff;
+}
+
+#modeltable tr:hover {
+    background-color: #f4f4f4;
+}
+
+#modeltable th {
+    height: 30px;
+    line-height: 30px;
+    background-color: #eee;
+    cursor: pointer;
+}
+
+#modeltable th:hover {
+    background-color: #e0e0e0;
+}
+
+#modeltable th .u, #modeltable th .d {
+    display: none;
+}
+
+#modeltable th.s0 .u {
+    display: inline-block;
+}
+
+#modeltable th.s1 .d {
+    display: inline-block;
+}
+
+#modeltable td, #modeltable th {
+    padding: 0 10px;
+}
+
+#modeltable td:nth-of-type(1), #modeltable th:nth-of-type(1) {
+    text-align: right;
+    width: 200px;
+}
+
+#modeltable td:nth-of-type(2), #modeltable th:nth-of-type(2) {
+    text-align: left;
+    width: 300px;
+}
+
+#modeltable td {
+    height: 20px;
+    line-height: 20px;
+    font-family: "Lucida Console", monospace;
+}
+
+#modeltable td span {
+    display: inline-block;
+    border-radius: 100%;
+    width: 10px;
+    height: 10px;
+    margin-right: 10px;
+}
