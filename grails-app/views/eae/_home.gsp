@@ -15,13 +15,6 @@
 
 <body>
     <div id="switch" style="text-align: right">
-    %{--<input--}%
-        %{--id="goSmartR"--}%
-        %{--class='txt flatbutton'--}%
-        %{--type="button"--}%
-        %{--value="Go To SmartR"--}%
-        %{--onclick="goToSmartRScript()"/>--}%
-    %{--</div>--}%
     <div id="index" style="text-align: center">
         <h1 class="txt"> Welcome to eTRIKS Analytical Engine.</h1><br/>
 

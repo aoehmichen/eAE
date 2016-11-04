@@ -5,7 +5,6 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 
 class EtriksEnginesController {
 
-    def smartRService
     def eaeService
 
     /**
@@ -37,11 +36,7 @@ class EtriksEnginesController {
         if (! params.engine) {
             render 'Please select an engine to execute.'
         } else {
-            if(params.engine == 'smartR'){
-                render template: '/smartR/index', model:[ scriptList: smartRService.scriptList] }
-            else{
                 render template: '/eae/home', model:[ hpcScriptList: eaeService.hpcScriptList] }
-        }
     }
 
 }

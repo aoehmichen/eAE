@@ -1,19 +1,3 @@
-/**
- *   Renders the input form for entering the parameters for a visualization/script
- */
-function goToSmartRScript() {
-    jQuery.ajax({
-        url: pageInfo.basePath + '/eae/goToSmartR' ,
-        type: "POST",
-        timeout: '600000'
-    }).done(function(serverAnswer) {
-        jQuery("#index").html(serverAnswer);
-    }).fail(function() {
-        jQuery("#index").html("Something went wrong in the submission process please contact your system administrator.");
-    });
-
-    showCohortInfo();
-}
 
 /**
  *   Activating drag and drop for a given div
