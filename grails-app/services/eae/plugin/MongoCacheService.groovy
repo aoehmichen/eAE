@@ -213,17 +213,17 @@ class MongoCacheService {
      */
     def retrieveDataFromMongoFS(String mongoURL, String mongoUser, String dbName, char[] password, String fileName){
         def (mongoIP, mongoPort) = mongoURL.split(":");
-        String extension = fileName.split('\\.')[1]
+        String extension = fileName.split('\\.')[1];
         MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoIP,mongoPort,mongoUser,dbName,password);
         MongoDatabase db = mongoClient.getDatabase(dbName);
         GridFSBucket gridFSBucket = GridFSBuckets.create(db);
 
         OutputStream outputstream = new ByteArrayOutputStream();
         gridFSBucket.downloadToStreamByName(fileName, outputstream);
-        String imageBase64 = outputstream.toByteArray().encodeAsBase64().toString()
+        String imageBase64 = outputstream.toByteArray().encodeAsBase64().toString();
 
         outputstream.flush();
-        outputstream.close()
+        outputstream.close();
         mongoClient.close();
 
         String imageSrc = "data:image/"+ extension + ";base64,"+imageBase64;
@@ -291,8 +291,9 @@ class MongoCacheService {
      * @param cacheRes
      * @return {0}
      */
-    def duplicateCacheForUser(String mongoURL, String mongoPort, String mongoUser, String database, char[] password, String workflow, String username, JSONObject cacheRes){
-        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoURL,mongoPort, mongoUser,database,password);
+    def duplicateCacheForUser(String mongoURL, String mongoUser, String database, char[] password, String workflow, String username, JSONObject cacheRes){
+        def (mongoIP, mongoPort) = mongoURL.split(":");
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoIP, mongoPort, mongoUser, database, password);
         MongoDatabase db = mongoClient.getDatabase(database);
         MongoCollection<Document> coll = db.getCollection(workflow);
 

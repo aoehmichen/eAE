@@ -120,6 +120,7 @@ class EaeController {
         def (MONGO_URL, MONGO_USER, MONGO_PASSWORD)= mongoParams();
         final def INTERFACE_URL = interfaceParams();
         String username = springSecurityService.getPrincipal().username;
+        String scriptDir = getWebAppFolder() + 'Scripts/eae/';
         String database = "eae";
         String workflow = params.workflow;
 
