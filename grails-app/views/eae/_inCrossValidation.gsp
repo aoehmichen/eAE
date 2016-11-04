@@ -19,6 +19,33 @@
                         value="Run CV"
                         onclick="triggerCV()"/>
             </td>
+        </tr>
+        <tr>
+            <td style='padding-right: 2em; padding-bottom: 1em'>
+                <div class="algorithmToUse">
+                    <select id='AlgoList'>
+                        <option value="ALS">Alternating Least Squares</option>
+                        <option value="LassoWithSGD">Lassot</option>
+                        <option value="LinearRegressionWithSGD">Linear Regression</option>
+                        <option value="LogisticRegressionWithLBFGS">Logistic Regression with Broyden–Fletcher–Goldfarb–Shannon</option>
+                        <option value="LogisticRegressionWithSGD">Logistic Regression with Steepest Gradient Descent</option>
+                        <option value="SVM">SVM</option>
+                    </select>
+                </div>
+            </td>
+            <td style='padding-right: 2em; padding-bottom: 1em'>
+                <select id='kFoldsOptions'>
+                    <option value="0.33">3-fold</option>
+                    <option value="0.2">5-fold</option>
+                    <option value="0.1">10-fold</option>
+                </select>
+            </td>
+            <td style='padding-right: 2em; padding-bottom: 1em'>
+                <select id='resamplingNumber'></select>
+            </td>
+            <td style='padding-right: 2em; padding-bottom: 1em'>
+                <textarea id="numberOfFeaturesToRemove" cols="25" rows="1" placeholder="Percentage of features to remove at every step"></textarea><br>
+            </td>
             <td style='padding-right: 2em; padding-bottom: 1em'>
                 <div class="peCheckBox"></div>
                 <input type="checkbox" id="addPE" checked> Do a pathway enrichment<br>
@@ -42,6 +69,7 @@
     var currentWorkflow = "CrossValidation";
     populateCacheDIV(currentWorkflow);
     activateDragAndDropEAE('highDimDataCV');
+    fillResamplingOption();
 
     function register() {
         registerConceptBoxEAE('highDimDataCV', [1, 2], 'hleaficon', 1, 1);
@@ -151,4 +179,12 @@
         tableSort('#modeltable');
     }
 
+    function fillResamplingOption(){
+        var _select = $('#resamplingNumber');
+        var i;
+        for (i=1;i<=100;i++){
+            _select.append($('<option></option>').val(i).html(i))
+        }
+    }
+        ​
 </script>
