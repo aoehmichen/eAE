@@ -20,8 +20,8 @@ class EaeNoSQLDataService {
      * @return {MongoCollection}
      */
     def getMongoCollection(String mongoURL, String mongoUser, String dbName, char[] password, String collectionName){
-        def url = mongoURL.split(':');
-        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(url[0], url[1],mongoUser,dbName,password);
+        def (mongoIP, mongoPort) = mongoURL.split(":");
+        MongoClient mongoClient = MongoCacheFactory.getMongoConnection(mongoIP, mongoPort,mongoUser,dbName,password);
         MongoDatabase db = mongoClient.getDatabase( dbName );
         MongoCollection<Document> coll = db.getCollection(collectionName);
         return coll;

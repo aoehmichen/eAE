@@ -26,13 +26,12 @@ class MongoCacheController {
     def retrieveCachedJobs = {
         def username = springSecurityService.getPrincipal().username;
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
-        final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
         final def (mongoUser, mongoPassword) = mongoParams();
 
         if(params.workflow == null) {
             throw new RuntimeException("The params in MongoCacheController are Null")
         }
-        def result = mongoCacheService.getJobsFromMongo(MONGO_URL, MONGO_PORT, mongoUser, "eae", mongoPassword, username, params.workflow )
+        def result = mongoCacheService.getJobsFromMongo(MONGO_URL, mongoUser, "eae", mongoPassword, username, params.workflow )
 
         render result
     }
@@ -44,10 +43,9 @@ class MongoCacheController {
      */
     def retrieveSingleCachedJob = {
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
-        final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
         final def (mongoUser, mongoPassword) = mongoParams();
         BasicDBObject query = mongoCacheQuery(params, params.WorkflowType);
-        def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_PORT, mongoUser, "eae", mongoPassword, params.Workflow, query);
+        def result = mongoCacheService.retrieveValueFromCache(MONGO_URL, mongoUser, "eae", mongoPassword, params.Workflow, query);
         result = eaeService.customPostProcessing(result, params.Workflow)
         render result;
     }
@@ -60,10 +58,9 @@ class MongoCacheController {
      */
     def retieveDataFromMongoFS = {
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
-        final String MONGO_PORT = grailsApplication.config.com.eae.mongoPort;
         final def (mongoUser, mongoPassword) = mongoParams();
         def dataSelected = params.FileName;
-        def file = mongoCacheService.retrieveDataFromMongoFS(MONGO_URL, MONGO_PORT, mongoUser, "eae", mongoPassword, dataSelected);
+        def file = mongoCacheService.retrieveDataFromMongoFS(MONGO_URL, mongoUser, "eae", mongoPassword, dataSelected);
         render file
     }
 
