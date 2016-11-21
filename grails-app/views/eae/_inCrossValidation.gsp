@@ -24,12 +24,11 @@
             <td style='padding-right: 2em; padding-bottom: 1em'>
                 <div class="algorithmToUse">
                     <select id='AlgoList'>
-                        <option value="ALS">Alternating Least Squares</option>
-                        <option value="LassoWithSGD">Lassot</option>
+                        <option value="LassoWithSGD">Lasso</option>
                         <option value="LinearRegressionWithSGD">Linear Regression</option>
                         <option value="LogisticRegressionWithLBFGS">Logistic Regression with Broyden–Fletcher–Goldfarb–Shannon</option>
                         <option value="LogisticRegressionWithSGD">Logistic Regression with Steepest Gradient Descent</option>
-                        <option value="SVM">SVM</option>
+                        <option value="SVM">Support Vector Machine (SVM)</option>
                     </select>
                 </div>
             </td>
@@ -81,7 +80,7 @@
     }
 
     function refreshCVCache(){
-        populateCacheDIV(currentWorkflow)
+        populateCacheDIV(currentWorkflow);
     }
 
     function customSanityCheck() {
@@ -138,24 +137,24 @@
                         .append($('<th/>').text("Iterations step"))
                         .append($('<th/>').text("Resampling"))
                         .append($('<th/>').text("Computation time"))
-        ));
+                ));
         $('#cvtable').append($('<tr/>')
-                        .append($('<td/>').text(jsonRecord.AlgorithmUsed))
-                        .append($('<td/>').text(jsonRecord.NumberOfFeaturesToRemove*100 + '%'))
-                        .append($('<td/>').text(jsonRecord.Resampling))
-                        .append($('<td/>').text(duration+ 's'))
+                .append($('<td/>').text(jsonRecord.AlgorithmUsed))
+                .append($('<td/>').text(jsonRecord.NumberOfFeaturesToRemove*100 + '%'))
+                .append($('<td/>').text(jsonRecord.Resampling))
+                .append($('<td/>').text(duration+ 's'))
         );
 
         _o.append($('<table/>').attr('id', "cvInfo").attr("class", "cvInfo" )
-                    .append($('<th/>').text("Performance Graph"))
-                    .append($('<th/>').text("Best Model characteristics"))
+                .append($('<th/>').text("Performance Graph"))
+                .append($('<th/>').text("Best Model characteristics"))
                 .append($('<tr/>')
                         .append($('<td/>').append($('<div/>').attr('id', "cvPerformanceGraph").attr("class", "CrossValidation")))
                         .append($('<td/>').append($('<table/>').attr("id","modeltable").attr("class", "modeltable")
-                        .append($('<tr/>')
-                            .append($('<th/>').text("Model Features"))
-                            .append($('<th/>').text("Weight"))
-                )))));
+                                .append($('<tr/>')
+                                        .append($('<th/>').text("Model Features"))
+                                        .append($('<th/>').text("Weight"))
+                                )))));
 
         var _h = $('#modeltable');
         $.each(jsonRecord.ModelFeatures, function (i, e) {
@@ -173,7 +172,7 @@
                     return +d.y;
                 })
                 .height(250);
-        
+
         d3.select('#cvPerformanceGraph').datum(formatData(jsonRecord.PerformanceCurve)).call(chart);
         tablePad('#modeltable', 2);
         tableSort('#modeltable');
@@ -186,5 +185,5 @@
             _select.append($('<option></option>').val(i).html(i))
         }
     }
-        ​
+    
 </script>
