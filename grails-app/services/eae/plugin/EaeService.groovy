@@ -2,9 +2,7 @@ package eae.plugin
 import com.mongodb.BasicDBObject
 import grails.transaction.Transactional
 import groovyx.net.http.AsyncHTTPBuilder
-import org.apache.oozie.client.OozieClient
 import org.json.JSONObject
-import eae.plugin.RestServiceFactory
 
 import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.GET
@@ -23,6 +21,17 @@ class EaeService {
         return scriptList
     }
 
+    /**
+     *
+     * @param params
+     * @param workflow
+     * @param MONGO_URL
+     * @param mongoUser
+     * @param database
+     * @param password
+     * @param username
+     * @return
+     */
     def customPreProcessing(params, workflow, MONGO_URL, mongoUser, database, password, username){
         switch (workflow){
             case "CrossValidation":
@@ -39,9 +48,8 @@ class EaeService {
      * @param MONGO_PORT
      * @param database
      * @param username
-     * @return
+     * @return {LinkedHashMap}
      *
-     * NB: Not the most elegant solution. TO BE IMPROVED
      */
     private def cvPreprocessing(params, MONGO_URL, mongoUser, database, password, username){
         String workflowSpecificParameters = params.workflowSpecificParameters;

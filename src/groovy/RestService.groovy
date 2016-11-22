@@ -18,7 +18,7 @@ public class RestServiceFactory {
     /**
      * Overides all the ssl part to enable self signed certificates....
      * @param uri
-     * @return
+     * @return {AsyncHTTPBuilder}
      */
      static def HTTPBuilder initializeHttpBuilder(String uri) {
 

@@ -7,7 +7,7 @@ import com.mongodb.ServerAddress
 public class MongoCacheFactory {
 
     /**
-     *
+     * Creates a new secure MongoClient to access MongoDB
      * @param IPAddress
      * @param port
      * @param user

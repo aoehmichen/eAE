@@ -12,6 +12,10 @@ class EaeController {
     def eaeService
     def mongoCacheService
 
+    /**
+     *
+     * @return {list(str)}: return all the mongo parameters required to create a connection
+     */
     def mongoParams(){
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_USER = grailsApplication.config.com.eae.mongoUser;
@@ -19,6 +23,10 @@ class EaeController {
         return [MONGO_URL, MONGO_USER, MONGO_PASSWORD];
     }
 
+    /**
+     *
+     * @return {String}: returns the IP adress and port of the interfaceEAE.
+     */
     def interfaceParams(){
         final String INTERFACE_URL = grailsApplication.config.com.eae.interfaceEAEURL;
         return INTERFACE_URL

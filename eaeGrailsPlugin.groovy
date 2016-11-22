@@ -1,6 +1,6 @@
 class eaeGrailsPlugin {
     // the plugin version
-    def version = "0.9"
+    def version = "1.0"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.3 > *"
     // resources that are excluded from plugin packaging
@@ -14,7 +14,7 @@ class eaeGrailsPlugin {
     def authorEmail = "ao1011@imperial.ac.uk"
     def description =
             '''
-            Brief summary/description of the plugin.
+            This plugin aims at providing a connection between tranSMART and the eTRIKS Analytical Environement
             '''
 
     // URL to the plugin's documentation
@@ -23,10 +23,10 @@ class eaeGrailsPlugin {
     // Extra (optional) plugin metadata
 
     // License: one of 'APACHE', 'GPL2', 'GPL3'
-//    def license = "APACHE"
+    def license = "APACHE"
 
     // Details of company behind the plugin (if there is one)
-//    def organization = [ name: "My Company", url: "http://www.my-company.com/" ]
+    def organization = [ name: "eTRIKS", url: "https://www.etriks.org/" ]
 
 
     // Any additional developers beyond the author specified above.
