@@ -47,11 +47,12 @@
             </td>
             <td style='padding-right: 2em; padding-bottom: 1em'>
                 Select the percentage of features  to remove at every iteration <br/>
-                <textarea id="numberOfFeaturesToRemove" cols="25" rows="1" placeholder="Percentage of features"></textarea><br>
+                <select id='numberOfFeaturesToRemove'></select>
             </td>
             <td style='padding-right: 2em; padding-bottom: 1em'>
                 <div class="peCheckBox"></div>
-                <input type="checkbox" id="addPE" checked> Do a pathway enrichment<br>
+                Do a pathway enrichment<br>
+                <input type="checkbox" id="addPE" checked>
             </td>
         </tr>
     </table>
@@ -73,6 +74,7 @@
     populateCacheDIV(currentWorkflow);
     activateDragAndDropEAE('highDimDataCV');
     fillResamplingOption();
+    fillFeaturesToRemoveOption();
 
     function register() {
         registerConceptBoxEAE('highDimDataCV', [1, 2], 'hleaficon', 1, 1);
@@ -186,6 +188,14 @@
         var _select = $('#resamplingNumber');
         var i;
         for (i=1;i<=10;i++){
+            _select.append($('<option></option>').val(i).html(i))
+        }
+    }
+
+    function fillFeaturesToRemoveOption(){
+        var _select = $('#numberOfFeaturesToRemove');
+        var i;
+        for (i=1;i<=50;i++){
             _select.append($('<option></option>').val(i).html(i))
         }
     }
