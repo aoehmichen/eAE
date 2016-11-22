@@ -16,7 +16,6 @@ grails.project.dependency.resolution = {
     }
     dependencies {
         compile 'org.mongodb:mongo-java-driver:3.3.0'
-        compile 'org.apache.oozie:oozie-client:4.2.0'
         compile 'org.apache.httpcomponents:httpcore:4.3.3'
         compile 'org.apache.httpcomponents:httpclient:4.3.6'
         compile ('org.codehaus.groovy.modules.http-builder:http-builder:0.5.1') {

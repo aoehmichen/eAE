@@ -19,9 +19,40 @@
                         value="Run CV"
                         onclick="triggerCV()"/>
             </td>
+        </tr>
+        <tr>
+            <td style='padding-right: 2em; padding-bottom: 1em'>
+                Select the algorithm to use <br/>
+                <div class="algorithmToUse">
+                    <select id='AlgoList'>
+                        <option value="LassoWithSGD">Lasso</option>
+                        <option value="LinearRegressionWithSGD">Linear Regression</option>
+                        <option value="LogisticRegressionWithLBFGS">Logistic Regression with Broyden–Fletcher–Goldfarb–Shannon</option>
+                        <option value="LogisticRegressionWithSGD">Logistic Regression with Steepest Gradient Descent</option>
+                        <option value="SVM">Support Vector Machine (SVM)</option>
+                    </select>
+                </div>
+            </td>
+            <td style='padding-right: 2em; padding-bottom: 1em'>
+                Select the number folds for the cross validation <br/>
+                <select id='kFoldsOptions'>
+                    <option value="0.33">3-fold</option>
+                    <option value="0.2">5-fold</option>
+                    <option value="0.1">10-fold</option>
+                </select>
+            </td>
+            <td style='padding-right: 2em; padding-bottom: 1em'>
+                Select the number resamplings <br/>
+                <select id='resamplingNumber'></select>
+            </td>
+            <td style='padding-right: 2em; padding-bottom: 1em'>
+                Select the percentage of features  to remove at every iteration <br/>
+                <select id='numberOfFeaturesToRemove'></select>
+            </td>
             <td style='padding-right: 2em; padding-bottom: 1em'>
                 <div class="peCheckBox"></div>
-                <input type="checkbox" id="addPE" checked> Do a pathway enrichment<br>
+                Do a pathway enrichment<br>
+                <input type="checkbox" id="addPE" checked>
             </td>
         </tr>
     </table>
@@ -42,6 +73,8 @@
     var currentWorkflow = "CrossValidation";
     populateCacheDIV(currentWorkflow);
     activateDragAndDropEAE('highDimDataCV');
+    fillResamplingOption();
+    fillFeaturesToRemoveOption();
 
     function register() {
         registerConceptBoxEAE('highDimDataCV', [1, 2], 'hleaficon', 1, 1);
@@ -53,7 +86,7 @@
     }
 
     function refreshCVCache(){
-        populateCacheDIV(currentWorkflow)
+        populateCacheDIV(currentWorkflow);
     }
 
     function customSanityCheck() {
@@ -72,8 +105,13 @@
 
     function customWorkflowParameters(){
         var data = [];
+        var algorithmToUse = $('#AlgoList').val();
+        var kfold = $('#kFoldsOptions').val();
+        var resampling =  $('#resamplingNumber').val();
+        var numberOfFeaturesToRemove = $('#numberOfFeaturesToRemove').val();
         var doEnrichement = $('#addPE').is(":checked");
-        data.push({name: 'doEnrichment', value: doEnrichement});
+        var workflowSpecificParameters = algorithmToUse + " " + kfold + " " + resampling + " " +  numberOfFeaturesToRemove + " " + doEnrichement;
+        data.push({name: 'workflowSpecificParameters', value: workflowSpecificParameters});
         return data;
     }
 
@@ -110,24 +148,24 @@
                         .append($('<th/>').text("Iterations step"))
                         .append($('<th/>').text("Resampling"))
                         .append($('<th/>').text("Computation time"))
-        ));
+                ));
         $('#cvtable').append($('<tr/>')
-                        .append($('<td/>').text(jsonRecord.AlgorithmUsed))
-                        .append($('<td/>').text(jsonRecord.NumberOfFeaturesToRemove*100 + '%'))
-                        .append($('<td/>').text(jsonRecord.Resampling))
-                        .append($('<td/>').text(duration+ 's'))
+                .append($('<td/>').text(jsonRecord.AlgorithmUsed))
+                .append($('<td/>').text(jsonRecord.NumberOfFeaturesToRemove*100 + '%'))
+                .append($('<td/>').text(jsonRecord.Resampling))
+                .append($('<td/>').text(duration+ 's'))
         );
 
         _o.append($('<table/>').attr('id', "cvInfo").attr("class", "cvInfo" )
-                    .append($('<th/>').text("Performance Graph"))
-                    .append($('<th/>').text("Best Model characteristics"))
+                .append($('<th/>').text("Performance Graph"))
+                .append($('<th/>').text("Best Model characteristics"))
                 .append($('<tr/>')
                         .append($('<td/>').append($('<div/>').attr('id', "cvPerformanceGraph").attr("class", "CrossValidation")))
                         .append($('<td/>').append($('<table/>').attr("id","modeltable").attr("class", "modeltable")
-                        .append($('<tr/>')
-                            .append($('<th/>').text("Model Features"))
-                            .append($('<th/>').text("Weight"))
-                )))));
+                                .append($('<tr/>')
+                                        .append($('<th/>').text("Model Features"))
+                                        .append($('<th/>').text("Weight"))
+                                )))));
 
         var _h = $('#modeltable');
         $.each(jsonRecord.ModelFeatures, function (i, e) {
@@ -145,10 +183,26 @@
                     return +d.y;
                 })
                 .height(250);
-        
+
         d3.select('#cvPerformanceGraph').datum(formatData(jsonRecord.PerformanceCurve)).call(chart);
         tablePad('#modeltable', 2);
         tableSort('#modeltable');
     }
 
+    function fillResamplingOption(){
+        var _select = $('#resamplingNumber');
+        var i;
+        for (i=1;i<=10;i++){
+            _select.append($('<option></option>').val(i).html(i))
+        }
+    }
+
+    function fillFeaturesToRemoveOption(){
+        var _select = $('#numberOfFeaturesToRemove');
+        var i;
+        for (i=1;i<=50;i++){
+            _select.append($('<option></option>').val(i/100).html(i))
+        }
+    }
+    
 </script>

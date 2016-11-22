@@ -9,7 +9,7 @@ class MongoCacheController {
 
     /**
      *
-     * @return
+     * @return {list(str)}: return all the mongo parameters required to create a connection.
      */
     private def mongoParams(){
         final String MONGO_USER = grailsApplication.config.com.eae.mongoUser;
@@ -19,9 +19,9 @@ class MongoCacheController {
 
 
     /**
-     * Method that will create the get the list of jobs to show in the etriks jobs tab
+     * Method that will create the get the list of jobs to show in the etriks jobs tab.
      *
-     * @return {json} : returns a json containing all the jobs for the specified user and workflow
+     * @return {json} : returns a json containing all the jobs for the specified user and workflow.
      */
     def retrieveCachedJobs = {
         def username = springSecurityService.getPrincipal().username;
@@ -37,9 +37,9 @@ class MongoCacheController {
     }
 
     /**
-     * Method that retrieves a single record from the cache
+     * Method that retrieves a single record from the cache.
      *
-     * @return {json} : returns the mongo document
+     * @return {json} : returns the mongo document.
      */
     def retrieveSingleCachedJob = {
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;

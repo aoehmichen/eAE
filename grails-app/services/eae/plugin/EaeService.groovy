@@ -2,9 +2,7 @@ package eae.plugin
 import com.mongodb.BasicDBObject
 import grails.transaction.Transactional
 import groovyx.net.http.AsyncHTTPBuilder
-import org.apache.oozie.client.OozieClient
 import org.json.JSONObject
-import eae.plugin.RestServiceFactory
 
 import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.GET
@@ -23,6 +21,17 @@ class EaeService {
         return scriptList
     }
 
+    /**
+     *
+     * @param params
+     * @param workflow
+     * @param MONGO_URL
+     * @param mongoUser
+     * @param database
+     * @param password
+     * @param username
+     * @return
+     */
     def customPreProcessing(params, workflow, MONGO_URL, mongoUser, database, password, username){
         switch (workflow){
             case "CrossValidation":
@@ -39,30 +48,25 @@ class EaeService {
      * @param MONGO_PORT
      * @param database
      * @param username
-     * @return
+     * @return {LinkedHashMap}
      *
-     * NB: Not the most elegant solution. TO BE IMPROVED
      */
     private def cvPreprocessing(params, MONGO_URL, mongoUser, database, password, username){
+        String workflowSpecificParameters = params.workflowSpecificParameters;
         def workflowParameters = [:];
         String mongoDocumentIDPE = "abcd0000" ;// fake mongoId
-        String doEnrichement = "false";
-        String algorithmToUse = "SVM"
-        String kfold= "0.2";
-        String resampling = "1";
-        String numberOfFeaturesToRemove = "0.4"
+        String doEnrichment = workflowSpecificParameters.split()[-1].toBoolean();
 
-        if( ((String)params.doEnrichment).toBoolean()){
+        if(doEnrichment){
             def query = new BasicDBObject("StudyName" , "PathwayEnrichment")
             query.append("DataType","None")
             query.append("CustomField","")
             query.append("WorkflowSpecificParameters","Bonferroni")
-            mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, mongoUser, database, password, "PathwayEnrichment", "NoSQL", username, query )
-            doEnrichement = "true"
+            mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, mongoUser, database, password, "PathwayEnrichment", "NoSQL", username, query);
         }
 
         workflowParameters['workflow'] = params.workflow;
-        workflowParameters['workflowSpecificParameters'] = algorithmToUse + " " + kfold + " " + resampling + " " +  numberOfFeaturesToRemove + " " + doEnrichement + " " + mongoDocumentIDPE.toString();
+        workflowParameters['workflowSpecificParameters'] = workflowSpecificParameters + " " + mongoDocumentIDPE.toString();
 
         return workflowParameters;
     }

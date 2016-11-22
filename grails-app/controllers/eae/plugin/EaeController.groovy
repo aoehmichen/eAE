@@ -12,6 +12,10 @@ class EaeController {
     def eaeService
     def mongoCacheService
 
+    /**
+     *
+     * @return {list(str)}: return all the mongo parameters required to create a connection
+     */
     def mongoParams(){
         final String MONGO_URL = grailsApplication.config.com.eae.mongoURL;
         final String MONGO_USER = grailsApplication.config.com.eae.mongoUser;
@@ -19,6 +23,10 @@ class EaeController {
         return [MONGO_URL, MONGO_USER, MONGO_PASSWORD];
     }
 
+    /**
+     *
+     * @return {String}: returns the IP adress and port of the interfaceEAE.
+     */
     def interfaceParams(){
         final String INTERFACE_URL = grailsApplication.config.com.eae.interfaceEAEURL;
         return INTERFACE_URL
@@ -132,8 +140,7 @@ class EaeController {
         String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_USER, MONGO_PASSWORD, database, workflow, query)
         def result
         if(cached == "NotCached") {
-            // The pre processing step is required to add default parameters that are not available in the UI to set but required by the workflow.
-            // this could be removed in the eventuallity all parameters can be set in the workflow UI for all workflows.
+            // The pre processing step is required to trigger additional steps required by the workflow.
             def workflowParameters = eaeService.customPreProcessing(params, workflow, MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, username)
 
             String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, "SQL", username, query)
