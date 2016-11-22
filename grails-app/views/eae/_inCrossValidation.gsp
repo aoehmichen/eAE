@@ -25,7 +25,7 @@
                 Select the algorithm to use <br/>
                 <div class="algorithmToUse">
                     <select id='AlgoList'>
-                        <option value="LassoWithSGD">Lasso</option>
+                        <option value="LassoWithSGD">Lasso with Steepest Gradient Descent</option>
                         <option value="LinearRegressionWithSGD">Linear Regression</option>
                         <option value="LogisticRegressionWithLBFGS">Logistic Regression with Broyden–Fletcher–Goldfarb–Shannon</option>
                         <option value="LogisticRegressionWithSGD">Logistic Regression with Steepest Gradient Descent</option>
