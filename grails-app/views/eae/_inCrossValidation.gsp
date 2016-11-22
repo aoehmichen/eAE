@@ -105,8 +105,13 @@
 
     function customWorkflowParameters(){
         var data = [];
+        var algorithmToUse = $('#AlgoList').val();
+        var kfold = $('#kFoldsOptions').val();
+        var resampling =  $('#resamplingNumber').val();
+        var numberOfFeaturesToRemove = $('#numberOfFeaturesToRemove').val();
         var doEnrichement = $('#addPE').is(":checked");
-        data.push({name: 'doEnrichment', value: doEnrichement});
+        var workflowSpecificParameters = algorithmToUse + " " + kfold + " " + resampling + " " +  numberOfFeaturesToRemove + " " + doEnrichement;
+        data.push({name: 'workflowSpecificParameters', value: workflowSpecificParameters});
         return data;
     }
 
@@ -196,7 +201,7 @@
         var _select = $('#numberOfFeaturesToRemove');
         var i;
         for (i=1;i<=50;i++){
-            _select.append($('<option></option>').val(i).html(i))
+            _select.append($('<option></option>').val(i/100).html(i))
         }
     }
     

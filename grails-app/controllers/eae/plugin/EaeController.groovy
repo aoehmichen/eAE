@@ -132,8 +132,7 @@ class EaeController {
         String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_USER, MONGO_PASSWORD, database, workflow, query)
         def result
         if(cached == "NotCached") {
-            // The pre processing step is required to add default parameters that are not available in the UI to set but required by the workflow.
-            // this could be removed in the eventuallity all parameters can be set in the workflow UI for all workflows.
+            // The pre processing step is required to trigger additional steps required by the workflow.
             def workflowParameters = eaeService.customPreProcessing(params, workflow, MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, username)
 
             String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, "SQL", username, query)
