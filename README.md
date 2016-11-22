@@ -1,5 +1,6 @@
 # eAE transmart plugin.
 
+![eAE-TM-plugin](https://i.imgur.com/1bM1Mlu.png)
 
 The eAE project is part of the [eTRIKS Analytical Environement (eAE)](https://eae.doc.ic.ac.uk/) project.
 
