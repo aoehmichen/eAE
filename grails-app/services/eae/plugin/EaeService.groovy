@@ -55,7 +55,7 @@ class EaeService {
         String workflowSpecificParameters = params.workflowSpecificParameters;
         def workflowParameters = [:];
         String mongoDocumentIDPE = "abcd0000" ;// fake mongoId
-        String doEnrichment = workflowSpecificParameters.split()[-1].toBoolean();
+        Boolean doEnrichment = ((String)params.doEnrichement).toBoolean();
 
         if(doEnrichment){
             def query = new BasicDBObject("StudyName" , "PathwayEnrichment")
@@ -66,7 +66,7 @@ class EaeService {
         }
 
         workflowParameters['workflow'] = params.workflow;
-        workflowParameters['workflowSpecificParameters'] = workflowSpecificParameters + " " + mongoDocumentIDPE.toString();
+        workflowParameters['workflowSpecificParameters'] = workflowSpecificParameters + " " +  doEnrichment.toString() + " " + mongoDocumentIDPE.toString();
 
         return workflowParameters;
     }

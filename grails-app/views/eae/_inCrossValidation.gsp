@@ -110,8 +110,9 @@
         var resampling =  $('#resamplingNumber').val();
         var numberOfFeaturesToRemove = $('#numberOfFeaturesToRemove').val();
         var doEnrichement = $('#addPE').is(":checked");
-        var workflowSpecificParameters = algorithmToUse + " " + kfold + " " + resampling + " " +  numberOfFeaturesToRemove + " " + doEnrichement;
+        var workflowSpecificParameters = algorithmToUse + " " + kfold + " " + resampling + " " +  numberOfFeaturesToRemove;
         data.push({name: 'workflowSpecificParameters', value: workflowSpecificParameters});
+        data.push({name: 'doEnrichement', value: workflowSpecificParameters});
         return data;
     }
 
