@@ -22,6 +22,7 @@
         </tr>
         <tr>
             <td style='padding-right: 2em; padding-bottom: 1em'>
+                Select the algorithm to use <br/>
                 <div class="algorithmToUse">
                     <select id='AlgoList'>
                         <option value="LassoWithSGD">Lasso</option>
@@ -33,6 +34,7 @@
                 </div>
             </td>
             <td style='padding-right: 2em; padding-bottom: 1em'>
+                Select the number folds for the cross validation <br/>
                 <select id='kFoldsOptions'>
                     <option value="0.33">3-fold</option>
                     <option value="0.2">5-fold</option>
@@ -40,10 +42,12 @@
                 </select>
             </td>
             <td style='padding-right: 2em; padding-bottom: 1em'>
+                Select the number resamplings <br/>
                 <select id='resamplingNumber'></select>
             </td>
             <td style='padding-right: 2em; padding-bottom: 1em'>
-                <textarea id="numberOfFeaturesToRemove" cols="25" rows="1" placeholder="Percentage of features to remove at every step"></textarea><br>
+                Select the percentage of features  to remove at every iteration <br/>
+                <textarea id="numberOfFeaturesToRemove" cols="25" rows="1" placeholder="Percentage of features"></textarea><br>
             </td>
             <td style='padding-right: 2em; padding-bottom: 1em'>
                 <div class="peCheckBox"></div>
@@ -181,7 +185,7 @@
     function fillResamplingOption(){
         var _select = $('#resamplingNumber');
         var i;
-        for (i=1;i<=100;i++){
+        for (i=1;i<=10;i++){
             _select.append($('<option></option>').val(i).html(i))
         }
     }

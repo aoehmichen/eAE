@@ -64,7 +64,6 @@ class EaeController {
      */
     def runNoSQLWorkflow = {
         def (MONGO_URL, MONGO_USER, MONGO_PASSWORD)= mongoParams();
-        def (MONGO_CACHE_IP, MONGO_CACHE_PORT) = MONGO_URL.split[":"];
         final def INTERFACE_URL = interfaceParams();
         String username = springSecurityService.getPrincipal().username;
         String database = "eae";
@@ -72,15 +71,15 @@ class EaeController {
 
         // We start building the mongo cache query and check if the workflow has already been run before
         def query = mongoCacheService.buildMongoCacheQueryNoSQL(params);
-        String cached = mongoCacheService.checkIfPresentInCache(MONGO_CACHE_IP, MONGO_CACHE_PORT, MONGO_USER, MONGO_PASSWORD, database, workflow, query)
+        String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_USER, MONGO_PASSWORD, database, workflow, query)
 
         // We check if this query has already been made before
         def result
         def workflowParameters = [:]
         if(cached == "NotCached") {
-            String mongoDocumentID = mongoCacheService.initJob(MONGO_CACHE_IP, MONGO_CACHE_PORT, MONGO_USER, database, MONGO_PASSWORD, workflow, "NoSQL", username, query)
+            String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, "NoSQL", username, query)
 
-            workflowParameters['mongoCacheIp'] = MONGO_CACHE_IP + ":" + MONGO_CACHE_PORT;
+            workflowParameters['mongoCacheIp'] = MONGO_URL;
             workflowParameters['workflow'] = workflow;
             workflowParameters['workflowType'] = "NoSQL";
             workflowParameters['workflowSpecificParameters'] = params.workflowSpecificParameters;
@@ -92,13 +91,13 @@ class EaeController {
 
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
-            result = mongoCacheService.retrieveValueFromCache(MONGO_CACHE_IP, MONGO_CACHE_PORT, MONGO_USER, database, MONGO_PASSWORD, workflow,query);
+            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow,query);
             query.append("User", username);
             query.removeField("DocumentType");
             query.append("DocumentType", "Copy")
-            Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_CACHE_IP, MONGO_CACHE_PORT, MONGO_USER, database, MONGO_PASSWORD, workflow, query);
+            Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, query);
             if(!copyAlreadyExists) {
-                mongoCacheService.duplicateCacheForUser(MONGO_CACHE_IP, MONGO_CACHE_PORT, MONGO_USER, database, MONGO_PASSWORD, workflow, username, result);
+                mongoCacheService.duplicateCacheForUser(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, username, result);
             }
             result = eaeService.customPostProcessing(result, params.workflow)
         }else{
@@ -119,9 +118,9 @@ class EaeController {
      */
     def runWorkflow = {
         def (MONGO_URL, MONGO_USER, MONGO_PASSWORD)= mongoParams();
-        def (MONGO_CACHE_IP, MONGO_CACHE_PORT) = MONGO_URL.split[":"];
         final def INTERFACE_URL = interfaceParams();
         String username = springSecurityService.getPrincipal().username;
+        String scriptDir = getWebAppFolder() + 'Scripts/eae/';
         String database = "eae";
         String workflow = params.workflow;
 
@@ -130,14 +129,14 @@ class EaeController {
         def query = mongoCacheService.buildMongoCacheQuery(params,parameterMap);
 
         // We check if this query has already been made before
-        String cached = mongoCacheService.checkIfPresentInCache(MONGO_CACHE_IP, MONGO_CACHE_PORT,MONGO_USER,MONGO_PASSWORD,database, workflow, query)
+        String cached = mongoCacheService.checkIfPresentInCache(MONGO_URL, MONGO_USER, MONGO_PASSWORD, database, workflow, query)
         def result
         if(cached == "NotCached") {
             // The pre processing step is required to add default parameters that are not available in the UI to set but required by the workflow.
             // this could be removed in the eventuallity all parameters can be set in the workflow UI for all workflows.
-            def workflowParameters = eaeService.customPreProcessing(params, workflow, MONGO_CACHE_IP, MONGO_CACHE_PORT, database, username)
+            def workflowParameters = eaeService.customPreProcessing(params, workflow, MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, username)
 
-            String mongoDocumentID = mongoCacheService.initJob(MONGO_CACHE_IP, MONGO_CACHE_PORT, MONGO_USER, database, MONGO_PASSWORD, workflow, "SQL", username, query)
+            String mongoDocumentID = mongoCacheService.initJob(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, "SQL", username, query)
 
             // Transfer the data file and additional file
             String dataFileName = eaeDataService.writeDataFile(username, mongoDocumentID, workflow, parameterMap, "data")
@@ -146,7 +145,7 @@ class EaeController {
 
             eaeDataService.zipFiles([dataFileName,additionalFileName], scriptDir, zipFileName)
 
-            workflowParameters['mongoCacheIp'] = MONGO_CACHE_IP + ":" + MONGO_CACHE_PORT;
+            workflowParameters['mongoCacheIp'] = MONGO_URL;
             workflowParameters['mongoDocumentID'] = mongoDocumentID;
             workflowParameters['workflowType'] = "SQL";
             workflowParameters['zipFile'] = "/tmp/" + zipFileName + ".zip";
@@ -157,14 +156,14 @@ class EaeController {
 
         }else if (cached == "Completed"){
             // The result is already available and we send back the result right away.
-            result = mongoCacheService.retrieveValueFromCache(MONGO_CACHE_IP, MONGO_CACHE_PORT, MONGO_USER, database, MONGO_PASSWORD, workflow, query);
+            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, query);
             query.append("User", username);
             query.removeField("DocumentType");
             query.append("DocumentType", "Copy")
-            Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_CACHE_IP, MONGO_CACHE_PORT, MONGO_USER, database, MONGO_PASSWORD, workflow, query);
+            Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, query);
             if(!copyAlreadyExists) {
                 // We create a copy to be listed in the mongo cache list of the workflow for the user.
-                mongoCacheService.duplicateCacheForUser(MONGO_CACHE_IP, MONGO_CACHE_PORT, MONGO_USER, database, MONGO_PASSWORD, workflow, username, result);
+                mongoCacheService.duplicateCacheForUser(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, username, result);
             }
             result = eaeService.customPostProcessing(result, params.workflow)
         }else{

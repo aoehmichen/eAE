@@ -23,10 +23,10 @@ class EaeService {
         return scriptList
     }
 
-    def customPreProcessing(params, workflow, MONGO_URL,MONGO_PORT,database,username){
+    def customPreProcessing(params, workflow, MONGO_URL, mongoUser, database, password, username){
         switch (workflow){
             case "CrossValidation":
-                return cvPreprocessing(params, MONGO_URL,MONGO_PORT,database,username);
+                return cvPreprocessing(params, MONGO_URL ,mongoUser, database, password, username);
             default:
                 throw new Exception("The workflow in customPreProcessing doesn't exist.")
         }
@@ -43,7 +43,7 @@ class EaeService {
      *
      * NB: Not the most elegant solution. TO BE IMPROVED
      */
-    private def cvPreprocessing(params, MONGO_URL,MONGO_PORT,database,username){
+    private def cvPreprocessing(params, MONGO_URL, mongoUser, database, password, username){
         def workflowParameters = [:];
         String mongoDocumentIDPE = "abcd0000" ;// fake mongoId
         String doEnrichement = "false";
@@ -57,7 +57,7 @@ class EaeService {
             query.append("DataType","None")
             query.append("CustomField","")
             query.append("WorkflowSpecificParameters","Bonferroni")
-            mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, MONGO_PORT, database, "PathwayEnrichment", "NoSQL", username, query )
+            mongoDocumentIDPE = mongoCacheService.initJob(MONGO_URL, mongoUser, database, password, "PathwayEnrichment", "NoSQL", username, query )
             doEnrichement = "true"
         }
 
