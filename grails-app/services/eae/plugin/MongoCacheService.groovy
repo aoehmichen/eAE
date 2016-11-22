@@ -153,6 +153,7 @@ class MongoCacheService {
         query.append('patientids_cohort1', parameterMap['patientids_cohort1']);
         query.append('patientids_cohort2', parameterMap['patientids_cohort2']);
         query.append('WorkflowData', workflowData);
+        query.append('WorkflowSpecificParameters',params.workflowSpecificParameters);
         query.append("DocumentType", "Original");
         return query
     }
