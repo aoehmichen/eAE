@@ -112,7 +112,7 @@
         var doEnrichement = $('#addPE').is(":checked");
         var workflowSpecificParameters = algorithmToUse + " " + kfold + " " + resampling + " " +  numberOfFeaturesToRemove;
         data.push({name: 'workflowSpecificParameters', value: workflowSpecificParameters});
-        data.push({name: 'doEnrichement', value: workflowSpecificParameters});
+        data.push({name: 'doEnrichement', value: doEnrichement});
         return data;
     }
 
