@@ -99,13 +99,15 @@ class EaeController {
 
             result = "Your Job has been submitted. Please come back later for the result"
         }else if (cached == "Completed"){
-            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow,query);
-            query.append("User", username);
-            query.removeField("DocumentType");
-            query.append("DocumentType", "Copy")
-            Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, query);
-            if(!copyAlreadyExists) {
-                mongoCacheService.duplicateCacheForUser(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, username, result);
+            result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, query);
+            if(result.get("User") != username) {
+                query.append("User", username);
+                query.removeField("DocumentType");
+                query.append("DocumentType", "Copy")
+                Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, query);
+                if (!copyAlreadyExists) {
+                    mongoCacheService.duplicateCacheForUser(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, username, result);
+                }
             }
             result = eaeService.customPostProcessing(result, params.workflow)
         }else{
@@ -164,13 +166,15 @@ class EaeController {
         }else if (cached == "Completed"){
             // The result is already available and we send back the result right away.
             result = mongoCacheService.retrieveValueFromCache(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, query);
-            query.append("User", username);
-            query.removeField("DocumentType");
-            query.append("DocumentType", "Copy")
-            Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, query);
-            if(!copyAlreadyExists) {
-                // We create a copy to be listed in the mongo cache list of the workflow for the user.
-                mongoCacheService.duplicateCacheForUser(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, username, result);
+            if(result.get("User") != username) {
+                query.append("User", username);
+                query.removeField("DocumentType");
+                query.append("DocumentType", "Copy")
+                Boolean copyAlreadyExists = mongoCacheService.copyPresentInCache(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, query);
+                if (!copyAlreadyExists) {
+                    // We create a copy to be listed in the mongo cache list of the workflow for the user.
+                    mongoCacheService.duplicateCacheForUser(MONGO_URL, MONGO_USER, database, MONGO_PASSWORD, workflow, username, result);
+                }
             }
             result = eaeService.customPostProcessing(result, params.workflow)
         }else{
